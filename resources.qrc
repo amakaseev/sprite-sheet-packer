@@ -1,0 +1,22 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/background_tran.png</file>
+        <file>res/designer-property-editor-configure.png</file>
+        <file>res/designer-reload-resources-button.png</file>
+        <file>res/document-open.png</file>
+        <file>res/document-save.png</file>
+        <file>res/document-save-as.png</file>
+        <file>res/filenew.png</file>
+        <file>res/preferences-system.png</file>
+        <file>res/refresh-32.png</file>
+        <file>res/settings.png</file>
+        <file>res/standardbutton-delete-128.png</file>
+        <file>res/zoomin.png</file>
+        <file>res/zoomout.png</file>
+        <file>res/add_folder.png</file>
+        <file>res/add_sprite.png</file>
+        <file>res/atlas.png</file>
+        <file>res/Delete.png</file>
+        <file>res/iPhone.png</file>
+    </qresource>
+</RCC>
