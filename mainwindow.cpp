@@ -148,7 +148,9 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
 
         QPixmap pixmap((*it_f).first);        
         if (pixmap.isNull()) continue;
-        pixmap = pixmap.scaled(pixmap.width() * scale, pixmap.height() * scale, Qt::KeepAspectRatio, Qt::FastTransformation);
+        if (scale != 1) {
+            pixmap = pixmap.scaled(ceil(pixmap.width() * scale), ceil(pixmap.height() * scale), Qt::KeepAspectRatio, Qt::FastTransformation);
+        }
 
         MyContent mycontent((*it_f).first, (*it_f).second, pixmap);
 
@@ -233,10 +235,11 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
 
         SpriteFrameInfo spriteFrame;
         spriteFrame.mFrame = QRect(content.coord.x, content.coord.y, content.size.w-spriteBorder, content.size.h-spriteBorder);
-        //spriteFrame.mOffset = QPoint(0, 0);
+//        spriteFrame.mOffset = QPoint(0, 0);
         spriteFrame.mOffset = QPoint(
-                    myContent.mRect.left() - myContent.mImage.width()/2 + (content.size.w-spriteBorder)/2,
-                    -myContent.mRect.top() + myContent.mImage.height()/2 - (content.size.h-spriteBorder)/2);
+                    myContent.mRect.left() + (-myContent.mImage.width() + content.size.w - spriteBorder) * 0.5f,
+                    -myContent.mRect.top() + ( myContent.mImage.height() - content.size.h + spriteBorder) * 0.5f
+                    );
         spriteFrame.mRotated = content.rotated;
         spriteFrame.mSourceColorRect = myContent.mRect;
         spriteFrame.mSourceSize = myContent.mImage.size();
@@ -377,6 +380,7 @@ void MainWindow::openSpritePack(const QString& fileName) {
 
         // load property
         QVariantMap propertyMap = plistDict["property"].toMap();
+        ui->sprites_prefixLineEdit->setText(propertyMap["spritesPrefix"].toString());
 
         // PACKING
         QVariantMap packingMap = propertyMap["packing"].toMap();
@@ -439,6 +443,7 @@ void MainWindow::saveSpritePack(const QString& fileName) {
 
     // save property
     QVariantMap propertyMap;
+    propertyMap["spritesPrefix"] = ui->sprites_prefixLineEdit->text();
 
     // PACKING
     QVariantMap packingMap;
@@ -503,24 +508,24 @@ void MainWindow::publishSpriteSheet(const QString& fileName, const QString& texN
         for (; it_f != spriteFrames.end(); ++it_f) {
             QVariantMap frameMap;
             frameMap["frame"] = QString("{{%1,%2},{%3,%4}}")
-                    .arg((int)(it_f.value().mFrame.left()))
-                    .arg((int)(it_f.value().mFrame.top()))
-                    .arg((int)(it_f.value().mFrame.width()))
-                    .arg((int)(it_f.value().mFrame.height()));
+                    .arg(it_f.value().mFrame.left())
+                    .arg(it_f.value().mFrame.top())
+                    .arg(it_f.value().mFrame.width())
+                    .arg(it_f.value().mFrame.height());
             frameMap["rotated"] = QVariant(it_f.value().mRotated);
             frameMap["offset"] = QString("{%1,%2}")
-                    .arg((int)(it_f.value().mOffset.x()))
-                    .arg((int)(it_f.value().mOffset.y()));
+                    .arg(it_f.value().mOffset.x())
+                    .arg(it_f.value().mOffset.y());
     //        frameMap["sourceColorRect"] = QString("{{%1,%2},{%3,%4}}")
     //                .arg(it_f.value().mSourceColorRect.left())
     //                .arg(it_f.value().mSourceColorRect.top())
     //                .arg(it_f.value().mSourceColorRect.width())
     //                .arg(it_f.value().mSourceColorRect.height());
             frameMap["sourceSize"] = QString("{%1,%2}")
-                    .arg((int)(it_f.value().mSourceSize.width()))
-                    .arg((int)(it_f.value().mSourceSize.height()));
+                    .arg(it_f.value().mSourceSize.width())
+                    .arg(it_f.value().mSourceSize.height());
 
-            framesMap[it_f.key()] = frameMap;
+            framesMap[ui->sprites_prefixLineEdit->text() + it_f.key()] = frameMap;
         }
 
         plist["frames"] = framesMap;
@@ -707,8 +712,8 @@ void MainWindow::on_output_publishPushButton_clicked()
     QString imageFileName = ui->output_spriteSheetLineEdit->text() + ".png";
     QString plistFileName;
     switch (ui->output_dataFormatComboBox->currentIndex()) {
-        case 0: plistFileName = ui->output_spriteSheetLineEdit->text() + ".plist";
-        case 1: plistFileName = ui->output_spriteSheetLineEdit->text() + ".json";
+        case 0: plistFileName = ui->output_spriteSheetLineEdit->text() + ".plist"; break;
+        case 1: plistFileName = ui->output_spriteSheetLineEdit->text() + ".json"; break;
     }
 
 

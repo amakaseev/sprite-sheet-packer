@@ -25,4 +25,4 @@ FORMS    += mainwindow.ui
 RESOURCES += \
     resources.qrc
 
-include(../../3rdParty/qtplist-master/qtplist-master.pri)
+include(3rdParty/qtplist-master/qtplist-master.pri)

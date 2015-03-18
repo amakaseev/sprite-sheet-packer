@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>1040</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -75,7 +75,7 @@
    <property name="minimumSize">
     <size>
      <width>280</width>
-     <height>190</height>
+     <height>191</height>
     </size>
    </property>
    <property name="windowIcon">
@@ -109,8 +109,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>262</width>
-          <height>579</height>
+          <width>221</width>
+          <height>282</height>
          </rect>
         </property>
         <attribute name="label">
@@ -301,8 +301,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>277</width>
-          <height>579</height>
+          <width>310</width>
+          <height>556</height>
          </rect>
         </property>
         <attribute name="label">
@@ -466,7 +466,7 @@
               <item>
                <widget class="QLineEdit" name="output_HDR_folderLineEdit">
                 <property name="text">
-                 <string>ipadhd</string>
+                 <string>hdr</string>
                 </property>
                </widget>
               </item>
@@ -526,7 +526,7 @@
               <item>
                <widget class="QLineEdit" name="output_HD_folderLineEdit">
                 <property name="text">
-                 <string>ipad</string>
+                 <string>hd</string>
                 </property>
                </widget>
               </item>
@@ -586,7 +586,7 @@
               <item>
                <widget class="QLineEdit" name="output_SD_folderLineEdit">
                 <property name="text">
-                 <string>iphone</string>
+                 <string>sd</string>
                 </property>
                </widget>
               </item>
