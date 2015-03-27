@@ -81,6 +81,14 @@ public:
             }
         }
         mRect = QRect(QPoint(l, t), QPoint(r,b));
+        if ((mRect.width() % 2) != (mImage.width() % 2)) {
+            if (l>0) l--; else r++;
+            mRect = QRect(QPoint(l, t), QPoint(r,b));
+        }
+        if ((mRect.height() % 2) != (mImage.height() % 2)) {
+            if (t>0) t--; else b++;
+            mRect = QRect(QPoint(l, t), QPoint(r,b));
+        }
         if ((mRect.width()<0)||(mRect.height()<0)) {
             mRect = QRect(0, 0, 2, 2);
         }
@@ -234,7 +242,7 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
         SpriteFrameInfo spriteFrame;
         spriteFrame.mFrame = QRect(content.coord.x, content.coord.y, content.size.w-spriteBorder, content.size.h-spriteBorder);
 //        spriteFrame.mOffset = QPoint(0, 0);
-        spriteFrame.mOffset = QPointF(
+        spriteFrame.mOffset = QPoint(
                     (myContent.mRect.left() + (-myContent.mImage.width() + content.size.w - spriteBorder) * 0.5f),
                     (-myContent.mRect.top() + ( myContent.mImage.height() - content.size.h + spriteBorder) * 0.5f)
                     );

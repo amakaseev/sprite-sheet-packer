@@ -10,7 +10,7 @@ class MainWindow;
 class SpriteFrameInfo {
 public:
     QRect   mFrame;
-    QPointF  mOffset;
+    QPoint  mOffset;
     bool    mRotated;
     QRect   mSourceColorRect;
     QSize   mSourceSize;
