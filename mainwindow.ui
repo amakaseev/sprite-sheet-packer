@@ -69,6 +69,7 @@
    <addaction name="separator"/>
    <addaction name="actionZoomIn"/>
    <addaction name="actionZoomOut"/>
+   <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="propertyDockWidget">
@@ -109,8 +110,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>221</width>
-          <height>282</height>
+          <width>256</width>
+          <height>556</height>
          </rect>
         </property>
         <attribute name="label">

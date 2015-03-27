@@ -26,13 +26,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setWindowIcon(QIcon("SpritePacker.icns"));
 
-    mScene = new QGraphicsScene(this);
-    //mScene->setBackgroundBrush(QBrush(QPixmap("://res/background_tran.png")));
-    mScene->setBackgroundBrush(QBrush(Qt::darkGray));
+    _scene = new QGraphicsScene(this);
+    //_scene->setBackgroundBrush(QBrush(QPixmap("://res/background_tran.png")));
+    _scene->setBackgroundBrush(QBrush(Qt::darkGray));
 
-    mGraphicsView = new QGraphicsView(this);
-    mGraphicsView->setScene(mScene);
-    setCentralWidget(mGraphicsView);
+    _graphicsView = new QGraphicsView(this);
+    _graphicsView->setScene(_scene);
+    setCentralWidget(_graphicsView);
 
     refreshOpenRecentMenu();
 
@@ -46,7 +46,6 @@ MainWindow::~MainWindow()
     QSettings settings;
     settings.setValue("MainWindow/geometry", saveGeometry());
     settings.setValue("MainWindow/state", saveState());
-
     delete ui;
 }
 
@@ -85,7 +84,6 @@ public:
         if ((mRect.width()<0)||(mRect.height()<0)) {
             mRect = QRect(0, 0, 2, 2);
         }
-        qDebug() << "trim from:" << mImage.size() << "to:" << mRect;
     }
 
     QString mFileName;
@@ -149,7 +147,7 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
         QPixmap pixmap((*it_f).first);        
         if (pixmap.isNull()) continue;
         if (scale != 1) {
-            pixmap = pixmap.scaled(ceil(pixmap.width() * scale), ceil(pixmap.height() * scale), Qt::KeepAspectRatio, Qt::FastTransformation);
+            pixmap = pixmap.scaled(ceil(pixmap.width() * scale), ceil(pixmap.height() * scale), Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
         MyContent mycontent((*it_f).first, (*it_f).second, pixmap);
@@ -236,9 +234,9 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
         SpriteFrameInfo spriteFrame;
         spriteFrame.mFrame = QRect(content.coord.x, content.coord.y, content.size.w-spriteBorder, content.size.h-spriteBorder);
 //        spriteFrame.mOffset = QPoint(0, 0);
-        spriteFrame.mOffset = QPoint(
-                    myContent.mRect.left() + (-myContent.mImage.width() + content.size.w - spriteBorder) * 0.5f,
-                    -myContent.mRect.top() + ( myContent.mImage.height() - content.size.h + spriteBorder) * 0.5f
+        spriteFrame.mOffset = QPointF(
+                    (myContent.mRect.left() + (-myContent.mImage.width() + content.size.w - spriteBorder) * 0.5f),
+                    (-myContent.mRect.top() + ( myContent.mImage.height() - content.size.h + spriteBorder) * 0.5f)
                     );
         spriteFrame.mRotated = content.rotated;
         spriteFrame.mSourceColorRect = myContent.mRect;
@@ -281,17 +279,17 @@ void MainWindow::refreshAtlas() {
 
     generateAtlas(1.f, atlasImage, spriteFrames);
 
-    mScene->clear();
-    mScene->addRect(atlasImage.rect(), QPen(Qt::darkRed), QBrush(QPixmap("://res/background_tran.png")));
-    QGraphicsPixmapItem* atlasPixmapItem = mScene->addPixmap(QPixmap::fromImage(atlasImage));
+    _scene->clear();
+    _scene->addRect(atlasImage.rect(), QPen(Qt::darkRed), QBrush(QPixmap("://res/background_tran.png")));
+    QGraphicsPixmapItem* atlasPixmapItem = _scene->addPixmap(QPixmap::fromImage(atlasImage));
 
     QVector<QRect> rects;
     foreach(QRect rect, rects) {
-        mScene->addRect(rect, QPen(Qt::darkGreen));
+        _scene->addRect(rect, QPen(Qt::darkGreen));
     }
 
-    mScene->addRect(atlasPixmapItem->boundingRect(), QPen(Qt::darkRed));
-    mScene->setSceneRect(atlasPixmapItem->boundingRect());
+    _scene->addRect(atlasPixmapItem->boundingRect(), QPen(Qt::darkRed));
+    _scene->setSceneRect(atlasPixmapItem->boundingRect());
 
     ui->statusBar->showMessage(QString("%1x%2").arg(atlasImage.width()).arg(atlasImage.height()));
 }
@@ -666,13 +664,13 @@ void MainWindow::on_actionRefresh_triggered()
 
 void MainWindow::on_actionZoomIn_triggered()
 {
-    mGraphicsView->scale(2.f, 2.f);
-    //mGraphicsView->fitInView(mScene->sceneRect(), Qt::KeepAspectRatio);
+    _graphicsView->scale(2.f, 2.f);
+    //_graphicsView->fitInView(_scene->sceneRect(), Qt::KeepAspectRatio);
 }
 
 void MainWindow::on_actionZoomOut_triggered()
 {
-    mGraphicsView->scale(0.5f, 0.5f);
+    _graphicsView->scale(0.5f, 0.5f);
 }
 
 void MainWindow::on_output_destFolderToolButton_clicked()
@@ -715,7 +713,6 @@ void MainWindow::on_output_publishPushButton_clicked()
         case 0: plistFileName = ui->output_spriteSheetLineEdit->text() + ".plist"; break;
         case 1: plistFileName = ui->output_spriteSheetLineEdit->text() + ".json"; break;
     }
-
 
 
     // HDR
@@ -783,4 +780,5 @@ void MainWindow::on_output_publishPushButton_clicked()
         atlasImage.save(sdImageFile);
         publishSpriteSheet(sdPlistFile, imageFileName, spriteFrames);
     }
+
 }

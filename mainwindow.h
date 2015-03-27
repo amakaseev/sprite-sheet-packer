@@ -10,7 +10,7 @@ class MainWindow;
 class SpriteFrameInfo {
 public:
     QRect   mFrame;
-    QPoint  mOffset;
+    QPointF  mOffset;
     bool    mRotated;
     QRect   mSourceColorRect;
     QSize   mSourceSize;
@@ -52,8 +52,8 @@ private slots:
 
 private:
     Ui::MainWindow*      ui;
-    QGraphicsScene*      mScene;
-    QGraphicsView*       mGraphicsView;
+    QGraphicsScene*     _scene;
+    QGraphicsView*      _graphicsView;
 };
 
 #endif // MAINWINDOW_H
