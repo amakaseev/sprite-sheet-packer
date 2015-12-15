@@ -177,23 +177,23 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
     // Sort the input content by size... usually packs better.
     inputContent.Sort();
 
-    // find optimal size for atlas
-    int w = 4;
-    int h = 4;
-    bool k = true;
-
     // A place to store packed content.
     BinPack2D::ContentAccumulator<MyContent> remainder;
     BinPack2D::ContentAccumulator<MyContent> outputContent;
 
     int textureBorder = ui->property_textureBorderSpinBox->value();
+    // find optimal size for atlas
+    int w = 4 + textureBorder*2;
+    int h = 4 + textureBorder*2;
+    bool k = true;
 
     while (1) {
-        BinPack2D::CanvasArray<MyContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<MyContent>(pow(2, w) - textureBorder*2, pow(2, h) - textureBorder*2, 1).Build();
+        BinPack2D::CanvasArray<MyContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<MyContent>(w - textureBorder*2, h - textureBorder*2, 1).Build();
 
         bool success = canvasArray.Place(inputContent, remainder);
         if (success) {
-            // Read all placed content.
+//            // Read all placed content.
+            outputContent = BinPack2D::ContentAccumulator<MyContent>();
             canvasArray.CollectContent(outputContent);
             break;
         }
@@ -205,12 +205,39 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
             h++;
         }
     }
+    while (1) {
+        w--;
+        BinPack2D::CanvasArray<MyContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<MyContent>(w - textureBorder*2, h - textureBorder*2, 1).Build();
+
+        bool success = canvasArray.Place(inputContent, remainder);
+        if (!success) {
+            w++;
+            break;
+        } else {
+            outputContent = BinPack2D::ContentAccumulator<MyContent>();
+            canvasArray.CollectContent(outputContent);
+        }
+    }
+    while (1) {
+        h--;
+        BinPack2D::CanvasArray<MyContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<MyContent>(w - textureBorder*2, h - textureBorder*2, 1).Build();
+
+        bool success = canvasArray.Place(inputContent, remainder);
+        if (!success) {
+            h++;
+            break;
+        } else {
+            outputContent = BinPack2D::ContentAccumulator<MyContent>();
+            canvasArray.CollectContent(outputContent);
+        }
+    }
+
 
     // parse output.
     typedef BinPack2D::Content<MyContent>::Vector::iterator binpack2d_iterator;
     //qDebug("PLACED:\n");
 
-    atlasImage = QImage(pow(2, w), pow(2, h), QImage::Format_RGBA8888);
+    atlasImage = QImage(w, h, QImage::Format_RGBA8888);
     atlasImage.fill(QColor(0, 0, 0, 0));
     QPainter painter(&atlasImage);
 
@@ -255,31 +282,31 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
 
         }
         spriteFrames[myContent.mName] = spriteFrame;
-/*
-        qDebug("\t%9s of size %3dx%3d at position %3d,%3d,%2d rotated=%s\n",
-               myContent.mName.toStdString().c_str(),
-               content.size.w,
-               content.size.h,
-               content.coord.x,
-               content.coord.y,
-               content.coord.z,
-               (content.rotated ? "yes":" no"));
-*/
+
+//        qDebug("\t%9s of size %3dx%3d at position %3d,%3d,%2d rotated=%s\n",
+//               myContent.mName.toStdString().c_str(),
+//               content.size.w,
+//               content.size.h,
+//               content.coord.x,
+//               content.coord.y,
+//               content.coord.z,
+//               (content.rotated ? "yes":" no"));
+
         painter.drawImage(QPoint(content.coord.x+textureBorder, content.coord.y+textureBorder), image);
         rects.push_back(QRect(content.coord.x+textureBorder, content.coord.y+textureBorder, image.width(), image.height()));
     }
     painter.end();
 
-/*
-    qDebug("NOT PLACED:\n");
-    for( binpack2d_iterator itor = remainder.Get().begin(); itor != remainder.Get().end(); itor++ ) {
-      const BinPack2D::Content<MyContent> &content = *itor;
-      const MyContent &myContent = content.content;
 
-      qDebug() << myContent.mFileName;
-    }
-*/
+//    qDebug("NOT PLACED:\n");
+//    for( binpack2d_iterator itor = remainder.Get().begin(); itor != remainder.Get().end(); itor++ ) {
+//      const BinPack2D::Content<MyContent> &content = *itor;
+//      const MyContent &myContent = content.content;
+
+//      qDebug() << myContent.mFileName;
+//    }
 }
+
 
 void MainWindow::refreshAtlas() {
     QImage atlasImage;

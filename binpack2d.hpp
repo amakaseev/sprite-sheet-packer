@@ -506,7 +506,8 @@ namespace BinPack2D {
                 const Size &sa = a.size;
                 const Size &sb = b.size;
 
-                //      return( sa.w * sa.h > sb.w * sb.h );
+                // Other sort
+                return( sa.w * sa.h > sb.w * sb.h );
 
                 if(sa.w != sb.w)
                     return sa.w > sb.w;
