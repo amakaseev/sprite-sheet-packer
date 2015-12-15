@@ -9,14 +9,7 @@
 #include "PListParser.h"
 #include "PListSerializer.h"
 
-int pow2(int len) {
-    int order=1;
-    while(pow(2,order)<len)
-    {
-       order++;
-    }
-    return pow(2,order);
-}
+#define MAX_RECENT 10
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -25,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     setWindowIcon(QIcon("SpritePacker.icns"));
+    //setUnifiedTitleAndToolBarOnMac(true);
 
     _scene = new QGraphicsScene(this);
     //_scene->setBackgroundBrush(QBrush(QPixmap("://res/background_tran.png")));
@@ -102,20 +96,18 @@ public:
 
 void MainWindow::refreshOpenRecentMenu() {
     QSettings settings;
-
+    QStringList openRecentList = settings.value("openRecentList").toStringList();
     ui->menuOpen_recent->clear();
-
-    QVariantList openRecentList = settings.value("openRecentList").toList();
-    QListIterator<QVariant> it(openRecentList);
-    it.toBack();
-    while (it.hasPrevious()) {
-        //QAction* recentAction =  new QAction(recent.toString(), ui->menuOpen_recent);
-        ui->menuOpen_recent->addAction(it.previous().toString(), this, SLOT(openRecent()));
+    for (auto file: openRecentList) {
+        QAction* recentAction = ui->menuOpen_recent->addAction(file);
+        connect(recentAction, SIGNAL(triggered()), this, SLOT(openRecent()));
+        if (!QFileInfo(file).exists()) {
+            recentAction->setEnabled(false);
+        }
     }
 }
 
 void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, SpriteFrameInfo>& spriteFrames) {
-
     BinPack2D::ContentAccumulator<MyContent> inputContent;
 
     QStringList nameFilter;
@@ -139,19 +131,13 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
         }
     }
 
-    // init images and rects
-    QProgressDialog progress("Process images...", "Cancel", 0, fileList.size(), this);
-    progress.setWindowModality(Qt::ApplicationModal);
-    progress.show();
-
+    int volume = 0;
     int spriteBorder = ui->property_spriteBorderSpinBox->value();
+    int textureBorder = ui->property_textureBorderSpinBox->value();
+
+    // init images and rects
     QList< QPair<QString,QString> >::iterator it_f = fileList.begin();
     for(; it_f != fileList.end(); ++it_f) {
-        // increment progress
-        progress.setValue(progress.value() + 1);
-        QCoreApplication::processEvents();
-        if (progress.wasCanceled()) return;
-
         QPixmap pixmap((*it_f).first);        
         if (pixmap.isNull()) continue;
         if (scale != 1) {
@@ -167,6 +153,7 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
 
         int width = mycontent.mRect.width();
         int height = mycontent.mRect.height();
+        volume += width * height * 1.2f;
 
         inputContent += BinPack2D::Content<MyContent>(mycontent,
                                                       BinPack2D::Coord(),
@@ -181,10 +168,10 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
     BinPack2D::ContentAccumulator<MyContent> remainder;
     BinPack2D::ContentAccumulator<MyContent> outputContent;
 
-    int textureBorder = ui->property_textureBorderSpinBox->value();
     // find optimal size for atlas
-    int w = 4 + textureBorder*2;
-    int h = 4 + textureBorder*2;
+    int w = sqrt(volume) + textureBorder*2;
+    int h = sqrt(volume) + textureBorder*2;
+    qDebug() << w << "x" << h;
     bool k = true;
 
     while (1) {
@@ -192,7 +179,6 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
 
         bool success = canvasArray.Place(inputContent, remainder);
         if (success) {
-//            // Read all placed content.
             outputContent = BinPack2D::ContentAccumulator<MyContent>();
             canvasArray.CollectContent(outputContent);
             break;
@@ -235,25 +221,14 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
 
     // parse output.
     typedef BinPack2D::Content<MyContent>::Vector::iterator binpack2d_iterator;
-    //qDebug("PLACED:\n");
 
     atlasImage = QImage(w, h, QImage::Format_RGBA8888);
     atlasImage.fill(QColor(0, 0, 0, 0));
     QPainter painter(&atlasImage);
 
-    // init progress
-    progress.setLabelText("Packing in atlas...");
-    progress.setMaximum(outputContent.Get().size());
-    progress.setValue(0);
-
     QVector<QRect> rects;
     spriteFrames.clear();
     for( binpack2d_iterator itor = outputContent.Get().begin(); itor != outputContent.Get().end(); itor++ ) {
-        // increment progress
-        progress.setValue(progress.value() + 1);
-        QCoreApplication::processEvents();
-        if (progress.wasCanceled()) return;
-
         const BinPack2D::Content<MyContent> &content = *itor;
 
         // retreive your data.
@@ -261,14 +236,14 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
         //qDebug() << myContent.mName << myContent.mRect;
 
         // image
-        QImage image = myContent.mImage.copy(myContent.mRect);
+        QImage image;
         if (content.rotated) {
+            image = myContent.mImage.copy(myContent.mRect);
             image = rotate90(image);
         }
 
         SpriteFrameInfo spriteFrame;
-        spriteFrame.mFrame = QRect(content.coord.x, content.coord.y, content.size.w-spriteBorder, content.size.h-spriteBorder);
-//        spriteFrame.mOffset = QPoint(0, 0);
+        spriteFrame.mFrame = QRect(content.coord.x + textureBorder, content.coord.y + textureBorder, content.size.w-spriteBorder, content.size.h-spriteBorder);
         spriteFrame.mOffset = QPoint(
                     (myContent.mRect.left() + (-myContent.mImage.width() + content.size.w - spriteBorder) * 0.5f),
                     (-myContent.mRect.top() + ( myContent.mImage.height() - content.size.h + spriteBorder) * 0.5f)
@@ -278,33 +253,18 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
         spriteFrame.mSourceSize = myContent.mImage.size();
         if (content.rotated) {
             spriteFrame.mFrame = QRect(content.coord.x, content.coord.y, content.size.h-spriteBorder, content.size.w-spriteBorder);
-            //spriteFrame.mSourceSize = QSize(myContent.mImage.size().height(), myContent.mImage.size().width());
 
         }
         spriteFrames[myContent.mName] = spriteFrame;
 
-//        qDebug("\t%9s of size %3dx%3d at position %3d,%3d,%2d rotated=%s\n",
-//               myContent.mName.toStdString().c_str(),
-//               content.size.w,
-//               content.size.h,
-//               content.coord.x,
-//               content.coord.y,
-//               content.coord.z,
-//               (content.rotated ? "yes":" no"));
-
-        painter.drawImage(QPoint(content.coord.x+textureBorder, content.coord.y+textureBorder), image);
+        if (content.rotated) {
+            painter.drawImage(QPoint(content.coord.x+textureBorder, content.coord.y+textureBorder), image);
+        } else {
+            painter.drawImage(QPoint(content.coord.x+textureBorder, content.coord.y+textureBorder), myContent.mImage, myContent.mRect);
+        }
         rects.push_back(QRect(content.coord.x+textureBorder, content.coord.y+textureBorder, image.width(), image.height()));
     }
     painter.end();
-
-
-//    qDebug("NOT PLACED:\n");
-//    for( binpack2d_iterator itor = remainder.Get().begin(); itor != remainder.Get().end(); itor++ ) {
-//      const BinPack2D::Content<MyContent> &content = *itor;
-//      const MyContent &myContent = content.content;
-
-//      qDebug() << myContent.mFileName;
-//    }
 }
 
 
@@ -392,17 +352,18 @@ void MainWindow::recursiveRefreshFolder(const QString& folder, QTreeWidgetItem* 
 void MainWindow::openSpritePack(const QString& fileName) {
     // add to recent file
     QSettings settings;
-    QVariantList openRecentList = settings.value("openRecentList").toList();
-    QStringList openRecentFilesList;
-    foreach(QVariant recent, openRecentList) {
-        openRecentFilesList.append(recent.toString());
-    }
-    openRecentFilesList.append(fileName);
-    if (openRecentList.count()>10) openRecentList.removeFirst();
-    openRecentFilesList.removeDuplicates();
-    settings.setValue("openRecentList", openRecentFilesList);
+    QStringList openRecentList = settings.value("openRecentList").toStringList();
+    openRecentList.removeAll(fileName);
+    openRecentList.prepend(fileName);
+    while (openRecentList.size() > MAX_RECENT)
+        openRecentList.removeLast();
+
+    settings.setValue("openRecentList", openRecentList);
+    settings.sync();
     refreshOpenRecentMenu();
 
+
+    // read sprite packer format
     QDir dir(QFileInfo(fileName).absolutePath());
     QFile file(fileName);
     file.open(QIODevice::ReadOnly);
@@ -622,7 +583,6 @@ void MainWindow::on_actionSave_triggered()
 
 void MainWindow::openRecent() {
     QAction* senderAction = dynamic_cast<QAction*>(sender());
-    qDebug() << "openRecent:" << senderAction->text();
     openSpritePack(senderAction->text());
 }
 

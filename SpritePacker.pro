@@ -12,6 +12,7 @@ TARGET = SpritePacker
 TEMPLATE = app
 
 ICON = SpritePacker.icns
+RC_FILE = SpritePacker.rc
 
 SOURCES += main.cpp\
 		mainwindow.cpp

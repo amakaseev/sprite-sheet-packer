@@ -4,9 +4,10 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    QApplication::setStyle(QStyleFactory::create("Fusion"));
 
-    QCoreApplication::setOrganizationName("Home");
-    QCoreApplication::setOrganizationDomain("Home.com");
+    QCoreApplication::setOrganizationName("spicyminds-lab");
+    QCoreApplication::setOrganizationDomain("spicyminds-lab.com");
     QCoreApplication::setApplicationName("SpritePacker");
     QDir::setCurrent(QApplication::applicationDirPath());
 
