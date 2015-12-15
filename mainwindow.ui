@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1230</width>
-    <height>996</height>
+    <height>1006</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -339,7 +339,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Destination folder:</string>
+             <string>Destination:</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

@@ -45,10 +45,10 @@ MainWindow::~MainWindow()
 
 class MyContent {
 public:
-    MyContent(const QString& fname, const QString& name, const QPixmap& pixmap) {
+    MyContent(const QString& fname, const QString& name, const QImage& image) {
         mFileName = fname;
         mName = name;
-        mImage = pixmap.toImage();
+        mImage = image;
         mRect = QRect(0, 0, mImage.width(), mImage.height());
     }
 
@@ -138,22 +138,22 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
     // init images and rects
     QList< QPair<QString,QString> >::iterator it_f = fileList.begin();
     for(; it_f != fileList.end(); ++it_f) {
-        QPixmap pixmap((*it_f).first);        
-        if (pixmap.isNull()) continue;
+        QImage image((*it_f).first);
+        if (image.isNull()) continue;
         if (scale != 1) {
-            pixmap = pixmap.scaled(ceil(pixmap.width() * scale), ceil(pixmap.height() * scale), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            image = image.scaled(ceil(image.width() * scale), ceil(image.height() * scale), Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
-        MyContent mycontent((*it_f).first, (*it_f).second, pixmap);
+        MyContent mycontent((*it_f).first, (*it_f).second, image);
 
         // Trim / Crop
-        if (ui->property_trimCropGroupBox->isChecked()) {
+        if (ui->property_trimCropGroupBox->isChecked() && ui->property_trimCropThesholdSpinBox->value()) {
             mycontent.trim(ui->property_trimCropThesholdSpinBox->value());
         }
 
         int width = mycontent.mRect.width();
         int height = mycontent.mRect.height();
-        volume += width * height * 1.2f;
+        volume += width * height * 1.02f;
 
         inputContent += BinPack2D::Content<MyContent>(mycontent,
                                                       BinPack2D::Coord(),
@@ -173,7 +173,7 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
     int h = sqrt(volume) + textureBorder*2;
     qDebug() << w << "x" << h;
     bool k = true;
-
+    int step = (w + h) / 20;
     while (1) {
         BinPack2D::CanvasArray<MyContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<MyContent>(w - textureBorder*2, h - textureBorder*2, 1).Build();
 
@@ -185,37 +185,42 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
         }
         if (k) {
             k = false;
-            w++;
+            w += step;
         } else {
             k = true;
-            h++;
+            h += step;
         }
+        qDebug() << "stage 1:" << w << "x" << h << "step:" << step;
     }
+    step = (w + h) / 20;
     while (1) {
-        w--;
+        w -= step;
         BinPack2D::CanvasArray<MyContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<MyContent>(w - textureBorder*2, h - textureBorder*2, 1).Build();
 
         bool success = canvasArray.Place(inputContent, remainder);
         if (!success) {
-            w++;
-            break;
+            w += step;
+            if (step > 1) step = qMax(step/2, 1); else break;
         } else {
             outputContent = BinPack2D::ContentAccumulator<MyContent>();
             canvasArray.CollectContent(outputContent);
         }
+        qDebug() << "stage 2:" << w << "x" << h << "step:" << step;
     }
+    step = (w + h) / 20;
     while (1) {
-        h--;
+        h -= step;
         BinPack2D::CanvasArray<MyContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<MyContent>(w - textureBorder*2, h - textureBorder*2, 1).Build();
 
         bool success = canvasArray.Place(inputContent, remainder);
         if (!success) {
-            h++;
-            break;
+            h += step;
+            if (step > 1) step = qMax(step/2, 1); else break;
         } else {
             outputContent = BinPack2D::ContentAccumulator<MyContent>();
             canvasArray.CollectContent(outputContent);
         }
+        qDebug() << "stage 3:" << w << "x" << h << "step:" << step;
     }
 
 
@@ -226,7 +231,6 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
     atlasImage.fill(QColor(0, 0, 0, 0));
     QPainter painter(&atlasImage);
 
-    QVector<QRect> rects;
     spriteFrames.clear();
     for( binpack2d_iterator itor = outputContent.Get().begin(); itor != outputContent.Get().end(); itor++ ) {
         const BinPack2D::Content<MyContent> &content = *itor;
@@ -262,7 +266,6 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
         } else {
             painter.drawImage(QPoint(content.coord.x+textureBorder, content.coord.y+textureBorder), myContent.mImage, myContent.mRect);
         }
-        rects.push_back(QRect(content.coord.x+textureBorder, content.coord.y+textureBorder, image.width(), image.height()));
     }
     painter.end();
 }
