@@ -24,9 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //_scene->setBackgroundBrush(QBrush(QPixmap("://res/background_tran.png")));
     _scene->setBackgroundBrush(QBrush(Qt::darkGray));
 
-    _graphicsView = new QGraphicsView(this);
-    _graphicsView->setScene(_scene);
-    setCentralWidget(_graphicsView);
+    ui->graphicsView->setScene(_scene);
 
     refreshOpenRecentMenu();
 
@@ -106,6 +104,13 @@ void MainWindow::refreshOpenRecentMenu() {
         }
     }
 }
+
+void MainWindow::openRecent() {
+    QAction* senderAction = dynamic_cast<QAction*>(sender());
+    openSpritePack(senderAction->text());
+}
+
+
 
 void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, SpriteFrameInfo>& spriteFrames) {
     BinPack2D::ContentAccumulator<MyContent> inputContent;
@@ -193,7 +198,7 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
         qDebug() << "stage 1:" << w << "x" << h << "step:" << step;
     }
     step = (w + h) / 20;
-    while (1) {
+    while (w) {
         w -= step;
         BinPack2D::CanvasArray<MyContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<MyContent>(w - textureBorder*2, h - textureBorder*2, 1).Build();
 
@@ -208,7 +213,7 @@ void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, Sp
         qDebug() << "stage 2:" << w << "x" << h << "step:" << step;
     }
     step = (w + h) / 20;
-    while (1) {
+    while (h) {
         h -= step;
         BinPack2D::CanvasArray<MyContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<MyContent>(w - textureBorder*2, h - textureBorder*2, 1).Build();
 
@@ -289,7 +294,9 @@ void MainWindow::refreshAtlas() {
     _scene->addRect(atlasPixmapItem->boundingRect(), QPen(Qt::darkRed));
     _scene->setSceneRect(atlasPixmapItem->boundingRect());
 
-    ui->statusBar->showMessage(QString("%1x%2").arg(atlasImage.width()).arg(atlasImage.height()));
+    //1024x1024x4 (RAM: 18.86MB)
+    float ram = (atlasImage.width() * atlasImage.height() * 4) / 1024.f / 1024.f;
+    ui->labelAtlasInfo->setText(QString("%1x%2x%3 (RAM: %4MB)").arg(atlasImage.width()).arg(atlasImage.height()).arg(4).arg(ram, 0, 'f', 2));
 }
 
 void MainWindow::refreshSpritesTree(const QStringList& fileList) {
@@ -413,6 +420,7 @@ void MainWindow::openSpritePack(const QString& fileName) {
 
         refreshSpritesTree(fileList);
         refreshAtlas();
+        on_toolButtonZoomFit_clicked();
     } else {
         QMessageBox::critical(this,
                              "ERROR",
@@ -584,12 +592,56 @@ void MainWindow::on_actionSave_triggered()
     }
 }
 
-void MainWindow::openRecent() {
-    QAction* senderAction = dynamic_cast<QAction*>(sender());
-    openSpritePack(senderAction->text());
+void MainWindow::on_actionRefresh_triggered()
+{
+    QStringList fileList;
+    for(int i = 0; i < ui->spritesTreeWidget->topLevelItemCount(); i++) {
+        QTreeWidgetItem* item = ui->spritesTreeWidget->topLevelItem(i);
+        fileList.push_back(item->data(0, Qt::UserRole).toString());
+    }
+
+    refreshSpritesTree(fileList);
+    refreshAtlas();
 }
 
-void MainWindow::on_actionAddSprites_triggered()
+void MainWindow::on_toolButtonZoomOut_clicked()
+{
+    ui->zoomSlider->setValue(ui->zoomSlider->value() - ui->zoomSlider->singleStep());
+}
+
+void MainWindow::on_toolButtonZoomIn_clicked()
+{
+    ui->zoomSlider->setValue(ui->zoomSlider->value() + ui->zoomSlider->singleStep());
+}
+
+void MainWindow::on_toolButtonZoom1x1_clicked()
+{
+    ui->zoomSlider->setValue(0);
+}
+
+void MainWindow::on_toolButtonZoomFit_clicked()
+{
+    ui->graphicsView->fitInView(_scene->sceneRect(), Qt::KeepAspectRatio);
+    QTransform tr = ui->graphicsView->transform();
+    float scale = tr.m11();
+    int value = 50 * scale - 50;
+    if (value > 0) {
+        value = ((int)(value/5.f))*5;
+    } else {
+        value = (floor(value/5.f))*5;
+    }
+    ui->zoomSlider->setValue(value);
+}
+
+void MainWindow::on_zoomSlider_valueChanged(int value)
+{
+    float scale = (value + 50.f) / 50.f;
+    ui->graphicsView->setTransform(QTransform::fromScale(scale, scale));
+
+    ui->labelZoomPercent->setText(QString::number((int)(scale * 100)) + " %");
+}
+
+void MainWindow::on_toolButtonAddSprites_clicked()
 {
     QSettings settings;
     QStringList fileNames = QFileDialog::getOpenFileNames(this,
@@ -612,7 +664,20 @@ void MainWindow::on_actionAddSprites_triggered()
     }
 }
 
-void MainWindow::on_actionAddFolder_triggered()
+void MainWindow::on_toolButtonRemoveSprites_clicked()
+{
+    if (ui->spritesTreeWidget->selectedItems().size() < 1) return;
+    if (QMessageBox::question(this, "Remove sprites", "You really want to remove the sprites?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
+        foreach (QTreeWidgetItem* item, ui->spritesTreeWidget->selectedItems()) {
+            ui->spritesTreeWidget->removeItemWidget(item, 0);
+            delete item;
+        }
+
+        refreshAtlas();
+    }
+}
+
+void MainWindow::on_toolButtonAddFolder_clicked()
 {
     QSettings settings;
     QString pathName = QFileDialog::getExistingDirectory(this,
@@ -633,42 +698,6 @@ void MainWindow::on_actionAddFolder_triggered()
 
         refreshAtlas();
     }
-}
-
-void MainWindow::on_actionRemove_triggered()
-{
-    if (ui->spritesTreeWidget->selectedItems().size() < 1) return;
-    if (QMessageBox::question(this, "Remove sprites", "You really want to remove the sprites?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
-        foreach (QTreeWidgetItem* item, ui->spritesTreeWidget->selectedItems()) {
-            ui->spritesTreeWidget->removeItemWidget(item, 0);
-            delete item;
-        }
-
-        refreshAtlas();
-    }
-}
-
-void MainWindow::on_actionRefresh_triggered()
-{
-    QStringList fileList;
-    for(int i = 0; i < ui->spritesTreeWidget->topLevelItemCount(); i++) {
-        QTreeWidgetItem* item = ui->spritesTreeWidget->topLevelItem(i);
-        fileList.push_back(item->data(0, Qt::UserRole).toString());
-    }
-
-    refreshSpritesTree(fileList);
-    refreshAtlas();
-}
-
-void MainWindow::on_actionZoomIn_triggered()
-{
-    _graphicsView->scale(2.f, 2.f);
-    //_graphicsView->fitInView(_scene->sceneRect(), Qt::KeepAspectRatio);
-}
-
-void MainWindow::on_actionZoomOut_triggered()
-{
-    _graphicsView->scale(0.5f, 0.5f);
 }
 
 void MainWindow::on_output_destFolderToolButton_clicked()
@@ -711,7 +740,6 @@ void MainWindow::on_output_publishPushButton_clicked()
         case 0: plistFileName = ui->output_spriteSheetLineEdit->text() + ".plist"; break;
         case 1: plistFileName = ui->output_spriteSheetLineEdit->text() + ".json"; break;
     }
-
 
     // HDR
     if (ui->output_HDR_groupBox->isChecked()) {
@@ -778,5 +806,4 @@ void MainWindow::on_output_publishPushButton_clicked()
         atlasImage.save(sdImageFile);
         publishSpriteSheet(sdPlistFile, imageFileName, spriteFrames);
     }
-
 }

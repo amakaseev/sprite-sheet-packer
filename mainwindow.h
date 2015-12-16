@@ -26,6 +26,8 @@ public:
 
 protected:
     void refreshOpenRecentMenu();
+    void openRecent();
+
     void generateAtlas(float scale, QImage& atlasImage, QMap<QString, SpriteFrameInfo>& spriteFrames);
     void refreshAtlas();
     void refreshSpritesTree(const QStringList& fileList);
@@ -38,14 +40,20 @@ private slots:
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionSave_triggered();
-    void openRecent();
 
-    void on_actionAddSprites_triggered();
-    void on_actionAddFolder_triggered();
-    void on_actionRemove_triggered();
     void on_actionRefresh_triggered();
-    void on_actionZoomIn_triggered();
-    void on_actionZoomOut_triggered();
+
+    // zoom control
+    void on_toolButtonZoomOut_clicked();
+    void on_toolButtonZoomIn_clicked();
+    void on_toolButtonZoom1x1_clicked();
+    void on_toolButtonZoomFit_clicked();
+    void on_zoomSlider_valueChanged(int value);
+
+    // source sprite control
+    void on_toolButtonAddSprites_clicked();
+    void on_toolButtonAddFolder_clicked();
+    void on_toolButtonRemoveSprites_clicked();
 
     void on_output_destFolderToolButton_clicked();
     void on_output_publishPushButton_clicked();
@@ -53,7 +61,6 @@ private slots:
 private:
     Ui::MainWindow*      ui;
     QGraphicsScene*     _scene;
-    QGraphicsView*      _graphicsView;
 };
 
 #endif // MAINWINDOW_H

@@ -6,20 +6,173 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1230</width>
+    <width>1442</width>
     <height>1006</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>SpritePacker</string>
   </property>
-  <widget class="QWidget" name="centralWidget"/>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout_3">
+    <item>
+     <widget class="QGraphicsView" name="graphicsView"/>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_16">
+      <item>
+       <widget class="QLabel" name="label_15">
+        <property name="text">
+         <string>Zoom: </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="zoomSlider">
+        <property name="minimum">
+         <number>-40</number>
+        </property>
+        <property name="maximum">
+         <number>40</number>
+        </property>
+        <property name="singleStep">
+         <number>5</number>
+        </property>
+        <property name="pageStep">
+         <number>50</number>
+        </property>
+        <property name="tracking">
+         <bool>true</bool>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="tickPosition">
+         <enum>QSlider::NoTicks</enum>
+        </property>
+        <property name="tickInterval">
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelZoomPercent">
+        <property name="text">
+         <string>100 %</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="toolButtonZoomOut">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/res/zoomout.png</normaloff>:/res/zoomout.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="toolButtonZoomIn">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/res/zoomin.png</normaloff>:/res/zoomin.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="toolButtonZoom1x1">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>42</width>
+          <height>42</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>1:1</string>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonTextOnly</enum>
+        </property>
+        <property name="autoRaise">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="toolButtonZoomFit">
+        <property name="minimumSize">
+         <size>
+          <width>42</width>
+          <height>42</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Fit</string>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonTextOnly</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelAtlasInfo">
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1230</width>
+     <width>1442</width>
      <height>22</height>
     </rect>
    </property>
@@ -69,9 +222,6 @@
    <addaction name="actionAddFolder"/>
    <addaction name="actionRefresh"/>
    <addaction name="actionRemove"/>
-   <addaction name="separator"/>
-   <addaction name="actionZoomIn"/>
-   <addaction name="actionZoomOut"/>
    <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -640,6 +790,87 @@
       </layout>
      </item>
      <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_15">
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QToolButton" name="toolButtonAddSprites">
+         <property name="text">
+          <string>...</string>
+         </property>
+         <property name="icon">
+          <iconset resource="resources.qrc">
+           <normaloff>:/res/add_sprite.png</normaloff>:/res/add_sprite.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>32</width>
+           <height>32</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="toolButtonAddFolder">
+         <property name="text">
+          <string>...</string>
+         </property>
+         <property name="icon">
+          <iconset resource="resources.qrc">
+           <normaloff>:/res/add_folder.png</normaloff>:/res/add_folder.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>32</width>
+           <height>32</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="toolButtonRemoveSprites">
+         <property name="text">
+          <string>...</string>
+         </property>
+         <property name="icon">
+          <iconset resource="resources.qrc">
+           <normaloff>:/res/standardbutton-delete-128.png</normaloff>:/res/standardbutton-delete-128.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>32</width>
+           <height>32</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+     <item>
       <widget class="QTreeWidget" name="spritesTreeWidget">
        <property name="iconSize">
         <size>
@@ -736,24 +967,6 @@
    </property>
    <property name="text">
     <string>Refresh</string>
-   </property>
-  </action>
-  <action name="actionZoomIn">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/zoomin.png</normaloff>:/res/zoomin.png</iconset>
-   </property>
-   <property name="text">
-    <string>Zoom In</string>
-   </property>
-  </action>
-  <action name="actionZoomOut">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/zoomout.png</normaloff>:/res/zoomout.png</iconset>
-   </property>
-   <property name="text">
-    <string>Zoom Out</string>
    </property>
   </action>
  </widget>
