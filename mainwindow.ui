@@ -281,7 +281,7 @@
            <string>Trim / Crop</string>
           </property>
           <property name="checkable">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_4">
            <item>
@@ -308,7 +308,7 @@
                 <number>9999</number>
                </property>
                <property name="value">
-                <number>2</number>
+                <number>1</number>
                </property>
               </widget>
              </item>
@@ -840,6 +840,9 @@
        </item>
        <item>
         <widget class="QToolButton" name="toolButtonRemoveSprites">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>...</string>
          </property>
@@ -872,6 +875,9 @@
      </item>
      <item>
       <widget class="QTreeWidget" name="spritesTreeWidget">
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ExtendedSelection</enum>
+       </property>
        <property name="iconSize">
         <size>
          <width>24</width>

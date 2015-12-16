@@ -1,10 +1,7 @@
-#include "binpack2d.hpp"
-
 #include <QtXml>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "imagerotate.h"
 
 #include "PListParser.h"
 #include "PListSerializer.h"
@@ -41,57 +38,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-class MyContent {
-public:
-    MyContent(const QString& fname, const QString& name, const QImage& image) {
-        mFileName = fname;
-        mName = name;
-        mImage = image;
-        mRect = QRect(0, 0, mImage.width(), mImage.height());
-    }
-
-    void trim(int alpha) {
-        int l = mImage.width();
-        int t = mImage.height();
-        int r = 0;
-        int b = 0;
-        for (int y=0; y<mImage.height(); y++) {
-            bool rowFilled = false;
-            for (int x=0; x<mImage.width(); x++) {
-                int a = qAlpha(mImage.pixel(x, y));
-                if (a >= alpha) {
-                    rowFilled = true;
-                    r = qMax(r, x);
-                    if (l > x) {
-                        l = x;
-                    }
-                }
-            }
-            if (rowFilled) {
-                t = qMin(t, y);
-                b = y;
-            }
-        }
-        mRect = QRect(QPoint(l, t), QPoint(r,b));
-        if ((mRect.width() % 2) != (mImage.width() % 2)) {
-            if (l>0) l--; else r++;
-            mRect = QRect(QPoint(l, t), QPoint(r,b));
-        }
-        if ((mRect.height() % 2) != (mImage.height() % 2)) {
-            if (t>0) t--; else b++;
-            mRect = QRect(QPoint(l, t), QPoint(r,b));
-        }
-        if ((mRect.width()<0)||(mRect.height()<0)) {
-            mRect = QRect(0, 0, 2, 2);
-        }
-    }
-
-    QString mFileName;
-    QString mName;
-    QImage  mImage;
-    QRect   mRect;
-};
-
 void MainWindow::refreshOpenRecentMenu() {
     QSettings settings;
     QStringList openRecentList = settings.value("openRecentList").toStringList();
@@ -105,182 +51,11 @@ void MainWindow::refreshOpenRecentMenu() {
     }
 }
 
-void MainWindow::openRecent() {
-    QAction* senderAction = dynamic_cast<QAction*>(sender());
-    openSpritePack(senderAction->text());
-}
-
-
-
-void MainWindow::generateAtlas(float scale, QImage& atlasImage, QMap<QString, SpriteFrameInfo>& spriteFrames) {
-    BinPack2D::ContentAccumulator<MyContent> inputContent;
-
-    QStringList nameFilter;
-    nameFilter << "*.png" << "*.jpg" << "*.jpeg" << "*.gif" << "*.bmp";
-
-    QList< QPair<QString,QString> > fileList;
-    for(int i = 0; i < ui->spritesTreeWidget->topLevelItemCount(); i++) {
-        QTreeWidgetItem* item = ui->spritesTreeWidget->topLevelItem(i);
-        QString pathName = item->data(0, Qt::UserRole).toString();
-        QFileInfo fi(pathName);
-
-        if (fi.isDir()) {
-            QDir dir(fi.path());
-            QDirIterator fileNames(pathName, nameFilter, QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-            while(fileNames.hasNext()){
-                fileNames.next();
-                fileList.push_back(qMakePair(fileNames.filePath(), dir.relativeFilePath(fileNames.filePath())));
-            }
-        } else {
-            fileList.push_back(qMakePair(pathName, fi.fileName()));
-        }
-    }
-
-    int volume = 0;
-    int spriteBorder = ui->property_spriteBorderSpinBox->value();
-    int textureBorder = ui->property_textureBorderSpinBox->value();
-
-    // init images and rects
-    QList< QPair<QString,QString> >::iterator it_f = fileList.begin();
-    for(; it_f != fileList.end(); ++it_f) {
-        QImage image((*it_f).first);
-        if (image.isNull()) continue;
-        if (scale != 1) {
-            image = image.scaled(ceil(image.width() * scale), ceil(image.height() * scale), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        }
-
-        MyContent mycontent((*it_f).first, (*it_f).second, image);
-
-        // Trim / Crop
-        if (ui->property_trimCropGroupBox->isChecked() && ui->property_trimCropThesholdSpinBox->value()) {
-            mycontent.trim(ui->property_trimCropThesholdSpinBox->value());
-        }
-
-        int width = mycontent.mRect.width();
-        int height = mycontent.mRect.height();
-        volume += width * height * 1.02f;
-
-        inputContent += BinPack2D::Content<MyContent>(mycontent,
-                                                      BinPack2D::Coord(),
-                                                      BinPack2D::Size(width+spriteBorder, height+spriteBorder),
-                                                      false);
-    }
-
-    // Sort the input content by size... usually packs better.
-    inputContent.Sort();
-
-    // A place to store packed content.
-    BinPack2D::ContentAccumulator<MyContent> remainder;
-    BinPack2D::ContentAccumulator<MyContent> outputContent;
-
-    // find optimal size for atlas
-    int w = sqrt(volume) + textureBorder*2;
-    int h = sqrt(volume) + textureBorder*2;
-    qDebug() << w << "x" << h;
-    bool k = true;
-    int step = (w + h) / 20;
-    while (1) {
-        BinPack2D::CanvasArray<MyContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<MyContent>(w - textureBorder*2, h - textureBorder*2, 1).Build();
-
-        bool success = canvasArray.Place(inputContent, remainder);
-        if (success) {
-            outputContent = BinPack2D::ContentAccumulator<MyContent>();
-            canvasArray.CollectContent(outputContent);
-            break;
-        }
-        if (k) {
-            k = false;
-            w += step;
-        } else {
-            k = true;
-            h += step;
-        }
-        qDebug() << "stage 1:" << w << "x" << h << "step:" << step;
-    }
-    step = (w + h) / 20;
-    while (w) {
-        w -= step;
-        BinPack2D::CanvasArray<MyContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<MyContent>(w - textureBorder*2, h - textureBorder*2, 1).Build();
-
-        bool success = canvasArray.Place(inputContent, remainder);
-        if (!success) {
-            w += step;
-            if (step > 1) step = qMax(step/2, 1); else break;
-        } else {
-            outputContent = BinPack2D::ContentAccumulator<MyContent>();
-            canvasArray.CollectContent(outputContent);
-        }
-        qDebug() << "stage 2:" << w << "x" << h << "step:" << step;
-    }
-    step = (w + h) / 20;
-    while (h) {
-        h -= step;
-        BinPack2D::CanvasArray<MyContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<MyContent>(w - textureBorder*2, h - textureBorder*2, 1).Build();
-
-        bool success = canvasArray.Place(inputContent, remainder);
-        if (!success) {
-            h += step;
-            if (step > 1) step = qMax(step/2, 1); else break;
-        } else {
-            outputContent = BinPack2D::ContentAccumulator<MyContent>();
-            canvasArray.CollectContent(outputContent);
-        }
-        qDebug() << "stage 3:" << w << "x" << h << "step:" << step;
-    }
-
-
-    // parse output.
-    typedef BinPack2D::Content<MyContent>::Vector::iterator binpack2d_iterator;
-
-    atlasImage = QImage(w, h, QImage::Format_RGBA8888);
-    atlasImage.fill(QColor(0, 0, 0, 0));
-    QPainter painter(&atlasImage);
-
-    spriteFrames.clear();
-    for( binpack2d_iterator itor = outputContent.Get().begin(); itor != outputContent.Get().end(); itor++ ) {
-        const BinPack2D::Content<MyContent> &content = *itor;
-
-        // retreive your data.
-        const MyContent &myContent = content.content;
-        //qDebug() << myContent.mName << myContent.mRect;
-
-        // image
-        QImage image;
-        if (content.rotated) {
-            image = myContent.mImage.copy(myContent.mRect);
-            image = rotate90(image);
-        }
-
-        SpriteFrameInfo spriteFrame;
-        spriteFrame.mFrame = QRect(content.coord.x + textureBorder, content.coord.y + textureBorder, content.size.w-spriteBorder, content.size.h-spriteBorder);
-        spriteFrame.mOffset = QPoint(
-                    (myContent.mRect.left() + (-myContent.mImage.width() + content.size.w - spriteBorder) * 0.5f),
-                    (-myContent.mRect.top() + ( myContent.mImage.height() - content.size.h + spriteBorder) * 0.5f)
-                    );
-        spriteFrame.mRotated = content.rotated;
-        spriteFrame.mSourceColorRect = myContent.mRect;
-        spriteFrame.mSourceSize = myContent.mImage.size();
-        if (content.rotated) {
-            spriteFrame.mFrame = QRect(content.coord.x, content.coord.y, content.size.h-spriteBorder, content.size.w-spriteBorder);
-
-        }
-        spriteFrames[myContent.mName] = spriteFrame;
-
-        if (content.rotated) {
-            painter.drawImage(QPoint(content.coord.x+textureBorder, content.coord.y+textureBorder), image);
-        } else {
-            painter.drawImage(QPoint(content.coord.x+textureBorder, content.coord.y+textureBorder), myContent.mImage, myContent.mRect);
-        }
-    }
-    painter.end();
-}
-
-
 void MainWindow::refreshAtlas() {
     QImage atlasImage;
     QMap<QString, SpriteFrameInfo> spriteFrames;
 
-    generateAtlas(1.f, atlasImage, spriteFrames);
+    SpriteAtlas::generate(fileListFromTree(), ui->property_textureBorderSpinBox->value(), ui->property_spriteBorderSpinBox->value(), ui->property_trimCropThesholdSpinBox->value(), 1.f, atlasImage, spriteFrames);
 
     _scene->clear();
     _scene->addRect(atlasImage.rect(), QPen(Qt::darkRed), QBrush(QPixmap("://res/background_tran.png")));
@@ -333,7 +108,6 @@ void MainWindow::refreshSpritesTree(const QStringList& fileList) {
 
 void MainWindow::recursiveRefreshFolder(const QString& folder, QTreeWidgetItem* parentItem) {
     QDir dir(folder);
-    qDebug() << "scan folder: " << folder;
 
     // scan folder(s)
     QFileInfoList entryList = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot | QDir::NoSymLinks, QDir::Name);
@@ -388,7 +162,6 @@ void MainWindow::openSpritePack(const QString& fileName) {
 
         // PACKING
         QVariantMap packingMap = propertyMap["packing"].toMap();
-        ui->property_trimCropGroupBox->setChecked(packingMap["trim"].toBool());
         ui->property_trimCropThesholdSpinBox->setValue(packingMap["threshold"].toInt());
         ui->property_textureBorderSpinBox->setValue(packingMap["textureBorder"].toInt());
         ui->property_spriteBorderSpinBox->setValue(packingMap["spriteBorder"].toInt());
@@ -452,7 +225,6 @@ void MainWindow::saveSpritePack(const QString& fileName) {
 
     // PACKING
     QVariantMap packingMap;
-    packingMap["trim"] = ui->property_trimCropGroupBox->isChecked();
     packingMap["threshold"] = ui->property_trimCropThesholdSpinBox->value();
     packingMap["textureBorder"] = ui->property_textureBorderSpinBox->value();
     packingMap["spriteBorder"] = ui->property_spriteBorderSpinBox->value();
@@ -483,15 +255,7 @@ void MainWindow::saveSpritePack(const QString& fileName) {
     plist["property"] = propertyMap;
 
     // SPRITES
-    // collect all root folders ans files
-    QVariantList spritesList;
-    for(int i = 0; i < ui->spritesTreeWidget->topLevelItemCount(); i++) {
-        QTreeWidgetItem* item = ui->spritesTreeWidget->topLevelItem(i);
-        QString pathName = item->data(0, Qt::UserRole).toString();
-
-        spritesList.append(dir.relativeFilePath(QFileInfo(pathName).absoluteFilePath()));
-    }
-    plist["sprites"] = QVariant(spritesList);
+    plist["sprites"] = QVariant(fileListFromTree());
 
 
     QFile file(fileName);
@@ -592,15 +356,23 @@ void MainWindow::on_actionSave_triggered()
     }
 }
 
-void MainWindow::on_actionRefresh_triggered()
-{
+void MainWindow::openRecent() {
+    QAction* senderAction = dynamic_cast<QAction*>(sender());
+    openSpritePack(senderAction->text());
+}
+
+QStringList MainWindow::fileListFromTree() {
     QStringList fileList;
     for(int i = 0; i < ui->spritesTreeWidget->topLevelItemCount(); i++) {
         QTreeWidgetItem* item = ui->spritesTreeWidget->topLevelItem(i);
         fileList.push_back(item->data(0, Qt::UserRole).toString());
     }
+    return fileList;
+}
 
-    refreshSpritesTree(fileList);
+void MainWindow::on_actionRefresh_triggered()
+{
+    refreshSpritesTree(fileListFromTree());
     refreshAtlas();
 }
 
@@ -660,20 +432,19 @@ void MainWindow::on_toolButtonAddSprites_clicked()
         }
         settings.setValue("spritesPath", fileNames.back());
 
+        refreshSpritesTree(fileListFromTree());
         refreshAtlas();
     }
 }
 
-void MainWindow::on_toolButtonRemoveSprites_clicked()
+void MainWindow::on_spritesTreeWidget_itemSelectionChanged()
 {
-    if (ui->spritesTreeWidget->selectedItems().size() < 1) return;
-    if (QMessageBox::question(this, "Remove sprites", "You really want to remove the sprites?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
-        foreach (QTreeWidgetItem* item, ui->spritesTreeWidget->selectedItems()) {
-            ui->spritesTreeWidget->removeItemWidget(item, 0);
-            delete item;
+    ui->toolButtonRemoveSprites->setEnabled(false);
+    foreach (QTreeWidgetItem* item, ui->spritesTreeWidget->selectedItems()) {
+        if (!item->parent()) {
+            ui->toolButtonRemoveSprites->setEnabled(true);
+            return;
         }
-
-        refreshAtlas();
     }
 }
 
@@ -694,10 +465,22 @@ void MainWindow::on_toolButtonAddFolder_clicked()
         item->setIcon(0, QFileIconProvider().icon(QFileIconProvider::Folder));
         item->setData(0, Qt::UserRole, fi.absoluteFilePath());
 
-        recursiveRefreshFolder(fi.absoluteFilePath(), item);
-
+        refreshSpritesTree(fileListFromTree());
         refreshAtlas();
     }
+}
+
+void MainWindow::on_toolButtonRemoveSprites_clicked()
+{
+    foreach (QTreeWidgetItem* item, ui->spritesTreeWidget->selectedItems()) {
+        if (!item->parent()) {
+            ui->spritesTreeWidget->removeItemWidget(item, 0);
+            delete item;
+        }
+    }
+
+    refreshSpritesTree(fileListFromTree());
+    refreshAtlas();
 }
 
 void MainWindow::on_output_destFolderToolButton_clicked()
@@ -757,7 +540,7 @@ void MainWindow::on_output_publishPushButton_clicked()
         QMap<QString, SpriteFrameInfo> spriteFrames;
 
         float scale = (float)ui->output_HDR_scaleSpinBox->value() / 100.f;
-        generateAtlas(scale, atlasImage, spriteFrames);
+        SpriteAtlas::generate(fileListFromTree(), ui->property_textureBorderSpinBox->value(), ui->property_spriteBorderSpinBox->value(), ui->property_trimCropThesholdSpinBox->value(), scale, atlasImage, spriteFrames);
 
         atlasImage.save(hdrImageFile);
         publishSpriteSheet(hdrPlistFile, imageFileName, spriteFrames);
@@ -779,7 +562,7 @@ void MainWindow::on_output_publishPushButton_clicked()
         QMap<QString, SpriteFrameInfo> spriteFrames;
 
         float scale = (float)ui->output_HD_scaleSpinBox->value() / 100.f;
-        generateAtlas(scale, atlasImage, spriteFrames);
+        SpriteAtlas::generate(fileListFromTree(), ui->property_textureBorderSpinBox->value(), ui->property_spriteBorderSpinBox->value(), ui->property_trimCropThesholdSpinBox->value(), scale, atlasImage, spriteFrames);
 
         atlasImage.save(hdImageFile);
         publishSpriteSheet(hdPlistFile, imageFileName, spriteFrames);
@@ -801,7 +584,7 @@ void MainWindow::on_output_publishPushButton_clicked()
         QMap<QString, SpriteFrameInfo> spriteFrames;
 
         float scale = (float)ui->output_SD_scaleSpinBox->value() / 100.f;
-        generateAtlas(scale, atlasImage, spriteFrames);
+        SpriteAtlas::generate(fileListFromTree(), ui->property_textureBorderSpinBox->value(), ui->property_spriteBorderSpinBox->value(), ui->property_trimCropThesholdSpinBox->value(), scale, atlasImage, spriteFrames);
 
         atlasImage.save(sdImageFile);
         publishSpriteSheet(sdPlistFile, imageFileName, spriteFrames);

@@ -2,19 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QtWidgets>
+#include "spriteatlas.h"
 
 namespace Ui {
 class MainWindow;
 }
-
-class SpriteFrameInfo {
-public:
-    QRect   mFrame;
-    QPoint  mOffset;
-    bool    mRotated;
-    QRect   mSourceColorRect;
-    QSize   mSourceSize;
-};
 
 class MainWindow : public QMainWindow
 {
@@ -26,12 +18,12 @@ public:
 
 protected:
     void refreshOpenRecentMenu();
-    void openRecent();
 
-    void generateAtlas(float scale, QImage& atlasImage, QMap<QString, SpriteFrameInfo>& spriteFrames);
     void refreshAtlas();
     void refreshSpritesTree(const QStringList& fileList);
     void recursiveRefreshFolder(const QString& folder, QTreeWidgetItem* parentItem);
+    QStringList fileListFromTree();
+
     void openSpritePack(const QString& fileName);
     void saveSpritePack(const QString& fileName);
     void publishSpriteSheet(const QString& fileName, const QString& texName, QMap<QString, SpriteFrameInfo>& spriteFrames);
@@ -40,6 +32,7 @@ private slots:
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionSave_triggered();
+    void openRecent();
 
     void on_actionRefresh_triggered();
 
@@ -51,6 +44,7 @@ private slots:
     void on_zoomSlider_valueChanged(int value);
 
     // source sprite control
+    void on_spritesTreeWidget_itemSelectionChanged();
     void on_toolButtonAddSprites_clicked();
     void on_toolButtonAddFolder_clicked();
     void on_toolButtonRemoveSprites_clicked();

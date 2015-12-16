@@ -11,15 +11,20 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = SpritePacker
 TEMPLATE = app
 
+CONFIG += c++11
+QMAKE_CXXFLAGS +=-std=c++11 -stdlib=libc++
+
 ICON = SpritePacker.icns
 RC_FILE = SpritePacker.rc
 
 SOURCES += main.cpp\
-		mainwindow.cpp
+    mainwindow.cpp \
+    spriteatlas.cpp
 
 HEADERS  += mainwindow.h \
     imagerotate.h \
-    binpack2d.hpp
+    binpack2d.hpp \
+    spriteatlas.h
 
 FORMS    += mainwindow.ui
 
