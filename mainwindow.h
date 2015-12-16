@@ -26,7 +26,7 @@ protected:
 
     void openSpritePack(const QString& fileName);
     void saveSpritePack(const QString& fileName);
-    void publishSpriteSheet(const QString& fileName, const QString& texName, QMap<QString, SpriteFrameInfo>& spriteFrames);
+    void publishSpriteSheet(const QString& fileName, const QString& texName, const QMap<QString, SpriteFrameInfo>& spriteFrames);
 
 private slots:
     void on_actionNew_triggered();

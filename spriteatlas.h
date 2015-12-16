@@ -2,6 +2,7 @@
 #define SPRITEATLAS_H
 
 #include <QtCore>
+#include <QImage>
 
 struct SpriteFrameInfo {
 public:
@@ -15,9 +16,22 @@ public:
 class SpriteAtlas
 {
 public:
-    SpriteAtlas();
+    SpriteAtlas(const QStringList& sourceList, int textureBorder = 0, int spriteBorder = 1, int trim = 1, float scale = 1);
 
-    static bool generate(const QStringList& sourceList, int textureBorder, int spriteBorder, int trim, float scale, QImage& atlasImage, QMap<QString, SpriteFrameInfo>& spriteFrames);
+    void generate();
+
+    const QImage& image() const { return _atlasImage; }
+    const QMap<QString, SpriteFrameInfo>& spriteFrames() { return _spriteFrames; }
+
+private:
+    QStringList _sourceList;
+    int _textureBorder;
+    int _spriteBorder;
+    int _trim;
+    float _scale;
+
+    QImage _atlasImage;
+    QMap<QString, SpriteFrameInfo> _spriteFrames;
 };
 
 #endif // SPRITEATLAS_H

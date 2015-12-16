@@ -52,10 +52,10 @@ void MainWindow::refreshOpenRecentMenu() {
 }
 
 void MainWindow::refreshAtlas() {
-    QImage atlasImage;
-    QMap<QString, SpriteFrameInfo> spriteFrames;
+    SpriteAtlas atlas(fileListFromTree(), ui->property_textureBorderSpinBox->value(), ui->property_spriteBorderSpinBox->value(), ui->property_trimCropThesholdSpinBox->value(), 1.f);
+    atlas.generate();
 
-    SpriteAtlas::generate(fileListFromTree(), ui->property_textureBorderSpinBox->value(), ui->property_spriteBorderSpinBox->value(), ui->property_trimCropThesholdSpinBox->value(), 1.f, atlasImage, spriteFrames);
+    const QImage& atlasImage = atlas.image();
 
     _scene->clear();
     _scene->addRect(atlasImage.rect(), QPen(Qt::darkRed), QBrush(QPixmap("://res/background_tran.png")));
@@ -263,7 +263,7 @@ void MainWindow::saveSpritePack(const QString& fileName) {
     file.write(PListSerializer::toPList(plist).toLatin1());
 }
 
-void MainWindow::publishSpriteSheet(const QString& fileName, const QString& texName, QMap<QString, SpriteFrameInfo>& spriteFrames) {
+void MainWindow::publishSpriteSheet(const QString& fileName, const QString& texName, const QMap<QString, SpriteFrameInfo>& spriteFrames) {
     if (ui->output_dataFormatComboBox->currentIndex() == 0) {
         QVariantMap plist;
 
@@ -273,7 +273,7 @@ void MainWindow::publishSpriteSheet(const QString& fileName, const QString& texN
         plist["metadata"] = metadataMap;
 
         QVariantMap framesMap;
-        QMap<QString, SpriteFrameInfo>::iterator it_f = spriteFrames.begin();
+        auto it_f = spriteFrames.begin();
         for (; it_f != spriteFrames.end(); ++it_f) {
             QVariantMap frameMap;
             frameMap["frame"] = QString("{{%1,%2},{%3,%4}}")
@@ -306,7 +306,7 @@ void MainWindow::publishSpriteSheet(const QString& fileName, const QString& texN
     } else if (ui->output_dataFormatComboBox->currentIndex() == 1) {
         QString jsonString;
         jsonString += "{";
-        QMap<QString, SpriteFrameInfo>::iterator it_f = spriteFrames.begin();
+        auto it_f = spriteFrames.begin();
         for (; it_f != spriteFrames.end(); ++it_f) {
             jsonString += "\"" + QFileInfo(it_f.key()).baseName() + "\":\"";
             jsonString += QString("%1,%2,%3,%4")
@@ -536,11 +536,13 @@ void MainWindow::on_output_publishPushButton_clicked()
         qDebug() << hdrPath;
         qDebug() << hdrImageFile;
 
-        QImage atlasImage;
-        QMap<QString, SpriteFrameInfo> spriteFrames;
-
         float scale = (float)ui->output_HDR_scaleSpinBox->value() / 100.f;
-        SpriteAtlas::generate(fileListFromTree(), ui->property_textureBorderSpinBox->value(), ui->property_spriteBorderSpinBox->value(), ui->property_trimCropThesholdSpinBox->value(), scale, atlasImage, spriteFrames);
+
+        SpriteAtlas atlas(fileListFromTree(), ui->property_textureBorderSpinBox->value(), ui->property_spriteBorderSpinBox->value(), ui->property_trimCropThesholdSpinBox->value(), scale);
+        atlas.generate();
+
+        const QImage& atlasImage = atlas.image();
+        const QMap<QString, SpriteFrameInfo>& spriteFrames = atlas.spriteFrames();
 
         atlasImage.save(hdrImageFile);
         publishSpriteSheet(hdrPlistFile, imageFileName, spriteFrames);
@@ -558,11 +560,13 @@ void MainWindow::on_output_publishPushButton_clicked()
         qDebug() << hdPath;
         qDebug() << hdImageFile;
 
-        QImage atlasImage;
-        QMap<QString, SpriteFrameInfo> spriteFrames;
-
         float scale = (float)ui->output_HD_scaleSpinBox->value() / 100.f;
-        SpriteAtlas::generate(fileListFromTree(), ui->property_textureBorderSpinBox->value(), ui->property_spriteBorderSpinBox->value(), ui->property_trimCropThesholdSpinBox->value(), scale, atlasImage, spriteFrames);
+
+        SpriteAtlas atlas(fileListFromTree(), ui->property_textureBorderSpinBox->value(), ui->property_spriteBorderSpinBox->value(), ui->property_trimCropThesholdSpinBox->value(), scale);
+        atlas.generate();
+
+        const QImage& atlasImage = atlas.image();
+        const QMap<QString, SpriteFrameInfo>& spriteFrames = atlas.spriteFrames();
 
         atlasImage.save(hdImageFile);
         publishSpriteSheet(hdPlistFile, imageFileName, spriteFrames);
@@ -580,11 +584,13 @@ void MainWindow::on_output_publishPushButton_clicked()
         qDebug() << sdPath;
         qDebug() << sdImageFile;
 
-        QImage atlasImage;
-        QMap<QString, SpriteFrameInfo> spriteFrames;
-
         float scale = (float)ui->output_SD_scaleSpinBox->value() / 100.f;
-        SpriteAtlas::generate(fileListFromTree(), ui->property_textureBorderSpinBox->value(), ui->property_spriteBorderSpinBox->value(), ui->property_trimCropThesholdSpinBox->value(), scale, atlasImage, spriteFrames);
+
+        SpriteAtlas atlas(fileListFromTree(), ui->property_textureBorderSpinBox->value(), ui->property_spriteBorderSpinBox->value(), ui->property_trimCropThesholdSpinBox->value(), scale);
+        atlas.generate();
+
+        const QImage& atlasImage = atlas.image();
+        const QMap<QString, SpriteFrameInfo>& spriteFrames = atlas.spriteFrames();
 
         atlasImage.save(sdImageFile);
         publishSpriteSheet(sdPlistFile, imageFileName, spriteFrames);

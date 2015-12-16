@@ -62,19 +62,36 @@ public:
     QRect   mRect;
 };
 
-SpriteAtlas::SpriteAtlas()
+SpriteAtlas::SpriteAtlas(const QStringList& sourceList, int textureBorder, int spriteBorder, int trim, float scale)
+    : _sourceList(sourceList)
+    , _textureBorder(textureBorder)
+    , _spriteBorder(spriteBorder)
+    , _trim(trim)
+    , _scale(scale)
 {
 
 }
 
-bool SpriteAtlas::generate(const QStringList& sourceList, int textureBorder, int spriteBorder, int trim, float scale, QImage& atlasImage, QMap<QString, SpriteFrameInfo>& spriteFrames) {
+// TODO: gui is freeze on very large atlases (no profit)
+//void SpriteAtlas::generateOnThread() {
+//    QThread* generateThread = new QThread(this);
+
+//     connect(generateThread, SIGNAL(started()), this, SLOT(generate()));
+//     connect(generateThread, SIGNAL(finished()), this, SLOT(deleteLater()));
+
+//     // Starts an event loop, and emits workerThread->started()
+//     generateThread->start();
+//}
+
+void SpriteAtlas::generate() {
+    qDebug() << _sourceList;
     BinPack2D::ContentAccumulator<PackContent> inputContent;
 
     QStringList nameFilter;
     nameFilter << "*.png" << "*.jpg" << "*.jpeg" << "*.gif" << "*.bmp";
 
     QList< QPair<QString, QString> > fileList;
-    for(auto pathName: sourceList) {
+    for(auto pathName: _sourceList) {
         QFileInfo fi(pathName);
 
         if (fi.isDir()) {
@@ -98,15 +115,15 @@ bool SpriteAtlas::generate(const QStringList& sourceList, int textureBorder, int
     for(; it_f != fileList.end(); ++it_f) {
         QImage image((*it_f).first);
         if (image.isNull()) continue;
-        if (scale != 1) {
-            image = image.scaled(ceil(image.width() * scale), ceil(image.height() * scale), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        if (_scale != 1) {
+            image = image.scaled(ceil(image.width() * _scale), ceil(image.height() * _scale), Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
         PackContent packContent((*it_f).first, (*it_f).second, image);
 
         // Trim / Crop
-        if (trim) {
-            packContent.trim(trim);
+        if (_trim) {
+            packContent.trim(_trim);
         }
 
         int width = packContent.mRect.width();
@@ -115,7 +132,7 @@ bool SpriteAtlas::generate(const QStringList& sourceList, int textureBorder, int
 
         inputContent += BinPack2D::Content<PackContent>(packContent,
                                                         BinPack2D::Coord(),
-                                                        BinPack2D::Size(width+spriteBorder, height+spriteBorder),
+                                                        BinPack2D::Size(width+_spriteBorder, height+_spriteBorder),
                                                         false);
     }
 
@@ -127,13 +144,13 @@ bool SpriteAtlas::generate(const QStringList& sourceList, int textureBorder, int
     BinPack2D::ContentAccumulator<PackContent> outputContent;
 
     // find optimal size for atlas
-    int w = sqrt(volume) + textureBorder*2;
-    int h = sqrt(volume) + textureBorder*2;
+    int w = sqrt(volume) + _textureBorder*2;
+    int h = sqrt(volume) + _textureBorder*2;
     qDebug() << w << "x" << h;
     bool k = true;
     int step = (w + h) / 20;
     while (1) {
-        BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - textureBorder*2, h - textureBorder*2, 1).Build();
+        BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
 
         bool success = canvasArray.Place(inputContent, remainder);
         if (success) {
@@ -149,11 +166,12 @@ bool SpriteAtlas::generate(const QStringList& sourceList, int textureBorder, int
             h += step;
         }
         qDebug() << "stage 1:" << w << "x" << h << "step:" << step;
+        QCoreApplication::processEvents();
     }
     step = (w + h) / 20;
     while (w) {
         w -= step;
-        BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - textureBorder*2, h - textureBorder*2, 1).Build();
+        BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
 
         bool success = canvasArray.Place(inputContent, remainder);
         if (!success) {
@@ -164,11 +182,12 @@ bool SpriteAtlas::generate(const QStringList& sourceList, int textureBorder, int
             canvasArray.CollectContent(outputContent);
         }
         qDebug() << "stage 2:" << w << "x" << h << "step:" << step;
+        QCoreApplication::processEvents();
     }
     step = (w + h) / 20;
     while (h) {
         h -= step;
-        BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - textureBorder*2, h - textureBorder*2, 1).Build();
+        BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
 
         bool success = canvasArray.Place(inputContent, remainder);
         if (!success) {
@@ -179,16 +198,17 @@ bool SpriteAtlas::generate(const QStringList& sourceList, int textureBorder, int
             canvasArray.CollectContent(outputContent);
         }
         qDebug() << "stage 3:" << w << "x" << h << "step:" << step;
+        QCoreApplication::processEvents();
     }
 
 
     // parse output.
     typedef BinPack2D::Content<PackContent>::Vector::iterator binpack2d_iterator;
 
-    atlasImage = QImage(w, h, QImage::Format_RGBA8888);
-    atlasImage.fill(QColor(0, 0, 0, 0));
+    _atlasImage = QImage(w, h, QImage::Format_RGBA8888);
+    _atlasImage.fill(QColor(0, 0, 0, 0));
 
-    spriteFrames.clear();
+    _spriteFrames.clear();
     for( binpack2d_iterator itor = outputContent.Get().begin(); itor != outputContent.Get().end(); itor++ ) {
         const BinPack2D::Content<PackContent> &content = *itor;
 
@@ -204,24 +224,24 @@ bool SpriteAtlas::generate(const QStringList& sourceList, int textureBorder, int
         }
 
         SpriteFrameInfo spriteFrame;
-        spriteFrame.mFrame = QRect(content.coord.x + textureBorder, content.coord.y + textureBorder, content.size.w-spriteBorder, content.size.h-spriteBorder);
+        spriteFrame.mFrame = QRect(content.coord.x + _textureBorder, content.coord.y + _textureBorder, content.size.w-_spriteBorder, content.size.h-_spriteBorder);
         spriteFrame.mOffset = QPoint(
-                    (packContent.mRect.left() + (-packContent.mImage.width() + content.size.w - spriteBorder) * 0.5f),
-                    (-packContent.mRect.top() + ( packContent.mImage.height() - content.size.h + spriteBorder) * 0.5f)
+                    (packContent.mRect.left() + (-packContent.mImage.width() + content.size.w - _spriteBorder) * 0.5f),
+                    (-packContent.mRect.top() + ( packContent.mImage.height() - content.size.h + _spriteBorder) * 0.5f)
                     );
         spriteFrame.mRotated = content.rotated;
         spriteFrame.mSourceColorRect = packContent.mRect;
         spriteFrame.mSourceSize = packContent.mImage.size();
         if (content.rotated) {
-            spriteFrame.mFrame = QRect(content.coord.x, content.coord.y, content.size.h-spriteBorder, content.size.w-spriteBorder);
+            spriteFrame.mFrame = QRect(content.coord.x, content.coord.y, content.size.h-_spriteBorder, content.size.w-_spriteBorder);
 
         }
-        spriteFrames[packContent.mName] = spriteFrame;
+        _spriteFrames[packContent.mName] = spriteFrame;
 
         if (content.rotated) {
-            copyImage(atlasImage, QPoint(content.coord.x+textureBorder, content.coord.y+textureBorder), image, image.rect());
+            copyImage(_atlasImage, QPoint(content.coord.x+_textureBorder, content.coord.y+_textureBorder), image, image.rect());
         } else {
-            copyImage(atlasImage, QPoint(content.coord.x+textureBorder, content.coord.y+textureBorder), packContent.mImage, packContent.mRect);
+            copyImage(_atlasImage, QPoint(content.coord.x+_textureBorder, content.coord.y+_textureBorder), packContent.mImage, packContent.mRect);
         }
     }
 }
