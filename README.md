@@ -1,3 +1,7 @@
 # sprite-sheet-packer
-Sprite sheet packer
-created by musikov
+Sprite sheet generator base on Qt created by amakaseev.
+Include GUI and command-line interface
+
+###Supported spritesheet formats###
+* cocos2d (plist)
+* json
