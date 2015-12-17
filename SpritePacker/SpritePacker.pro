@@ -20,13 +20,15 @@ RC_FILE = SpritePacker.rc
 SOURCES += main.cpp\
     MainWindow.cpp \
     SpriteAtlas.cpp \
-    ScalingVariantWidget.cpp
+    ScalingVariantWidget.cpp \
+    SpritePackerProjectFile.cpp
 
 HEADERS += MainWindow.h \
     ImageRotate.h \
     SpriteAtlas.h \
     binpack2d.hpp \
-    ScalingVariantWidget.h
+    ScalingVariantWidget.h \
+    SpritePackerProjectFile.h
 
 FORMS += MainWindow.ui \
     ScalingVariantWidget.ui

@@ -24,8 +24,8 @@ protected:
     void recursiveRefreshFolder(const QString& folder, QTreeWidgetItem* parentItem);
     QStringList fileListFromTree();
 
-    void openSpritePack(const QString& fileName);
-    void saveSpritePack(const QString& fileName);
+    void openSpritePackerProject(const QString& fileName);
+    void saveSpritePackerProject(const QString& fileName);
     void publishSpriteSheet(const QString& fileName, const QString& texName, const QMap<QString, SpriteFrameInfo>& spriteFrames);
 
 private slots:
