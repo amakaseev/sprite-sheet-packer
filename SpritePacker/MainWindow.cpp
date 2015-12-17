@@ -59,6 +59,11 @@ void MainWindow::refreshOpenRecentMenu() {
     }
 }
 
+void MainWindow::openRecent() {
+    QAction* senderAction = dynamic_cast<QAction*>(sender());
+    openSpritePack(senderAction->text());
+}
+
 void MainWindow::refreshAtlas() {
     SpriteAtlas atlas(fileListFromTree(), ui->textureBorderSpinBox->value(), ui->spriteBorderSpinBox->value(), ui->trimSpinBox->value(), 1.f);
     atlas.generate();
@@ -213,19 +218,20 @@ void MainWindow::openSpritePack(const QString& fileName) {
 void MainWindow::saveSpritePack(const QString& fileName) {
     // add to recent file
     QSettings settings;
-    QVariantList openRecentList = settings.value("openRecentList").toList();
-    QStringList openRecentFilesList;
-    foreach(QVariant recent, openRecentList) {
-        openRecentFilesList.append(recent.toString());
-    }
-    openRecentFilesList.append(fileName);
-    if (openRecentList.count()>10) openRecentList.removeFirst();
-    openRecentFilesList.removeDuplicates();
-    settings.setValue("openRecentList", openRecentFilesList);
+    QStringList openRecentList = settings.value("openRecentList").toStringList();
+    openRecentList.removeAll(fileName);
+    openRecentList.prepend(fileName);
+    while (openRecentList.size() > MAX_RECENT)
+        openRecentList.removeLast();
+
+    settings.setValue("openRecentList", openRecentList);
+    settings.sync();
     refreshOpenRecentMenu();
 
     QDir dir(QFileInfo(fileName).absolutePath());
     QVariantMap plist;
+
+    QJsonObject json;
 
     // save property
     QVariantMap propertyMap;
@@ -341,8 +347,15 @@ void MainWindow::on_actionNew_triggered() {
 
 void MainWindow::on_actionOpen_triggered() {
     QSettings settings;
+    QString dir;
+    if (!_currentProjectFileName.isEmpty()) {
+        dir = _currentProjectFileName;
+    } else {
+        dir = settings.value("spritePackerFileName", QDir::currentPath()).toString();
+    }
+
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open sprite packer."),
-                                                    settings.value("spritePackerFileName", QDir::currentPath()).toString(),
+                                                    dir,
                                                     tr("Sprite packer (*.sp)"));
     if (!fileName.isEmpty()) {
         settings.setValue("spritePackerFileName", fileName);
@@ -351,69 +364,32 @@ void MainWindow::on_actionOpen_triggered() {
 }
 
 void MainWindow::on_actionSave_triggered() {
-    QSettings settings;
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save sprite packer."),
-                                                    settings.value("spritePackerFileName", QDir::currentPath()).toString(),
-                                                    tr("Sprite packer (*.sp)"));
-    if (!fileName.isEmpty()) {
-        settings.setValue("spritePackerFileName", fileName);
+    if (_currentProjectFileName.isEmpty()) {
+        on_actionSaveAs_triggered();
+    } else {
+        saveSpritePack(_currentProjectFileName);
+    }
+}
 
+void MainWindow::on_actionSaveAs_triggered() {
+    QSettings settings;
+    QString dir;
+    if (!_currentProjectFileName.isEmpty()) {
+        dir = _currentProjectFileName;
+    } else {
+        dir = settings.value("spritePackerFileName", QDir::currentPath()).toString();
+    }
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save sprite packer."),
+                                                    dir,
+                                                    tr("Sprite packer (*.json)"));
+    if (!fileName.isEmpty()) {
+        _currentProjectFileName = fileName;
+        settings.setValue("spritePackerFileName", fileName);
         saveSpritePack(fileName);
     }
 }
 
-void MainWindow::openRecent() {
-    QAction* senderAction = dynamic_cast<QAction*>(sender());
-    openSpritePack(senderAction->text());
-}
-
-QStringList MainWindow::fileListFromTree() {
-    QStringList fileList;
-    for(int i = 0; i < ui->spritesTreeWidget->topLevelItemCount(); i++) {
-        QTreeWidgetItem* item = ui->spritesTreeWidget->topLevelItem(i);
-        fileList.push_back(item->data(0, Qt::UserRole).toString());
-    }
-    return fileList;
-}
-
-void MainWindow::on_actionRefresh_triggered() {
-    refreshSpritesTree(fileListFromTree());
-    refreshAtlas();
-}
-
-void MainWindow::on_toolButtonZoomOut_clicked() {
-    ui->zoomSlider->setValue(ui->zoomSlider->value() - ui->zoomSlider->singleStep());
-}
-
-void MainWindow::on_toolButtonZoomIn_clicked() {
-    ui->zoomSlider->setValue(ui->zoomSlider->value() + ui->zoomSlider->singleStep());
-}
-
-void MainWindow::on_toolButtonZoom1x1_clicked() {
-    ui->zoomSlider->setValue(0);
-}
-
-void MainWindow::on_toolButtonZoomFit_clicked() {
-    ui->graphicsView->fitInView(_scene->sceneRect(), Qt::KeepAspectRatio);
-    QTransform tr = ui->graphicsView->transform();
-    float scale = tr.m11();
-    int value = 50 * scale - 50;
-    if (value > 0) {
-        value = ((int)(value/5.f))*5;
-    } else {
-        value = (floor(value/5.f))*5;
-    }
-    ui->zoomSlider->setValue(value);
-}
-
-void MainWindow::on_zoomSlider_valueChanged(int value) {
-    float scale = (value + 50.f) / 50.f;
-    ui->graphicsView->setTransform(QTransform::fromScale(scale, scale));
-
-    ui->labelZoomPercent->setText(QString::number((int)(scale * 100)) + " %");
-}
-
-void MainWindow::on_toolButtonAddSprites_clicked() {
+void MainWindow::on_actionAddSprites_triggered() {
     QSettings settings;
     QStringList fileNames = QFileDialog::getOpenFileNames(this,
                                                           tr("Open Image"),
@@ -436,17 +412,7 @@ void MainWindow::on_toolButtonAddSprites_clicked() {
     }
 }
 
-void MainWindow::on_spritesTreeWidget_itemSelectionChanged() {
-    ui->toolButtonRemoveSprites->setEnabled(false);
-    foreach (QTreeWidgetItem* item, ui->spritesTreeWidget->selectedItems()) {
-        if (!item->parent()) {
-            ui->toolButtonRemoveSprites->setEnabled(true);
-            return;
-        }
-    }
-}
-
-void MainWindow::on_toolButtonAddFolder_clicked() {
+void MainWindow::on_actionAddFolder_triggered() {
     QSettings settings;
     QString pathName = QFileDialog::getExistingDirectory(this,
                                                          tr("Open Folder"),
@@ -467,7 +433,7 @@ void MainWindow::on_toolButtonAddFolder_clicked() {
     }
 }
 
-void MainWindow::on_toolButtonRemoveSprites_clicked() {
+void MainWindow::on_actionRemove_triggered() {
     foreach (QTreeWidgetItem* item, ui->spritesTreeWidget->selectedItems()) {
         if (!item->parent()) {
             ui->spritesTreeWidget->removeItemWidget(item, 0);
@@ -479,18 +445,12 @@ void MainWindow::on_toolButtonRemoveSprites_clicked() {
     refreshAtlas();
 }
 
-void MainWindow::on_output_destFolderToolButton_clicked() {
-    QString destPath = ui->destPathLineEdit->text();
-    destPath = QFileDialog::getExistingDirectory(this,
-                                                 tr("Destination folder"),
-                                                 destPath,
-                                                 QFileDialog::DontResolveSymlinks);
-    if (!destPath.isEmpty()) {
-        ui->destPathLineEdit->setText(destPath);
-    }
+void MainWindow::on_actionRefresh_triggered() {
+    refreshSpritesTree(fileListFromTree());
+    refreshAtlas();
 }
 
-void MainWindow::on_output_publishPushButton_clicked() {
+void MainWindow::on_actionPublish_triggered() {
     QDir dir(ui->destPathLineEdit->text());
     if ((!dir.exists())||(ui->destPathLineEdit->text().isEmpty())) {
         QMessageBox::critical(this, "Publish error", "Destination folder invalid!");
@@ -585,6 +545,68 @@ void MainWindow::on_output_publishPushButton_clicked() {
         publishSpriteSheet(sdPlistFile, imageFileName, spriteFrames);
     }
     */
+}
+
+QStringList MainWindow::fileListFromTree() {
+    QStringList fileList;
+    for(int i = 0; i < ui->spritesTreeWidget->topLevelItemCount(); i++) {
+        QTreeWidgetItem* item = ui->spritesTreeWidget->topLevelItem(i);
+        fileList.push_back(item->data(0, Qt::UserRole).toString());
+    }
+    return fileList;
+}
+
+void MainWindow::on_toolButtonZoomOut_clicked() {
+    ui->zoomSlider->setValue(ui->zoomSlider->value() - ui->zoomSlider->singleStep());
+}
+
+void MainWindow::on_toolButtonZoomIn_clicked() {
+    ui->zoomSlider->setValue(ui->zoomSlider->value() + ui->zoomSlider->singleStep());
+}
+
+void MainWindow::on_toolButtonZoom1x1_clicked() {
+    ui->zoomSlider->setValue(0);
+}
+
+void MainWindow::on_toolButtonZoomFit_clicked() {
+    ui->graphicsView->fitInView(_scene->sceneRect(), Qt::KeepAspectRatio);
+    QTransform tr = ui->graphicsView->transform();
+    float scale = tr.m11();
+    int value = 50 * scale - 50;
+    if (value > 0) {
+        value = ((int)(value/5.f))*5;
+    } else {
+        value = (floor(value/5.f))*5;
+    }
+    ui->zoomSlider->setValue(value);
+}
+
+void MainWindow::on_zoomSlider_valueChanged(int value) {
+    float scale = (value + 50.f) / 50.f;
+    ui->graphicsView->setTransform(QTransform::fromScale(scale, scale));
+
+    ui->labelZoomPercent->setText(QString::number((int)(scale * 100)) + " %");
+}
+
+void MainWindow::on_spritesTreeWidget_itemSelectionChanged() {
+    ui->actionRemove->setEnabled(false);
+    foreach (QTreeWidgetItem* item, ui->spritesTreeWidget->selectedItems()) {
+        if (!item->parent()) {
+            ui->actionRemove->setEnabled(true);
+            return;
+        }
+    }
+}
+
+void MainWindow::on_output_destFolderToolButton_clicked() {
+    QString destPath = ui->destPathLineEdit->text();
+    destPath = QFileDialog::getExistingDirectory(this,
+                                                 tr("Destination folder"),
+                                                 destPath,
+                                                 QFileDialog::DontResolveSymlinks);
+    if (!destPath.isEmpty()) {
+        ui->destPathLineEdit->setText(destPath);
+    }
 }
 
 void MainWindow::on_addScalingVariantPushButton_clicked() {

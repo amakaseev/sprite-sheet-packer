@@ -190,7 +190,7 @@
     <addaction name="menuOpen_recent"/>
     <addaction name="separator"/>
     <addaction name="actionSave"/>
-    <addaction name="actionSave_as"/>
+    <addaction name="actionSaveAs"/>
     <addaction name="separator"/>
    </widget>
    <addaction name="menuFile"/>
@@ -220,15 +220,17 @@
    <addaction name="separator"/>
    <addaction name="actionAddSprites"/>
    <addaction name="actionAddFolder"/>
-   <addaction name="actionRefresh"/>
    <addaction name="actionRemove"/>
+   <addaction name="separator"/>
+   <addaction name="actionRefresh"/>
+   <addaction name="actionPublish"/>
    <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="propertyDockWidget">
    <property name="minimumSize">
     <size>
-     <width>300</width>
+     <width>340</width>
      <height>400</height>
     </size>
    </property>
@@ -254,23 +256,6 @@
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QPushButton" name="output_publishPushButton">
-       <property name="text">
-        <string>PUBLISH</string>
-       </property>
-       <property name="icon">
-        <iconset resource="resources.qrc">
-         <normaloff>:/res/iPhone.png</normaloff>:/res/iPhone.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QScrollArea" name="scrollArea">
        <property name="widgetResizable">
         <bool>true</bool>
@@ -280,8 +265,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>305</width>
-          <height>797</height>
+          <width>350</width>
+          <height>839</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -392,6 +377,118 @@
                    <property name="maximum">
                     <number>9999</number>
                    </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupBox_3">
+              <property name="title">
+               <string>Texture</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_7">
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_7">
+                 <item>
+                  <widget class="QLabel" name="label_7">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>Max size:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QComboBox" name="comboBox_2">
+                   <property name="currentIndex">
+                    <number>6</number>
+                   </property>
+                   <item>
+                    <property name="text">
+                     <string>32</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>64</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>128</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>256</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>512</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>1024</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>2048</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>4096</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>8192</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_8">
+                 <item>
+                  <widget class="QLabel" name="label_8">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>Size constraints:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QComboBox" name="comboBox_3">
+                   <property name="currentIndex">
+                    <number>1</number>
+                   </property>
+                   <item>
+                    <property name="text">
+                     <string>POT (Power of 2)</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>NPOT (Free size)</string>
+                    </property>
+                   </item>
                   </widget>
                  </item>
                 </layout>
@@ -621,90 +718,6 @@
    <widget class="QWidget" name="dockWidgetContents_2">
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_15">
-       <item>
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QToolButton" name="toolButtonAddSprites">
-         <property name="text">
-          <string>...</string>
-         </property>
-         <property name="icon">
-          <iconset resource="resources.qrc">
-           <normaloff>:/res/add_sprite.png</normaloff>:/res/add_sprite.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>32</width>
-           <height>32</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QToolButton" name="toolButtonAddFolder">
-         <property name="text">
-          <string>...</string>
-         </property>
-         <property name="icon">
-          <iconset resource="resources.qrc">
-           <normaloff>:/res/add_folder.png</normaloff>:/res/add_folder.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>32</width>
-           <height>32</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QToolButton" name="toolButtonRemoveSprites">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>...</string>
-         </property>
-         <property name="icon">
-          <iconset resource="resources.qrc">
-           <normaloff>:/res/standardbutton-delete-128.png</normaloff>:/res/standardbutton-delete-128.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>32</width>
-           <height>32</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="horizontalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </item>
-     <item>
       <layout class="QHBoxLayout" name="horizontalLayout_5">
        <item>
         <widget class="QLabel" name="label_5">
@@ -751,7 +764,7 @@
      <normaloff>:/res/filenew.png</normaloff>:/res/filenew.png</iconset>
    </property>
    <property name="text">
-    <string>New</string>
+    <string>New project</string>
    </property>
   </action>
   <action name="actionOpen">
@@ -760,7 +773,7 @@
      <normaloff>:/res/document-open.png</normaloff>:/res/document-open.png</iconset>
    </property>
    <property name="text">
-    <string>Open...</string>
+    <string>Open project</string>
    </property>
   </action>
   <action name="actionSave">
@@ -769,16 +782,7 @@
      <normaloff>:/res/document-save.png</normaloff>:/res/document-save.png</iconset>
    </property>
    <property name="text">
-    <string>Save</string>
-   </property>
-  </action>
-  <action name="actionSave_as">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/document-save-as.png</normaloff>:/res/document-save-as.png</iconset>
-   </property>
-   <property name="text">
-    <string>Save As...</string>
+    <string>Save project</string>
    </property>
   </action>
   <action name="actionAddSprites">
@@ -787,7 +791,7 @@
      <normaloff>:/res/add_sprite.png</normaloff>:/res/add_sprite.png</iconset>
    </property>
    <property name="text">
-    <string>Add Sprites</string>
+    <string>Add sprites</string>
    </property>
    <property name="toolTip">
     <string>Add Sprites</string>
@@ -799,16 +803,19 @@
      <normaloff>:/res/add_folder.png</normaloff>:/res/add_folder.png</iconset>
    </property>
    <property name="text">
-    <string>Add Folder</string>
+    <string>Add smart folder</string>
    </property>
   </action>
   <action name="actionRemove">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="resources.qrc">
      <normaloff>:/res/standardbutton-delete-128.png</normaloff>:/res/standardbutton-delete-128.png</iconset>
    </property>
    <property name="text">
-    <string>Remove</string>
+    <string>Remove sprites</string>
    </property>
   </action>
   <action name="actionRefresh">
@@ -817,7 +824,25 @@
      <normaloff>:/res/refresh-32.png</normaloff>:/res/refresh-32.png</iconset>
    </property>
    <property name="text">
-    <string>Refresh</string>
+    <string>Refresh preview</string>
+   </property>
+  </action>
+  <action name="actionPublish">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/iPhone.png</normaloff>:/res/iPhone.png</iconset>
+   </property>
+   <property name="text">
+    <string>Publish sprite sheet</string>
+   </property>
+  </action>
+  <action name="actionSaveAs">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/document-save.png</normaloff>:/res/document-save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save As...</string>
    </property>
   </action>
  </widget>
