@@ -12,6 +12,6 @@ int main(int argc, char *argv[])
 
     printHelp();
 
-    return a.exec();
+    return 1;
 }
 

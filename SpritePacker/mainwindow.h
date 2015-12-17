@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QtWidgets>
-#include "spriteatlas.h"
+#include "SpriteAtlas.h"
 
 namespace Ui {
 class MainWindow;
@@ -51,6 +51,9 @@ private slots:
 
     void on_output_destFolderToolButton_clicked();
     void on_output_publishPushButton_clicked();
+
+    void on_addScalingVariantPushButton_clicked();
+    void removeScalingVariant();
 
 private:
     Ui::MainWindow*      ui;

@@ -17,20 +17,21 @@ QMAKE_CXXFLAGS +=-std=c++11 -stdlib=libc++
 ICON = SpritePacker.icns
 RC_FILE = SpritePacker.rc
 
-INCLUDEPATH = ./ ../shared
-
 SOURCES += main.cpp\
-    mainwindow.cpp \
-    ../shared/spriteatlas.cpp
+    MainWindow.cpp \
+    SpriteAtlas.cpp \
+    ScalingVariantWidget.cpp
 
-HEADERS += mainwindow.h \
-    ../shared/imagerotate.h \
-    ../shared/binpack2d.hpp \
-    ../shared/spriteatlas.h
+HEADERS += MainWindow.h \
+    ImageRotate.h \
+    SpriteAtlas.h \
+    binpack2d.hpp \
+    ScalingVariantWidget.h
 
-FORMS += mainwindow.ui
+FORMS += MainWindow.ui \
+    ScalingVariantWidget.ui
 
 RESOURCES += \
     resources.qrc
 
-include(../shared/qtplist-master/qtplist-master.pri)
+include(qtplist-master/qtplist-master.pri)

@@ -1,7 +1,7 @@
-#include "spriteatlas.h"
+#include "SpriteAtlas.h"
 
 #include "binpack2d.hpp"
-#include "imagerotate.h"
+#include "ImageRotate.h"
 
 void copyImage(QImage& dst, const QPoint& pos, const QImage& src, const QRect& srcRect) {
     for (int x=0; x<srcRect.width(); ++x) {

@@ -1,7 +1,8 @@
 #include <QtXml>
 
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "MainWindow.h"
+#include "ScalingVariantWidget.h"
+#include "ui_MainWindow.h"
 
 #include "PListParser.h"
 #include "PListSerializer.h"
@@ -23,6 +24,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->graphicsView->setScene(_scene);
 
+    // configure default values
+    ui->trimSpinBox->setValue(1);
+    ui->textureBorderSpinBox->setValue(0);
+    ui->spriteBorderSpinBox->setValue(1);
+
+    on_addScalingVariantPushButton_clicked();
+
+
     refreshOpenRecentMenu();
 
     QSettings settings;
@@ -30,8 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
     restoreState(settings.value("MainWindow/state").toByteArray());
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     QSettings settings;
     settings.setValue("MainWindow/geometry", saveGeometry());
     settings.setValue("MainWindow/state", saveState());
@@ -52,7 +60,7 @@ void MainWindow::refreshOpenRecentMenu() {
 }
 
 void MainWindow::refreshAtlas() {
-    SpriteAtlas atlas(fileListFromTree(), ui->property_textureBorderSpinBox->value(), ui->property_spriteBorderSpinBox->value(), ui->property_trimCropThesholdSpinBox->value(), 1.f);
+    SpriteAtlas atlas(fileListFromTree(), ui->textureBorderSpinBox->value(), ui->spriteBorderSpinBox->value(), ui->trimSpinBox->value(), 1.f);
     atlas.generate();
 
     const QImage& atlasImage = atlas.image();
@@ -158,31 +166,31 @@ void MainWindow::openSpritePack(const QString& fileName) {
 
         // load property
         QVariantMap propertyMap = plistDict["property"].toMap();
-        ui->sprites_prefixLineEdit->setText(propertyMap["spritesPrefix"].toString());
+        ui->spritesPrefixLineEdit->setText(propertyMap["spritesPrefix"].toString());
 
         // PACKING
         QVariantMap packingMap = propertyMap["packing"].toMap();
-        ui->property_trimCropThesholdSpinBox->setValue(packingMap["threshold"].toInt());
-        ui->property_textureBorderSpinBox->setValue(packingMap["textureBorder"].toInt());
-        ui->property_spriteBorderSpinBox->setValue(packingMap["spriteBorder"].toInt());
+        ui->trimSpinBox->setValue(packingMap["threshold"].toInt());
+        ui->textureBorderSpinBox->setValue(packingMap["textureBorder"].toInt());
+        ui->spriteBorderSpinBox->setValue(packingMap["spriteBorder"].toInt());
 
         // OUTPUT
         QVariantMap outputMap = propertyMap["output"].toMap();
-        ui->output_dataFormatComboBox->setCurrentIndex(outputMap["dataFormat"].toInt());
-        ui->output_destPathLineEdit->setText(QDir(dir.absoluteFilePath(outputMap["destPath"].toString())).absolutePath());
-        ui->output_spriteSheetLineEdit->setText(outputMap["spriteSheetName"].toString());
-        QVariantMap hdrMap = outputMap["HDR"].toMap();
-        ui->output_HDR_groupBox->setChecked(hdrMap["enable"].toBool());
-        ui->output_HDR_scaleSpinBox->setValue(hdrMap["scale"].toInt());
-        ui->output_HDR_folderLineEdit->setText(hdrMap["folder"].toString());
-        QVariantMap hdMap = outputMap["HD"].toMap();
-        ui->output_HD_groupBox->setChecked(hdMap["enable"].toBool());
-        ui->output_HD_scaleSpinBox->setValue(hdMap["scale"].toInt());
-        ui->output_HD_folderLineEdit->setText(hdMap["folder"].toString());
-        QVariantMap sdMap = outputMap["SD"].toMap();
-        ui->output_SD_groupBox->setChecked(sdMap["enable"].toBool());
-        ui->output_SD_scaleSpinBox->setValue(sdMap["scale"].toInt());
-        ui->output_SD_folderLineEdit->setText(sdMap["folder"].toString());
+        ui->dataFormatComboBox->setCurrentIndex(outputMap["dataFormat"].toInt());
+        ui->destPathLineEdit->setText(QDir(dir.absoluteFilePath(outputMap["destPath"].toString())).absolutePath());
+        ui->spriteSheetLineEdit->setText(outputMap["spriteSheetName"].toString());
+//        QVariantMap hdrMap = outputMap["HDR"].toMap();
+//        ui->output_HDR_groupBox->setChecked(hdrMap["enable"].toBool());
+//        ui->output_HDR_scaleSpinBox->setValue(hdrMap["scale"].toInt());
+//        ui->output_HDR_folderLineEdit->setText(hdrMap["folder"].toString());
+//        QVariantMap hdMap = outputMap["HD"].toMap();
+//        ui->output_HD_groupBox->setChecked(hdMap["enable"].toBool());
+//        ui->output_HD_scaleSpinBox->setValue(hdMap["scale"].toInt());
+//        ui->output_HD_folderLineEdit->setText(hdMap["folder"].toString());
+//        QVariantMap sdMap = outputMap["SD"].toMap();
+//        ui->output_SD_groupBox->setChecked(sdMap["enable"].toBool());
+//        ui->output_SD_scaleSpinBox->setValue(sdMap["scale"].toInt());
+//        ui->output_SD_folderLineEdit->setText(sdMap["folder"].toString());
 
 
         QStringList fileList;
@@ -221,35 +229,35 @@ void MainWindow::saveSpritePack(const QString& fileName) {
 
     // save property
     QVariantMap propertyMap;
-    propertyMap["spritesPrefix"] = ui->sprites_prefixLineEdit->text();
+    propertyMap["spritesPrefix"] = ui->spritesPrefixLineEdit->text();
 
     // PACKING
     QVariantMap packingMap;
-    packingMap["threshold"] = ui->property_trimCropThesholdSpinBox->value();
-    packingMap["textureBorder"] = ui->property_textureBorderSpinBox->value();
-    packingMap["spriteBorder"] = ui->property_spriteBorderSpinBox->value();
+    packingMap["threshold"] = ui->trimSpinBox->value();
+    packingMap["textureBorder"] = ui->textureBorderSpinBox->value();
+    packingMap["spriteBorder"] = ui->spriteBorderSpinBox->value();
     propertyMap["packing"] = packingMap;
 
     // OUTPUT
     QVariantMap outputMap;
-    outputMap["dataFormat"] = ui->output_dataFormatComboBox->currentIndex();
-    outputMap["destPath"] = dir.relativeFilePath(ui->output_destPathLineEdit->text());
-    outputMap["spriteSheetName"] = ui->output_spriteSheetLineEdit->text();
-    QVariantMap hdrMap;
-    hdrMap["enable"] = QVariant(ui->output_HDR_groupBox->isChecked());
-    hdrMap["scale"] = QVariant(ui->output_HDR_scaleSpinBox->value());
-    hdrMap["folder"] = QVariant(ui->output_HDR_folderLineEdit->text());
-    QVariantMap hdMap;
-    hdMap["enable"] = QVariant(ui->output_HD_groupBox->isChecked());
-    hdMap["scale"] = QVariant(ui->output_HD_scaleSpinBox->value());
-    hdMap["folder"] = QVariant(ui->output_HD_folderLineEdit->text());
-    QVariantMap sdMap;
-    sdMap["enable"] = QVariant(ui->output_SD_groupBox->isChecked());
-    sdMap["scale"] = QVariant(ui->output_SD_scaleSpinBox->value());
-    sdMap["folder"] = QVariant(ui->output_SD_folderLineEdit->text());
-    outputMap["HDR"] = hdrMap;
-    outputMap["HD"] = hdMap;
-    outputMap["SD"] = sdMap;
+    outputMap["dataFormat"] = ui->dataFormatComboBox->currentIndex();
+    outputMap["destPath"] = dir.relativeFilePath(ui->destPathLineEdit->text());
+    outputMap["spriteSheetName"] = ui->spriteSheetLineEdit->text();
+//    QVariantMap hdrMap;
+//    hdrMap["enable"] = QVariant(ui->output_HDR_groupBox->isChecked());
+//    hdrMap["scale"] = QVariant(ui->output_HDR_scaleSpinBox->value());
+//    hdrMap["folder"] = QVariant(ui->output_HDR_folderLineEdit->text());
+//    QVariantMap hdMap;
+//    hdMap["enable"] = QVariant(ui->output_HD_groupBox->isChecked());
+//    hdMap["scale"] = QVariant(ui->output_HD_scaleSpinBox->value());
+//    hdMap["folder"] = QVariant(ui->output_HD_folderLineEdit->text());
+//    QVariantMap sdMap;
+//    sdMap["enable"] = QVariant(ui->output_SD_groupBox->isChecked());
+//    sdMap["scale"] = QVariant(ui->output_SD_scaleSpinBox->value());
+//    sdMap["folder"] = QVariant(ui->output_SD_folderLineEdit->text());
+//    outputMap["HDR"] = hdrMap;
+//    outputMap["HD"] = hdMap;
+//    outputMap["SD"] = sdMap;
     propertyMap["output"] = outputMap;
 
     plist["property"] = propertyMap;
@@ -264,7 +272,7 @@ void MainWindow::saveSpritePack(const QString& fileName) {
 }
 
 void MainWindow::publishSpriteSheet(const QString& fileName, const QString& texName, const QMap<QString, SpriteFrameInfo>& spriteFrames) {
-    if (ui->output_dataFormatComboBox->currentIndex() == 0) {
+    if (ui->dataFormatComboBox->currentIndex() == 0) {
         QVariantMap plist;
 
         QVariantMap metadataMap;
@@ -294,7 +302,7 @@ void MainWindow::publishSpriteSheet(const QString& fileName, const QString& texN
                     .arg(it_f.value().mSourceSize.width())
                     .arg(it_f.value().mSourceSize.height());
 
-            framesMap[ui->sprites_prefixLineEdit->text() + it_f.key()] = frameMap;
+            framesMap[ui->spritesPrefixLineEdit->text() + it_f.key()] = frameMap;
         }
 
         plist["frames"] = framesMap;
@@ -303,7 +311,7 @@ void MainWindow::publishSpriteSheet(const QString& fileName, const QString& texN
         QFile file(fileName);
         file.open(QIODevice::WriteOnly | QIODevice::Text);
         file.write(PListSerializer::toPList(plist).toLatin1());
-    } else if (ui->output_dataFormatComboBox->currentIndex() == 1) {
+    } else if (ui->dataFormatComboBox->currentIndex() == 1) {
         QString jsonString;
         jsonString += "{";
         auto it_f = spriteFrames.begin();
@@ -326,13 +334,12 @@ void MainWindow::publishSpriteSheet(const QString& fileName, const QString& texN
 }
 
 
-void MainWindow::on_actionNew_triggered()
-{
-
+void MainWindow::on_actionNew_triggered() {
+    ui->spriteSheetLineEdit->setText("");
+    ui->spritesTreeWidget->clear();
 }
 
-void MainWindow::on_actionOpen_triggered()
-{
+void MainWindow::on_actionOpen_triggered() {
     QSettings settings;
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open sprite packer."),
                                                     settings.value("spritePackerFileName", QDir::currentPath()).toString(),
@@ -343,8 +350,7 @@ void MainWindow::on_actionOpen_triggered()
     }
 }
 
-void MainWindow::on_actionSave_triggered()
-{
+void MainWindow::on_actionSave_triggered() {
     QSettings settings;
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save sprite packer."),
                                                     settings.value("spritePackerFileName", QDir::currentPath()).toString(),
@@ -370,29 +376,24 @@ QStringList MainWindow::fileListFromTree() {
     return fileList;
 }
 
-void MainWindow::on_actionRefresh_triggered()
-{
+void MainWindow::on_actionRefresh_triggered() {
     refreshSpritesTree(fileListFromTree());
     refreshAtlas();
 }
 
-void MainWindow::on_toolButtonZoomOut_clicked()
-{
+void MainWindow::on_toolButtonZoomOut_clicked() {
     ui->zoomSlider->setValue(ui->zoomSlider->value() - ui->zoomSlider->singleStep());
 }
 
-void MainWindow::on_toolButtonZoomIn_clicked()
-{
+void MainWindow::on_toolButtonZoomIn_clicked() {
     ui->zoomSlider->setValue(ui->zoomSlider->value() + ui->zoomSlider->singleStep());
 }
 
-void MainWindow::on_toolButtonZoom1x1_clicked()
-{
+void MainWindow::on_toolButtonZoom1x1_clicked() {
     ui->zoomSlider->setValue(0);
 }
 
-void MainWindow::on_toolButtonZoomFit_clicked()
-{
+void MainWindow::on_toolButtonZoomFit_clicked() {
     ui->graphicsView->fitInView(_scene->sceneRect(), Qt::KeepAspectRatio);
     QTransform tr = ui->graphicsView->transform();
     float scale = tr.m11();
@@ -405,16 +406,14 @@ void MainWindow::on_toolButtonZoomFit_clicked()
     ui->zoomSlider->setValue(value);
 }
 
-void MainWindow::on_zoomSlider_valueChanged(int value)
-{
+void MainWindow::on_zoomSlider_valueChanged(int value) {
     float scale = (value + 50.f) / 50.f;
     ui->graphicsView->setTransform(QTransform::fromScale(scale, scale));
 
     ui->labelZoomPercent->setText(QString::number((int)(scale * 100)) + " %");
 }
 
-void MainWindow::on_toolButtonAddSprites_clicked()
-{
+void MainWindow::on_toolButtonAddSprites_clicked() {
     QSettings settings;
     QStringList fileNames = QFileDialog::getOpenFileNames(this,
                                                           tr("Open Image"),
@@ -437,8 +436,7 @@ void MainWindow::on_toolButtonAddSprites_clicked()
     }
 }
 
-void MainWindow::on_spritesTreeWidget_itemSelectionChanged()
-{
+void MainWindow::on_spritesTreeWidget_itemSelectionChanged() {
     ui->toolButtonRemoveSprites->setEnabled(false);
     foreach (QTreeWidgetItem* item, ui->spritesTreeWidget->selectedItems()) {
         if (!item->parent()) {
@@ -448,8 +446,7 @@ void MainWindow::on_spritesTreeWidget_itemSelectionChanged()
     }
 }
 
-void MainWindow::on_toolButtonAddFolder_clicked()
-{
+void MainWindow::on_toolButtonAddFolder_clicked() {
     QSettings settings;
     QString pathName = QFileDialog::getExistingDirectory(this,
                                                          tr("Open Folder"),
@@ -470,8 +467,7 @@ void MainWindow::on_toolButtonAddFolder_clicked()
     }
 }
 
-void MainWindow::on_toolButtonRemoveSprites_clicked()
-{
+void MainWindow::on_toolButtonRemoveSprites_clicked() {
     foreach (QTreeWidgetItem* item, ui->spritesTreeWidget->selectedItems()) {
         if (!item->parent()) {
             ui->spritesTreeWidget->removeItemWidget(item, 0);
@@ -483,47 +479,40 @@ void MainWindow::on_toolButtonRemoveSprites_clicked()
     refreshAtlas();
 }
 
-void MainWindow::on_output_destFolderToolButton_clicked()
-{
-    QString destPath = ui->output_destPathLineEdit->text();
+void MainWindow::on_output_destFolderToolButton_clicked() {
+    QString destPath = ui->destPathLineEdit->text();
     destPath = QFileDialog::getExistingDirectory(this,
                                                  tr("Destination folder"),
                                                  destPath,
                                                  QFileDialog::DontResolveSymlinks);
     if (!destPath.isEmpty()) {
-        ui->output_destPathLineEdit->setText(destPath);
+        ui->destPathLineEdit->setText(destPath);
     }
 }
 
-void MainWindow::on_output_publishPushButton_clicked()
-{
-    QDir dir(ui->output_destPathLineEdit->text());
-    if ((!dir.exists())||(ui->output_destPathLineEdit->text().isEmpty())) {
+void MainWindow::on_output_publishPushButton_clicked() {
+    QDir dir(ui->destPathLineEdit->text());
+    if ((!dir.exists())||(ui->destPathLineEdit->text().isEmpty())) {
         QMessageBox::critical(this, "Publish error", "Destination folder invalid!");
-        ui->output_destPathLineEdit->setFocus();
+        ui->destPathLineEdit->setFocus();
         return;
     }
 
-    QString spriteSheetName = ui->output_spriteSheetLineEdit->text();
+    QString spriteSheetName = ui->spriteSheetLineEdit->text();
     if (spriteSheetName.isEmpty()) {
         QMessageBox::critical(this, "Publish error", "Sprite sheet name invalid!");
-        ui->output_spriteSheetLineEdit->setFocus();
+        ui->spriteSheetLineEdit->setFocus();
         return;
     }
 
-    //You must to choose at least one mode
-    if ((!ui->output_HDR_groupBox->isChecked())&&(!ui->output_HD_groupBox->isChecked())&&(!ui->output_SD_groupBox->isChecked())){
-        QMessageBox::critical(this, "Publish error", "You have to choose at least one mode: HDR/HD/SD");
-        return;
-    }
-
-    QString imageFileName = ui->output_spriteSheetLineEdit->text() + ".png";
+    QString imageFileName = ui->spriteSheetLineEdit->text() + ".png";
     QString plistFileName;
-    switch (ui->output_dataFormatComboBox->currentIndex()) {
-        case 0: plistFileName = ui->output_spriteSheetLineEdit->text() + ".plist"; break;
-        case 1: plistFileName = ui->output_spriteSheetLineEdit->text() + ".json"; break;
+    switch (ui->dataFormatComboBox->currentIndex()) {
+        case 0: plistFileName = ui->spriteSheetLineEdit->text() + ".plist"; break;
+        case 1: plistFileName = ui->spriteSheetLineEdit->text() + ".json"; break;
     }
 
+    /*
     // HDR
     if (ui->output_HDR_groupBox->isChecked()) {
         dir.mkpath(ui->output_HDR_folderLineEdit->text());
@@ -538,7 +527,7 @@ void MainWindow::on_output_publishPushButton_clicked()
 
         float scale = (float)ui->output_HDR_scaleSpinBox->value() / 100.f;
 
-        SpriteAtlas atlas(fileListFromTree(), ui->property_textureBorderSpinBox->value(), ui->property_spriteBorderSpinBox->value(), ui->property_trimCropThesholdSpinBox->value(), scale);
+        SpriteAtlas atlas(fileListFromTree(), ui->textureBorderSpinBox->value(), ui->spriteBorderSpinBox->value(), ui->trimSpinBox->value(), scale);
         atlas.generate();
 
         const QImage& atlasImage = atlas.image();
@@ -562,7 +551,7 @@ void MainWindow::on_output_publishPushButton_clicked()
 
         float scale = (float)ui->output_HD_scaleSpinBox->value() / 100.f;
 
-        SpriteAtlas atlas(fileListFromTree(), ui->property_textureBorderSpinBox->value(), ui->property_spriteBorderSpinBox->value(), ui->property_trimCropThesholdSpinBox->value(), scale);
+        SpriteAtlas atlas(fileListFromTree(), ui->textureBorderSpinBox->value(), ui->spriteBorderSpinBox->value(), ui->trimSpinBox->value(), scale);
         atlas.generate();
 
         const QImage& atlasImage = atlas.image();
@@ -586,7 +575,7 @@ void MainWindow::on_output_publishPushButton_clicked()
 
         float scale = (float)ui->output_SD_scaleSpinBox->value() / 100.f;
 
-        SpriteAtlas atlas(fileListFromTree(), ui->property_textureBorderSpinBox->value(), ui->property_spriteBorderSpinBox->value(), ui->property_trimCropThesholdSpinBox->value(), scale);
+        SpriteAtlas atlas(fileListFromTree(), ui->textureBorderSpinBox->value(), ui->spriteBorderSpinBox->value(), ui->trimSpinBox->value(), scale);
         atlas.generate();
 
         const QImage& atlasImage = atlas.image();
@@ -595,4 +584,27 @@ void MainWindow::on_output_publishPushButton_clicked()
         atlasImage.save(sdImageFile);
         publishSpriteSheet(sdPlistFile, imageFileName, spriteFrames);
     }
+    */
+}
+
+void MainWindow::on_addScalingVariantPushButton_clicked() {
+    ScalingVariantWidget* scalingVariantWidget = new ScalingVariantWidget();
+    connect(scalingVariantWidget, SIGNAL(remove()), this, SLOT(removeScalingVariant()));
+    ui->scalingVariantsGroupBox->layout()->addWidget(scalingVariantWidget);
+
+    if (ui->scalingVariantsGroupBox->layout()->count() == 1) {
+        ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(ui->scalingVariantsGroupBox->layout()->itemAt(0)->widget());
+        if (scalingVariantWidget) {
+           scalingVariantWidget->setRemoveEnabled(false);
+        }
+    }
+}
+
+void MainWindow::removeScalingVariant() {
+    qDebug() << "remove" << sender();
+    ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(sender());
+    if (scalingVariantWidget) {
+        delete scalingVariantWidget;
+    }
+//    QAction* senderAction = dynamic_cast<QAction*>(sender());
 }
