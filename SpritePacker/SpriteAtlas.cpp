@@ -84,14 +84,13 @@ SpriteAtlas::SpriteAtlas(const QStringList& sourceList, int textureBorder, int s
 
 }
 
-// TODO: gui is freeze on very large atlases (no profit)
+// TODO: QThread: gui is freeze on very large atlases (no profit) wtf?
 //void SpriteAtlas::generateOnThread() {
 //    QThread* generateThread = new QThread(this);
 
 //     connect(generateThread, SIGNAL(started()), this, SLOT(generate()));
 //     connect(generateThread, SIGNAL(finished()), this, SLOT(deleteLater()));
 
-//     // Starts an event loop, and emits workerThread->started()
 //     generateThread->start();
 //}
 

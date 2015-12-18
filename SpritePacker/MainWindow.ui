@@ -231,7 +231,6 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionNew"/>
-   <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
    <addaction name="separator"/>
    <addaction name="actionAddSprites"/>
@@ -638,7 +637,7 @@
                <widget class="QLineEdit" name="destPathLineEdit"/>
               </item>
               <item>
-               <widget class="QToolButton" name="output_destFolderToolButton">
+               <widget class="QToolButton" name="destFolderToolButton">
                 <property name="text">
                  <string>...</string>
                 </property>

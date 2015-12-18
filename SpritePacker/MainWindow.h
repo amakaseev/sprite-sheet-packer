@@ -47,7 +47,7 @@ private slots:
     void on_zoomSlider_valueChanged(int value);
 
     void on_spritesTreeWidget_itemSelectionChanged();
-    void on_output_destFolderToolButton_clicked();
+    void on_destFolderToolButton_clicked();
     void on_addScalingVariantPushButton_clicked();
     void removeScalingVariant();
 

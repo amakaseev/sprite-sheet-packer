@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     setWindowIcon(QIcon("SpritePacker.icns"));
-    //setUnifiedTitleAndToolBarOnMac(true);
+    setUnifiedTitleAndToolBarOnMac(true);
 
     SpritePackerProjectFile::factory().set<SpritePackerProjectFile>("json");
     SpritePackerProjectFile::factory().set<SpritePackerProjectFileOLD>("sp");
@@ -36,6 +36,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     on_addScalingVariantPushButton_clicked();
 
+    // setup open button
+    auto openButton = new QToolButton(this);
+    openButton->setIcon(ui->actionOpen->icon());
+    openButton->setText(ui->actionOpen->text());
+    openButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    openButton->setPopupMode(QToolButton::MenuButtonPopup);
+    openButton->setMenu(ui->menuOpen_recent);
+    connect(openButton, SIGNAL(pressed()), this, SLOT(on_actionOpen_triggered()));
+    ui->mainToolBar->insertWidget(ui->actionSave, openButton);
 
     refreshOpenRecentMenu();
 
@@ -550,7 +559,7 @@ void MainWindow::on_spritesTreeWidget_itemSelectionChanged() {
     }
 }
 
-void MainWindow::on_output_destFolderToolButton_clicked() {
+void MainWindow::on_destFolderToolButton_clicked() {
     QString destPath = ui->destPathLineEdit->text();
     destPath = QFileDialog::getExistingDirectory(this,
                                                  tr("Destination folder"),

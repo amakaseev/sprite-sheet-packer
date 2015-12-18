@@ -4,7 +4,9 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    QApplication::setStyle(QStyleFactory::create("Fusion"));
+#ifdef Q_OS_WIN32
+        QApplication::setStyle(QStyleFactory::create("Fusion"));
+#endif
 
     QCoreApplication::setOrganizationName("spicyminds-lab");
     QCoreApplication::setOrganizationDomain("spicyminds-lab.com");
