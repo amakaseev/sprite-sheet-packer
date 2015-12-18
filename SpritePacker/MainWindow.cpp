@@ -353,9 +353,11 @@ void MainWindow::on_actionOpen_triggered() {
         dir = settings.value("spritePackerFileName", QDir::currentPath()).toString();
     }
 
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open sprite packer."),
+    QString selectedFilter;
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open project file."),
                                                     dir,
-                                                    tr("Sprite sheet packer (*.json *.sp *.tps)"));
+                                                    tr("Supported formats (*.json *.sp *.tps)"));
+    qDebug() << selectedFilter;
     if (!fileName.isEmpty()) {
         settings.setValue("spritePackerFileName", fileName);
         openSpritePackerProject(fileName);
@@ -380,7 +382,7 @@ void MainWindow::on_actionSaveAs_triggered() {
     }
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save sprite packer project file."),
                                                     dir,
-                                                    tr("Sprite sheet packer project (*.json)"));
+                                                    tr("Sprite sheet packer (*.json)"));
     if (!fileName.isEmpty()) {
         settings.setValue("spritePackerFileName", fileName);
         saveSpritePackerProject(fileName);

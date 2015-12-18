@@ -20,6 +20,18 @@ public:
         mRect = QRect(0, 0, mImage.width(), mImage.height());
     }
 
+    bool isIdentical(const PackContent& other) {
+        if (mRect != other.mRect) return false;
+
+        for (int x=mRect.left(); x<=mRect.right(); ++x) {
+            for (int y=mRect.top(); y<=mRect.bottom(); ++y) {
+                if (mImage.pixel(x, y) != other.mImage.pixel(x, y)) return false;
+            }
+        }
+
+        return true;
+    }
+
     void trim(int alpha) {
         int l = mImage.width();
         int t = mImage.height();
@@ -84,7 +96,9 @@ SpriteAtlas::SpriteAtlas(const QStringList& sourceList, int textureBorder, int s
 //}
 
 void SpriteAtlas::generate() {
-    qDebug() << _sourceList;
+    QTime timePerform;
+    timePerform.start();
+
     BinPack2D::ContentAccumulator<PackContent> inputContent;
 
     QStringList nameFilter;
@@ -110,6 +124,7 @@ void SpriteAtlas::generate() {
 
     int volume = 0;
 
+    QMap<QString, QVector<QPair<QString, QSize>>> identicalContent;
     // init images and rects
     QList< QPair<QString,QString> >::iterator it_f = fileList.begin();
     for(; it_f != fileList.end(); ++it_f) {
@@ -124,6 +139,21 @@ void SpriteAtlas::generate() {
         // Trim / Crop
         if (_trim) {
             packContent.trim(_trim);
+        }
+
+        bool findIdentical = false;
+        auto& contentVector = inputContent.Get();
+        for (auto& content: contentVector) {
+            if (content.content.isIdentical(packContent)) {
+                findIdentical = true;
+                identicalContent[content.content.mName].push_back(qMakePair(packContent.mName, packContent.mImage.size()));
+                qDebug() << "isIdentical";
+                break;
+            }
+        }
+
+        if (findIdentical) {
+            continue;
         }
 
         int width = packContent.mRect.width();
@@ -209,6 +239,7 @@ void SpriteAtlas::generate() {
     _atlasImage.fill(QColor(0, 0, 0, 0));
 
     _spriteFrames.clear();
+    int skipSprites = 0;
     for( binpack2d_iterator itor = outputContent.Get().begin(); itor != outputContent.Get().end(); itor++ ) {
         const BinPack2D::Content<PackContent> &content = *itor;
 
@@ -236,12 +267,34 @@ void SpriteAtlas::generate() {
             spriteFrame.mFrame = QRect(content.coord.x, content.coord.y, content.size.h-_spriteBorder, content.size.w-_spriteBorder);
 
         }
-        _spriteFrames[packContent.mName] = spriteFrame;
-
         if (content.rotated) {
             copyImage(_atlasImage, QPoint(content.coord.x+_textureBorder, content.coord.y+_textureBorder), image, image.rect());
         } else {
             copyImage(_atlasImage, QPoint(content.coord.x+_textureBorder, content.coord.y+_textureBorder), packContent.mImage, packContent.mRect);
         }
+        _spriteFrames[packContent.mName] = spriteFrame;
+
+        // add ident to sprite frames
+        auto identicalIt = identicalContent.find(packContent.mName);
+        if (identicalIt != identicalContent.end()) {
+            QStringList identicalList;
+            for (auto ident: (*identicalIt)) {
+                SpriteFrameInfo identSpriteFrameInfo = spriteFrame;
+                identSpriteFrameInfo.mOffset = QPoint(
+                            (packContent.mRect.left() + (-ident.second.width() + content.size.w - _spriteBorder) * 0.5f),
+                            (-packContent.mRect.top() + ( ident.second.height() - content.size.h + _spriteBorder) * 0.5f)
+                            );
+                identSpriteFrameInfo.mSourceSize = ident.second;
+                _spriteFrames[ident.first] = identSpriteFrameInfo;
+
+                identicalList.push_back(ident.first);
+            }
+            skipSprites += identicalList.size();
+            qDebug() << packContent.mName << "identical:" << identicalList;
+        }
     }
+
+    qDebug() << "Total skip sprites: " << skipSprites;
+    int elapsed = timePerform.elapsed();
+    qDebug() << "Generate time mc:" <<  elapsed << " sec:" << elapsed/1000.f;
 }
