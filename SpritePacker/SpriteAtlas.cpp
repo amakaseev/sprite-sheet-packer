@@ -113,11 +113,11 @@ void SpriteAtlas::generate() {
             while(fileNames.hasNext()){
                 fileNames.next();
                 fileList.push_back(qMakePair(fileNames.filePath(), dir.relativeFilePath(fileNames.filePath())));
-                qDebug() << fileList.back();
+                //qDebug() << fileList.back();
             }
         } else {
             fileList.push_back(qMakePair(pathName, fi.fileName()));
-            qDebug() << fileList.back();
+            //qDebug() << fileList.back();
         }
     }
 

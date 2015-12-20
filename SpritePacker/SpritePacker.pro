@@ -12,7 +12,7 @@ TARGET = SpritePacker
 TEMPLATE = app
 
 CONFIG += c++11
-QMAKE_CXXFLAGS +=-std=c++11 -stdlib=libc++
+#QMAKE_CXXFLAGS +=-std=c++11 -stdlib=libc++
 
 ICON = SpritePacker.icns
 RC_FILE = SpritePacker.rc
