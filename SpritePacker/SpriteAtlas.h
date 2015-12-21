@@ -21,7 +21,7 @@ public:
     void generate();
 
     const QImage& image() const { return _atlasImage; }
-    const QMap<QString, SpriteFrameInfo>& spriteFrames() { return _spriteFrames; }
+    const QMap<QString, SpriteFrameInfo>& spriteFrames() const { return _spriteFrames; }
 
 private:
     QStringList _sourceList;

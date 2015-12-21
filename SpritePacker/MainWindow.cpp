@@ -1,6 +1,7 @@
 #include <QtXml>
 
 #include "MainWindow.h"
+#include "PublishSpriteSheet.h"
 #include "ScalingVariantWidget.h"
 #include "SpritePackerProjectFile.h"
 #include "ui_MainWindow.h"
@@ -280,69 +281,6 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
     refreshOpenRecentMenu();
 }
 
-void MainWindow::publishSpriteSheet(const QString& fileName, const QString& texName, const QMap<QString, SpriteFrameInfo>& spriteFrames) {
-    if (ui->dataFormatComboBox->currentIndex() == 0) {
-        QVariantMap plist;
-
-        QVariantMap metadataMap;
-        metadataMap["format"] = QVariant(2);
-        metadataMap["textureFileName"] = texName;
-        plist["metadata"] = metadataMap;
-
-        QVariantMap framesMap;
-        auto it_f = spriteFrames.begin();
-        for (; it_f != spriteFrames.end(); ++it_f) {
-            QVariantMap frameMap;
-            frameMap["frame"] = QString("{{%1,%2},{%3,%4}}")
-                    .arg(it_f.value().mFrame.left())
-                    .arg(it_f.value().mFrame.top())
-                    .arg(it_f.value().mFrame.width())
-                    .arg(it_f.value().mFrame.height());
-            frameMap["rotated"] = QVariant(it_f.value().mRotated);
-            frameMap["offset"] = QString("{%1,%2}")
-                    .arg(it_f.value().mOffset.x())
-                    .arg(it_f.value().mOffset.y());
-    //        frameMap["sourceColorRect"] = QString("{{%1,%2},{%3,%4}}")
-    //                .arg(it_f.value().mSourceColorRect.left())
-    //                .arg(it_f.value().mSourceColorRect.top())
-    //                .arg(it_f.value().mSourceColorRect.width())
-    //                .arg(it_f.value().mSourceColorRect.height());
-            frameMap["sourceSize"] = QString("{%1,%2}")
-                    .arg(it_f.value().mSourceSize.width())
-                    .arg(it_f.value().mSourceSize.height());
-
-            framesMap[ui->spritesPrefixLineEdit->text() + it_f.key()] = frameMap;
-        }
-
-        plist["frames"] = framesMap;
-        qDebug() << "spriteSheet:" << fileName;
-
-        QFile file(fileName);
-        file.open(QIODevice::WriteOnly | QIODevice::Text);
-        file.write(PListSerializer::toPList(plist).toLatin1());
-    } else if (ui->dataFormatComboBox->currentIndex() == 1) {
-        QString jsonString;
-        jsonString += "{";
-        auto it_f = spriteFrames.begin();
-        for (; it_f != spriteFrames.end(); ++it_f) {
-            jsonString += "\"" + QFileInfo(it_f.key()).baseName() + "\":\"";
-            jsonString += QString("%1,%2,%3,%4")
-                    .arg((int)(it_f.value().mFrame.left()))
-                    .arg((int)(it_f.value().mFrame.top()))
-                    .arg((int)(it_f.value().mFrame.width()))
-                    .arg((int)(it_f.value().mFrame.height()));
-            jsonString += "\",";
-        }
-        jsonString.remove(jsonString.length()-1, 1);
-        jsonString += "}";
-
-        QFile file(fileName);
-        file.open(QIODevice::WriteOnly | QIODevice::Text);
-        file.write(jsonString.toLatin1());
-    }
-}
-
-
 void MainWindow::on_actionNew_triggered() {
     ui->spriteSheetLineEdit->setText("");
     ui->spritesTreeWidget->clear();
@@ -499,11 +437,15 @@ void MainWindow::on_actionPublish_triggered() {
             SpriteAtlas atlas(fileListFromTree(), ui->textureBorderSpinBox->value(), ui->spriteBorderSpinBox->value(), ui->trimSpinBox->value(), scale);
             atlas.generate();
 
-            const QImage& atlasImage = atlas.image();
-            const QMap<QString, SpriteFrameInfo>& spriteFrames = atlas.spriteFrames();
+//            const QImage& atlasImage = atlas.image();
+//            const QMap<QString, SpriteFrameInfo>& spriteFrames = atlas.spriteFrames();
+//            atlasImage.save(scaleImageFile);
+//            publishSpriteSheet(scaleDataFile, imageFileName, spriteFrames);
 
-            atlasImage.save(scaleImageFile);
-            publishSpriteSheet(scaleDataFile, imageFileName, spriteFrames);
+            ScalingVariant scalingVariant;
+            scalingVariant.folderName = folderName;
+            scalingVariant.scale = scale;
+            PublishSpriteSheet(ui->destPathLineEdit->text(), ui->spriteSheetLineEdit->text(), scalingVariant, atlas);
         }
     }
 }

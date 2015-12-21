@@ -26,7 +26,6 @@ protected:
 
     void openSpritePackerProject(const QString& fileName);
     void saveSpritePackerProject(const QString& fileName);
-    void publishSpriteSheet(const QString& fileName, const QString& texName, const QMap<QString, SpriteFrameInfo>& spriteFrames);
 
 private slots:
     void openRecent();
