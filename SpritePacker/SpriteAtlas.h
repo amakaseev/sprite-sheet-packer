@@ -18,7 +18,7 @@ class SpriteAtlas
 public:
     SpriteAtlas(const QStringList& sourceList, int textureBorder = 0, int spriteBorder = 1, int trim = 1, bool pot2 = false, int maxSize = 8192, float scale = 1);
 
-    void generate();
+    bool generate();
 
     const QImage& image() const { return _atlasImage; }
     const QMap<QString, SpriteFrameInfo>& spriteFrames() const { return _spriteFrames; }

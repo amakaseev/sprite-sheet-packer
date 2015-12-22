@@ -105,7 +105,7 @@ SpriteAtlas::SpriteAtlas(const QStringList& sourceList, int textureBorder, int s
 //     generateThread->start();
 //}
 
-void SpriteAtlas::generate() {
+bool SpriteAtlas::generate() {
     QTime timePerform;
     timePerform.start();
 
@@ -131,7 +131,7 @@ void SpriteAtlas::generate() {
     }
 
     int volume = 0;
-
+    int skipSprites = 0;
     QMap<QString, QVector<QPair<QString, QSize>>> identicalContent;
     // init images and rects
     QList< QPair<QString,QString> >::iterator it_f = fileList.begin();
@@ -155,7 +155,8 @@ void SpriteAtlas::generate() {
             if (content.content.isIdentical(packContent)) {
                 findIdentical = true;
                 identicalContent[content.content.mName].push_back(qMakePair(packContent.mName, packContent.mImage.size()));
-                qDebug() << "isIdentical";
+                qDebug() << "isIdentical:" << packContent.mName << "==" << content.content.mName;
+                skipSprites++;
                 break;
             }
         }
@@ -173,6 +174,10 @@ void SpriteAtlas::generate() {
                                                         BinPack2D::Size(width+_spriteBorder, height+_spriteBorder),
                                                         false);
     }
+    if (skipSprites)
+        qDebug() << "Total skip sprites: " << skipSprites;
+
+    QCoreApplication::processEvents();
 
     // Sort the input content by size... usually packs better.
     inputContent.Sort();
@@ -187,7 +192,7 @@ void SpriteAtlas::generate() {
     if (_pot2) {
         w = pow2(w);
         h = pow2(h);
-        qDebug() << w << "x" << h;
+        qDebug() << "Volume size:" << w << "x" << h;
 
         bool k = true;
         while (1) {
@@ -201,7 +206,7 @@ void SpriteAtlas::generate() {
             } else {
                 if ((w == _maxTextureSize) && (h == _maxTextureSize)) {
                     qDebug() << "Max size Limit!";
-                    return;
+                    return false;
                 }
             }
             if (k) {
@@ -211,7 +216,7 @@ void SpriteAtlas::generate() {
                 k = true;
                 h = qMin(h*2, _maxTextureSize);
             }
-            qDebug() << "stage 1:" << w << "x" << h;
+            qDebug() << "Resize for bigger:" << w << "x" << h;
             QCoreApplication::processEvents();
         }
         while (w > 2) {
@@ -226,7 +231,7 @@ void SpriteAtlas::generate() {
                 outputContent = BinPack2D::ContentAccumulator<PackContent>();
                 canvasArray.CollectContent(outputContent);
             }
-            qDebug() << "stage 2:" << w << "x" << h;
+            qDebug() << "Optimize width:" << w << "x" << h;
             QCoreApplication::processEvents();
         }
         while (h > 2) {
@@ -241,11 +246,11 @@ void SpriteAtlas::generate() {
                 outputContent = BinPack2D::ContentAccumulator<PackContent>();
                 canvasArray.CollectContent(outputContent);
             }
-            qDebug() << "stage 3:" << w << "x" << h;
+            qDebug() << "Optimize height:" << w << "x" << h;
             QCoreApplication::processEvents();
         }
     } else {
-        qDebug() << w << "x" << h;
+        qDebug() << "Volume size:" << w << "x" << h;
         bool k = true;
         int step = (w + h) / 20;
         while (1) {
@@ -259,7 +264,7 @@ void SpriteAtlas::generate() {
             } else {
                 if ((w == _maxTextureSize) && (h == _maxTextureSize)) {
                     qDebug() << "Max size Limit!";
-                    return;
+                    return false;
                 }
             }
             if (k) {
@@ -269,7 +274,7 @@ void SpriteAtlas::generate() {
                 k = true;
                 h = qMin(h + step, _maxTextureSize);;
             }
-            qDebug() << "stage 1:" << w << "x" << h << "step:" << step;
+            qDebug() << "Resize for bigger:" << w << "x" << h << "step:" << step;
             QCoreApplication::processEvents();
         }
         step = (w + h) / 20;
@@ -285,7 +290,7 @@ void SpriteAtlas::generate() {
                 outputContent = BinPack2D::ContentAccumulator<PackContent>();
                 canvasArray.CollectContent(outputContent);
             }
-            qDebug() << "stage 2:" << w << "x" << h << "step:" << step;
+            qDebug() << "Optimize width:" << w << "x" << h << "step:" << step;
             QCoreApplication::processEvents();
         }
         step = (w + h) / 20;
@@ -301,11 +306,13 @@ void SpriteAtlas::generate() {
                 outputContent = BinPack2D::ContentAccumulator<PackContent>();
                 canvasArray.CollectContent(outputContent);
             }
-            qDebug() << "stage 3:" << w << "x" << h << "step:" << step;
+            qDebug() << "Optimize height:" << w << "x" << h << "step:" << step;
             QCoreApplication::processEvents();
         }
     }
 
+    qDebug() << "Found optimize size:" << w << "x" << h;
+    QCoreApplication::processEvents();
 
     // parse output.
     typedef BinPack2D::Content<PackContent>::Vector::iterator binpack2d_iterator;
@@ -314,7 +321,6 @@ void SpriteAtlas::generate() {
     _atlasImage.fill(QColor(0, 0, 0, 0));
 
     _spriteFrames.clear();
-    int skipSprites = 0;
     for( binpack2d_iterator itor = outputContent.Get().begin(); itor != outputContent.Get().end(); itor++ ) {
         const BinPack2D::Content<PackContent> &content = *itor;
 
@@ -364,12 +370,10 @@ void SpriteAtlas::generate() {
 
                 identicalList.push_back(ident.first);
             }
-            skipSprites += identicalList.size();
-            qDebug() << packContent.mName << "identical:" << identicalList;
         }
     }
 
-    qDebug() << "Total skip sprites: " << skipSprites;
     int elapsed = timePerform.elapsed();
-    qDebug() << "Generate time mc:" <<  elapsed << " sec:" << elapsed/1000.f;
+    qDebug() << "Generate time mc:" <<  elapsed/1000.f << "sec";
+    return true;
 }

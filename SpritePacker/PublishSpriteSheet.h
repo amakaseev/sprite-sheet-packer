@@ -20,9 +20,7 @@ public slots:
 class JSWriter: public QObject {
     Q_OBJECT
 public:
-    explicit JSWriter(const QImage& image): _image(image) {
-        qDebug() << "JSWriter::JSWriter";
-    }
+    explicit JSWriter(const QImage& image): _image(image) { }
 
 public slots:
     void writeData(const QString& fileName, const QJSValue& data, const QString& format);

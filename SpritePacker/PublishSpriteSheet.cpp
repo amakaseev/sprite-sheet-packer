@@ -30,13 +30,11 @@ QJSValue jsValue(QJSEngine& engine, const QPoint& point) {
 }
 
 void JSConsole::log(QString msg) {
-    qDebug() << "jsConsole:"<< msg;
+    qDebug() << "js:"<< msg;
 }
 
 void JSWriter::writeData(const QString& fileName, const QJSValue& data, const QString& format) {
-    qDebug() << "writeData" << fileName;
-    //qDebug() << "data" << data.toVariant();
-    qDebug() << "format" << format;
+    qDebug() << "writeData" << fileName << "format:" << format;
     if (format == "PLIST") {
         QFile file(fileName);
         file.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -56,6 +54,7 @@ void JSWriter::writeData(const QString& fileName, const QJSValue& data, const QS
 }
 
 void JSWriter::writeImage(const QString& fileName) {
+    qDebug() << "writeImage" << fileName;
     _image.save(fileName);
 }
 

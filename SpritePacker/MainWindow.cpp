@@ -5,6 +5,7 @@
 #include "ScalingVariantWidget.h"
 #include "SpritePackerProjectFile.h"
 #include "PreferencesDialog.h"
+#include "PublishStatusDialog.h"
 #include "ui_MainWindow.h"
 
 #include "PListParser.h"
@@ -120,7 +121,10 @@ void MainWindow::refreshAtlas() {
                       ui->pot2ComboBox->currentIndex()? true:false,
                       ui->maxTextureSizeComboBox->currentText().toInt(),
                       1.f);
-    atlas.generate();
+    if (!atlas.generate()) {
+        QMessageBox::critical(this, "Publish error", "Max texture size limit is small!");
+        return;
+    }
 
     const QImage& atlasImage = atlas.image();
 
@@ -445,14 +449,11 @@ void MainWindow::on_actionPublish_triggered() {
         return;
     }
 
-    QString imageFileName = ui->spriteSheetLineEdit->text() + ".png";
-    QString dataFileName;
-    switch (ui->dataFormatComboBox->currentIndex()) {
-        case 0: dataFileName = ui->spriteSheetLineEdit->text() + ".plist"; break;
-        case 1: dataFileName = ui->spriteSheetLineEdit->text() + ".json"; break;
-    }
+    PublishStatusDialog* publishStatusDialog = new PublishStatusDialog(this);
+    publishStatusDialog->setAttribute(Qt::WA_DeleteOnClose);
+    publishStatusDialog->open();
 
-    qDebug() << "Publish to:" << dir;
+    publishStatusDialog->log(QString("Publish to: " + dir.canonicalPath()));
     for (int i=0; i<ui->scalingVariantsGroupBox->layout()->count(); ++i) {
         ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(ui->scalingVariantsGroupBox->layout()->itemAt(i)->widget());
         if (scalingVariantWidget) {
@@ -465,7 +466,10 @@ void MainWindow::on_actionPublish_triggered() {
                               ui->pot2ComboBox->currentIndex()? true:false,
                               ui->maxTextureSizeComboBox->currentText().toInt(),
                               scale);
-            atlas.generate();
+            if (!atlas.generate()) {
+                QMessageBox::critical(this, "Publish error", "Max texture size limit is small!");
+                continue;
+            }
 
             ScalingVariant scalingVariant;
             scalingVariant.folderName = scalingVariantWidget->variantFolder();
@@ -473,10 +477,12 @@ void MainWindow::on_actionPublish_triggered() {
             PublishSpriteSheet::publish(ui->destPathLineEdit->text(), ui->spriteSheetLineEdit->text(), ui->dataFormatComboBox->currentText(), scalingVariant, atlas);
         }
     }
+    publishStatusDialog->complete();
 }
 
 void MainWindow::on_actionPreferences_triggered() {
     PreferencesDialog* preferencesDialog = new PreferencesDialog(this);
+    preferencesDialog->setAttribute(Qt::WA_DeleteOnClose);
     if (preferencesDialog->exec()) {
         refreshFormats();
     }
@@ -540,7 +546,7 @@ void MainWindow::on_destFolderToolButton_clicked() {
                                                  destPath,
                                                  QFileDialog::DontResolveSymlinks);
     if (!destPath.isEmpty()) {
-        ui->destPathLineEdit->setText(destPath);
+        ui->destPathLineEdit->setText(QDir(destPath).canonicalPath());
     }
 }
 

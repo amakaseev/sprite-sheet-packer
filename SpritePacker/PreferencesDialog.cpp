@@ -6,6 +6,7 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) :
     ui(new Ui::PreferencesDialog)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_DeleteOnClose);
 
     QSettings settings;
     QString customFormatFolder = settings.value("Preferences/customFormatFolder").toString();

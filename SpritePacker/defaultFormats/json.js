@@ -7,8 +7,6 @@ function exportSpriteSheet(destPath, spriteSheetName, scalingVariant, spriteFram
     }
     destFileName += spriteSheetName;
 
-    console.log("Publish: " + destFileName);
-
     var jsonFrames = {};
     for (var key in spriteFrames) {
         var spriteFrame = spriteFrames[key];

@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     ScalingVariantWidget.cpp \
     SpritePackerProjectFile.cpp \
     PublishSpriteSheet.cpp \
-    PreferencesDialog.cpp
+    PreferencesDialog.cpp \
+    PublishStatusDialog.cpp
 
 HEADERS += MainWindow.h \
     ImageRotate.h \
@@ -30,11 +31,13 @@ HEADERS += MainWindow.h \
     ScalingVariantWidget.h \
     SpritePackerProjectFile.h \
     PublishSpriteSheet.h \
-    PreferencesDialog.h
+    PreferencesDialog.h \
+    PublishStatusDialog.h
 
 FORMS += MainWindow.ui \
     ScalingVariantWidget.ui \
-    PreferencesDialog.ui
+    PreferencesDialog.ui \
+    PublishStatusDialog.ui
 
 RESOURCES += resources.qrc
 

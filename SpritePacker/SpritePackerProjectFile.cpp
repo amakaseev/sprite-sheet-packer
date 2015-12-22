@@ -35,7 +35,7 @@ bool SpritePackerProjectFile::read(const QString &fileName) {
     }
 
     _dataFormat = json["dataFormat"].toString();
-    _destPath = dir.absoluteFilePath(json["destPath"].toString());
+    _destPath = QDir(dir.absoluteFilePath(json["destPath"].toString())).canonicalPath();
     _spriteSheetName = json["spriteSheetName"].toString();
 
     _srcList.clear();
@@ -115,7 +115,7 @@ bool SpritePackerProjectFileOLD::read(const QString &fileName) {
     case 1: _dataFormat = "json"; break;
     default: _dataFormat = "cocos2d"; break;
     }
-    _destPath = QDir(dir.absoluteFilePath(outputMap["destPath"].toString())).absolutePath();
+    _destPath = QDir(dir.absoluteFilePath(outputMap["destPath"].toString())).canonicalPath();
     _spriteSheetName = outputMap["spriteSheetName"].toString();
 
     _scalingVariants.clear();
