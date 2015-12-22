@@ -9,11 +9,6 @@ struct ScalingVariant{
     float   scale;
 };
 
-enum TDataFormat {
-    kCocos2D = 0,
-    kJson
-};
-
 class SpritePackerProjectFile
 {
 public:
@@ -41,8 +36,8 @@ public:
     void setScalingVariants(const QVector<ScalingVariant>& scalingVariants) { _scalingVariants = scalingVariants; }
     const QVector<ScalingVariant>& scalingVariants() const { return _scalingVariants; }
 
-    void setDataFormat(TDataFormat dataFormat) { _dataFormat = dataFormat; }
-    TDataFormat dataFormat() { return _dataFormat; }
+    void setDataFormat(const QString& dataFormat) { _dataFormat = dataFormat; }
+    const QString& dataFormat() const { return _dataFormat; }
 
     void setDestPath(const QString& destPath) { _destPath = destPath; }
     const QString& destPath() const { return _destPath; }
@@ -69,7 +64,7 @@ protected:
     bool    _pot2;
 
     QVector<ScalingVariant> _scalingVariants;
-    TDataFormat _dataFormat;
+    QString _dataFormat;
 
     QString     _destPath;
     QString     _spriteSheetName;

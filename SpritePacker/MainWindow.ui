@@ -199,6 +199,8 @@
     <addaction name="actionSaveAs"/>
     <addaction name="separator"/>
     <addaction name="actionPublish"/>
+    <addaction name="separator"/>
+    <addaction name="actionPreferences"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -598,16 +600,14 @@
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Algorithm&lt;/span&gt;&lt;/p&gt;&lt;p&gt;There are currently 2 algorithms&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;MaxRects&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Currently the best packing algorithm. Tries to use the last texture space by applying different heuristics when placing the sprites.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Basic&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Simple layout by filling sprites from left to right until the maximum width of the texture is reached. Good for fixed-size sprites.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
-                <item>
-                 <property name="text">
-                  <string>cocos2d</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>json</string>
-                 </property>
-                </item>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="dataFormatSetupToolButton">
+                <property name="icon">
+                 <iconset resource="resources.qrc">
+                  <normaloff>:/res/preferences-system.png</normaloff>:/res/preferences-system.png</iconset>
+                </property>
                </widget>
               </item>
              </layout>
@@ -864,6 +864,15 @@
    </property>
    <property name="text">
     <string>Save As...</string>
+   </property>
+  </action>
+  <action name="actionPreferences">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/preferences-system.png</normaloff>:/res/preferences-system.png</iconset>
+   </property>
+   <property name="text">
+    <string>Preferences ...</string>
    </property>
   </action>
  </widget>

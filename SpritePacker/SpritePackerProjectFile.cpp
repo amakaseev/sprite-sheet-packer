@@ -34,12 +34,7 @@ bool SpritePackerProjectFile::read(const QString &fileName) {
         _scalingVariants.push_back(scalingVariant);
     }
 
-    if (json["dataFormat"].toString() == "Cocos2D") {
-        _dataFormat = kCocos2D;
-    } else if (json["dataFormat"].toString() == "Json") {
-        _dataFormat = kJson;
-    }
-
+    _dataFormat = json["dataFormat"].toString();
     _destPath = dir.absoluteFilePath(json["destPath"].toString());
     _spriteSheetName = json["spriteSheetName"].toString();
 
@@ -71,12 +66,7 @@ bool SpritePackerProjectFile::write(const QString &fileName) {
         scalingVariants.append(scalingVariantObject);
     }
     json["scalingVariants"] = scalingVariants;
-
-    switch (_dataFormat) {
-        case kCocos2D: json["dataFormat"] = "Cocos2D"; break;
-        case kJson: json["dataFormat"] = "Json"; break;
-    }
-
+    json["dataFormat"] = _dataFormat;
     json["destPath"] = dir.relativeFilePath(_destPath);
     json["spriteSheetName"] = _spriteSheetName;
     QStringList srcRelative;
@@ -120,7 +110,11 @@ bool SpritePackerProjectFileOLD::read(const QString &fileName) {
 
     // OUTPUT
     QVariantMap outputMap = propertyMap["output"].toMap();
-    _dataFormat = (TDataFormat)outputMap["dataFormat"].toInt();
+    switch (outputMap["dataFormat"].toInt()) {
+    case 0: _dataFormat = "cocos2d"; break;
+    case 1: _dataFormat = "json"; break;
+    default: _dataFormat = "cocos2d"; break;
+    }
     _destPath = QDir(dir.absoluteFilePath(outputMap["destPath"].toString())).absolutePath();
     _spriteSheetName = outputMap["spriteSheetName"].toString();
 

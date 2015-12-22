@@ -4,6 +4,7 @@
 #include "PublishSpriteSheet.h"
 #include "ScalingVariantWidget.h"
 #include "SpritePackerProjectFile.h"
+#include "PreferencesDialog.h"
 #include "ui_MainWindow.h"
 
 #include "PListParser.h"
@@ -25,7 +26,6 @@ MainWindow::MainWindow(QWidget *parent) :
     SpritePackerProjectFile::factory().set<SpritePackerProjectFileTPS>("tps");
 
     _scene = new QGraphicsScene(this);
-    //_scene->setBackgroundBrush(QBrush(QPixmap("://res/background_tran.png")));
     _scene->setBackgroundBrush(QBrush(Qt::darkGray));
 
     ui->graphicsView->setScene(_scene);
@@ -38,15 +38,14 @@ MainWindow::MainWindow(QWidget *parent) :
     on_addScalingVariantPushButton_clicked();
 
     // setup open button
-    auto openButton = new QToolButton(this);
-    openButton->setIcon(ui->actionOpen->icon());
-    openButton->setText(ui->actionOpen->text());
-    openButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    openButton->setPopupMode(QToolButton::MenuButtonPopup);
-    openButton->setMenu(ui->menuOpen_recent);
-    connect(openButton, SIGNAL(pressed()), this, SLOT(on_actionOpen_triggered()));
-    ui->mainToolBar->insertWidget(ui->actionSave, openButton);
+    _openButton = new QToolButton(this);
+    _openButton->setIcon(ui->actionOpen->icon());
+    _openButton->setText(ui->actionOpen->text());
+    _openButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    connect(_openButton, SIGNAL(pressed()), this, SLOT(on_actionOpen_triggered()));
+    ui->mainToolBar->insertWidget(ui->actionSave, _openButton);
 
+    refreshFormats();
     refreshOpenRecentMenu();
 
     QSettings settings;
@@ -61,6 +60,33 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
+void MainWindow::refreshFormats() {
+    QSettings settings;
+    QStringList formatsFolder;
+    formatsFolder.push_back(qApp->applicationDirPath() + "/defaultFormats");
+    formatsFolder.push_back(settings.value("Preferences/customFormatFolder").toString());
+
+    // load formats
+    PublishSpriteSheet::formats().clear();
+    for (auto folder: formatsFolder) {
+        if (QDir(folder).exists()) {
+            QDirIterator fileNames(folder, QStringList() << "*.js", QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot);
+            while(fileNames.hasNext()) {
+                fileNames.next();
+                PublishSpriteSheet::addFormat(fileNames.fileInfo().baseName(), fileNames.filePath());
+            }
+        }
+    }
+
+    QString prevFormat = ui->dataFormatComboBox->currentText();
+    ui->dataFormatComboBox->clear();
+    for (auto format: PublishSpriteSheet::formats().keys()) {
+        QString fileName(PublishSpriteSheet::formats()[format]);
+        ui->dataFormatComboBox->addItem(QIcon(fileName.left(fileName.lastIndexOf(".")) + ".png"), format);
+    }
+    ui->dataFormatComboBox->setCurrentText(prevFormat);
+}
+
 void MainWindow::refreshOpenRecentMenu() {
     QSettings settings;
     QStringList openRecentList = settings.value("openRecentList").toStringList();
@@ -71,6 +97,13 @@ void MainWindow::refreshOpenRecentMenu() {
         if (!QFileInfo(file).exists()) {
             recentAction->setEnabled(false);
         }
+    }
+
+    if (!openRecentList.empty()) {
+        _openButton->setPopupMode(QToolButton::MenuButtonPopup);
+        _openButton->setMenu(ui->menuOpen_recent);
+    } else {
+        _openButton->setMenu(NULL);
     }
 }
 
@@ -181,10 +214,7 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     ui->spriteBorderSpinBox->setValue(projectFile->spriteBorder());
     ui->maxTextureSizeComboBox->setCurrentText(QString::number(projectFile->maxTextureSize()));
     ui->pot2ComboBox->setCurrentIndex(projectFile->pot2()? 0:1);
-    switch (projectFile->dataFormat()) {
-        case kCocos2D: ui->dataFormatComboBox->setCurrentIndex(0); break;
-        case kJson: ui->dataFormatComboBox->setCurrentIndex(1); break;
-    }
+    ui->dataFormatComboBox->setCurrentText(projectFile->dataFormat());
     ui->destPathLineEdit->setText(projectFile->destPath());
     ui->spriteSheetLineEdit->setText(projectFile->spriteSheetName());
 
@@ -233,10 +263,7 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
     projectFile->setSpriteBorder(ui->spriteBorderSpinBox->value());
     projectFile->setMaxTextureSize(ui->maxTextureSizeComboBox->currentText().toInt());
     projectFile->setPot2((ui->pot2ComboBox->currentIndex() == 0)? true:false);
-    switch (ui->dataFormatComboBox->currentIndex()) {
-        case 0: projectFile->setDataFormat(kCocos2D); break;
-        case 1: projectFile->setDataFormat(kJson); break;
-    }
+    projectFile->setDataFormat(ui->dataFormatComboBox->currentText());
     projectFile->setDestPath(ui->destPathLineEdit->text());
     projectFile->setSpriteSheetName(ui->spriteSheetLineEdit->text());
 
@@ -445,8 +472,15 @@ void MainWindow::on_actionPublish_triggered() {
             ScalingVariant scalingVariant;
             scalingVariant.folderName = folderName;
             scalingVariant.scale = scale;
-            PublishSpriteSheet(ui->destPathLineEdit->text(), ui->spriteSheetLineEdit->text(), scalingVariant, atlas);
+            PublishSpriteSheet::publish(ui->destPathLineEdit->text(), ui->spriteSheetLineEdit->text(), ui->dataFormatComboBox->currentText(), scalingVariant, atlas);
         }
+    }
+}
+
+void MainWindow::on_actionPreferences_triggered() {
+    PreferencesDialog* preferencesDialog = new PreferencesDialog(this);
+    if (preferencesDialog->exec()) {
+        refreshFormats();
     }
 }
 
@@ -511,6 +545,11 @@ void MainWindow::on_destFolderToolButton_clicked() {
         ui->destPathLineEdit->setText(destPath);
     }
 }
+
+void MainWindow::on_dataFormatSetupToolButton_clicked() {
+    on_actionPreferences_triggered();
+}
+
 
 void MainWindow::on_addScalingVariantPushButton_clicked() {
     ScalingVariantWidget* scalingVariantWidget = new ScalingVariantWidget();

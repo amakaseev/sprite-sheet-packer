@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     SpriteAtlas.cpp \
     ScalingVariantWidget.cpp \
     SpritePackerProjectFile.cpp \
-    PublishSpriteSheet.cpp
+    PublishSpriteSheet.cpp \
+    PreferencesDialog.cpp
 
 HEADERS += MainWindow.h \
     ImageRotate.h \
@@ -28,28 +29,31 @@ HEADERS += MainWindow.h \
     binpack2d.hpp \
     ScalingVariantWidget.h \
     SpritePackerProjectFile.h \
-    PublishSpriteSheet.h
+    PublishSpriteSheet.h \
+    PreferencesDialog.h
 
 FORMS += MainWindow.ui \
-    ScalingVariantWidget.ui
+    ScalingVariantWidget.ui \
+    PreferencesDialog.ui
 
 RESOURCES += resources.qrc
 
 include(qtplist-master/qtplist-master.pri)
 
 OTHER_FILES += \
-    defaultPublish/cocos2d-x.js \
-    defaultPublish/json.js \
+    defaultFormats/cocos2d.js \
+    defaultFormats/json.js \
 
 macx {
-    exportData.files = defaultPublish/cocos2d-x.js defaultPublish/json.js
-    exportData.path = Contents/MacOS/defaultPublish
+    exportData.files += defaultFormats/cocos2d.js defaultFormats/cocos2d.png
+    exportData.files += defaultFormats/json.js defaultFormats/json.png
+    exportData.path = Contents/MacOS/defaultFormats
     QMAKE_BUNDLE_DATA += exportData
 }
 
 win32 {
-    exportData.files = defaultPublish/*.*
-    exportData.path = defaultPublish
+    exportData.files = defaultFormats/*.*
+    exportData.path = defaultFormats
     DEPLOYMENT += exportData
 }
 

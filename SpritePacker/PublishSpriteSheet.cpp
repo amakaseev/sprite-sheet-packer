@@ -4,6 +4,8 @@
 #include "PListSerializer.h"
 #include <QMessageBox>
 
+QMap<QString, QString> PublishSpriteSheet::_formats;
+
 QJSValue jsValue(QJSEngine& engine, const QRect& rect) {
     QJSValue value = engine.newObject();
     value.setProperty("x", rect.left());
@@ -57,10 +59,18 @@ void JSWriter::writeImage(const QString& fileName) {
     _image.save(fileName);
 }
 
-bool PublishSpriteSheet(const QString& destPath, const QString& spriteSheetName, const ScalingVariant& scalingVariant, const SpriteAtlas& spriteAtlas) {
+bool PublishSpriteSheet::publish(const QString& destPath, const QString& spriteSheetName, const QString& format, const ScalingVariant& scalingVariant, const SpriteAtlas& spriteAtlas) {
     QJSEngine engine;
 
-    QString scriptFileName = "defaultPublish/cocos2d-x.js";
+    auto it_format = _formats.find(format);
+    if (it_format == _formats.end()) {
+        QString errorString = QString("Not found script file for [%1] format").arg(format);
+        qDebug() << errorString;
+        QMessageBox::critical(NULL, "Export script error", errorString);
+        return false;
+    }
+
+    QString scriptFileName = it_format.value();
     QFile scriptFile(scriptFileName);
     if (!scriptFile.open(QIODevice::ReadOnly)) {
         qDebug() << "File [" << scriptFileName << "] not found!";
