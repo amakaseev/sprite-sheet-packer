@@ -113,7 +113,13 @@ void MainWindow::openRecent() {
 }
 
 void MainWindow::refreshAtlas() {
-    SpriteAtlas atlas(fileListFromTree(), ui->textureBorderSpinBox->value(), ui->spriteBorderSpinBox->value(), ui->trimSpinBox->value(), 1.f);
+    SpriteAtlas atlas(fileListFromTree(),
+                      ui->textureBorderSpinBox->value(),
+                      ui->spriteBorderSpinBox->value(),
+                      ui->trimSpinBox->value(),
+                      ui->pot2ComboBox->currentIndex()? true:false,
+                      ui->maxTextureSizeComboBox->currentText().toInt(),
+                      1.f);
     atlas.generate();
 
     const QImage& atlasImage = atlas.image();
@@ -213,7 +219,7 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     ui->textureBorderSpinBox->setValue(projectFile->textureBorder());
     ui->spriteBorderSpinBox->setValue(projectFile->spriteBorder());
     ui->maxTextureSizeComboBox->setCurrentText(QString::number(projectFile->maxTextureSize()));
-    ui->pot2ComboBox->setCurrentIndex(projectFile->pot2()? 0:1);
+    ui->pot2ComboBox->setCurrentIndex(projectFile->pot2()? 1:0);
     ui->dataFormatComboBox->setCurrentText(projectFile->dataFormat());
     ui->destPathLineEdit->setText(projectFile->destPath());
     ui->spriteSheetLineEdit->setText(projectFile->spriteSheetName());
@@ -262,7 +268,7 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
     projectFile->setTextureBorder(ui->textureBorderSpinBox->value());
     projectFile->setSpriteBorder(ui->spriteBorderSpinBox->value());
     projectFile->setMaxTextureSize(ui->maxTextureSizeComboBox->currentText().toInt());
-    projectFile->setPot2((ui->pot2ComboBox->currentIndex() == 0)? true:false);
+    projectFile->setPot2(ui->pot2ComboBox->currentIndex()? true:false);
     projectFile->setDataFormat(ui->dataFormatComboBox->currentText());
     projectFile->setDestPath(ui->destPathLineEdit->text());
     projectFile->setSpriteSheetName(ui->spriteSheetLineEdit->text());
@@ -450,27 +456,19 @@ void MainWindow::on_actionPublish_triggered() {
     for (int i=0; i<ui->scalingVariantsGroupBox->layout()->count(); ++i) {
         ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(ui->scalingVariantsGroupBox->layout()->itemAt(i)->widget());
         if (scalingVariantWidget) {
-            QString folderName = scalingVariantWidget->variantFolder();
             float scale = scalingVariantWidget->scale();
 
-            dir.mkpath(folderName);
-            QDir dirPath(dir.absoluteFilePath(folderName));
-            QString scaleImageFile = dirPath.absoluteFilePath(imageFileName);
-            QString scaleDataFile = dirPath.absoluteFilePath(dataFileName);
-
-            qDebug() << "  folder:" << folderName;
-            qDebug() << "  scale:" << scale;
-
-            SpriteAtlas atlas(fileListFromTree(), ui->textureBorderSpinBox->value(), ui->spriteBorderSpinBox->value(), ui->trimSpinBox->value(), scale);
+            SpriteAtlas atlas(fileListFromTree(),
+                              ui->textureBorderSpinBox->value(),
+                              ui->spriteBorderSpinBox->value(),
+                              ui->trimSpinBox->value(),
+                              ui->pot2ComboBox->currentIndex()? true:false,
+                              ui->maxTextureSizeComboBox->currentText().toInt(),
+                              scale);
             atlas.generate();
 
-//            const QImage& atlasImage = atlas.image();
-//            const QMap<QString, SpriteFrameInfo>& spriteFrames = atlas.spriteFrames();
-//            atlasImage.save(scaleImageFile);
-//            publishSpriteSheet(scaleDataFile, imageFileName, spriteFrames);
-
             ScalingVariant scalingVariant;
-            scalingVariant.folderName = folderName;
+            scalingVariant.folderName = scalingVariantWidget->variantFolder();
             scalingVariant.scale = scale;
             PublishSpriteSheet::publish(ui->destPathLineEdit->text(), ui->spriteSheetLineEdit->text(), ui->dataFormatComboBox->currentText(), scalingVariant, atlas);
         }

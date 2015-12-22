@@ -282,7 +282,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>350</width>
+          <width>314</width>
           <height>839</height>
          </rect>
         </property>
@@ -310,7 +310,7 @@
                  <item>
                   <widget class="QLabel" name="label_3">
                    <property name="sizePolicy">
-                    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
@@ -349,7 +349,7 @@
                  <item>
                   <widget class="QLabel" name="label_4">
                    <property name="sizePolicy">
-                    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
@@ -376,7 +376,7 @@
                  <item>
                   <widget class="QLabel" name="label_2">
                    <property name="sizePolicy">
-                    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
@@ -412,7 +412,7 @@
                  <item>
                   <widget class="QLabel" name="label_7">
                    <property name="sizePolicy">
-                    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
@@ -428,7 +428,7 @@
                  <item>
                   <widget class="QComboBox" name="maxTextureSizeComboBox">
                    <property name="currentIndex">
-                    <number>6</number>
+                    <number>8</number>
                    </property>
                    <item>
                     <property name="text">
@@ -475,6 +475,11 @@
                      <string>8192</string>
                     </property>
                    </item>
+                   <item>
+                    <property name="text">
+                     <string>none</string>
+                    </property>
+                   </item>
                   </widget>
                  </item>
                 </layout>
@@ -484,7 +489,7 @@
                  <item>
                   <widget class="QLabel" name="label_8">
                    <property name="sizePolicy">
-                    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
@@ -499,17 +504,23 @@
                  </item>
                  <item>
                   <widget class="QComboBox" name="pot2ComboBox">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
                    <property name="currentIndex">
-                    <number>1</number>
+                    <number>0</number>
                    </property>
                    <item>
                     <property name="text">
-                     <string>POT (Power of 2)</string>
+                     <string>Free size</string>
                     </property>
                    </item>
                    <item>
                     <property name="text">
-                     <string>NPOT (Free size)</string>
+                     <string>Power of 2</string>
                     </property>
                    </item>
                   </widget>
@@ -527,7 +538,7 @@
                  <bool>false</bool>
                 </property>
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -579,7 +590,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -620,7 +631,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -657,7 +668,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -678,6 +689,13 @@
                </widget>
               </item>
              </layout>
+            </item>
+            <item>
+             <widget class="Line" name="line_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QGroupBox" name="scalingVariantsGroupBox">

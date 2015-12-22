@@ -76,13 +76,13 @@ private:
 
 class SpritePackerProjectFileOLD: public SpritePackerProjectFile {
 public:
-    virtual bool write(const QString& fileName) { return false; }
+    virtual bool write(const QString&) { return false; }
     virtual bool read(const QString& fileName);
 };
 
 class SpritePackerProjectFileTPS: public SpritePackerProjectFile {
 public:
-    virtual bool write(const QString& fileName) { return false; }
+    virtual bool write(const QString&) { return false; }
     virtual bool read(const QString& fileName);
 };
 

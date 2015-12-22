@@ -16,7 +16,7 @@ public:
 class SpriteAtlas
 {
 public:
-    SpriteAtlas(const QStringList& sourceList, int textureBorder = 0, int spriteBorder = 1, int trim = 1, float scale = 1);
+    SpriteAtlas(const QStringList& sourceList, int textureBorder = 0, int spriteBorder = 1, int trim = 1, bool pot2 = false, int maxSize = 8192, float scale = 1);
 
     void generate();
 
@@ -28,6 +28,8 @@ private:
     int _textureBorder;
     int _spriteBorder;
     int _trim;
+    bool _pot2;
+    int _maxTextureSize;
     float _scale;
 
     QImage _atlasImage;

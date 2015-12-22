@@ -3,6 +3,15 @@
 #include "binpack2d.hpp"
 #include "ImageRotate.h"
 
+int pow2(int len) {
+    int order = 1;
+    while(pow(2,order) < len)
+    {
+       order++;
+    }
+    return pow(2,order);
+}
+
 void copyImage(QImage& dst, const QPoint& pos, const QImage& src, const QRect& srcRect) {
     for (int x=0; x<srcRect.width(); ++x) {
         for (int y=0; y<srcRect.height(); ++y) {
@@ -74,11 +83,13 @@ public:
     QRect   mRect;
 };
 
-SpriteAtlas::SpriteAtlas(const QStringList& sourceList, int textureBorder, int spriteBorder, int trim, float scale)
+SpriteAtlas::SpriteAtlas(const QStringList& sourceList, int textureBorder, int spriteBorder, int trim, bool pot2, int maxSize, float scale)
     : _sourceList(sourceList)
     , _textureBorder(textureBorder)
     , _spriteBorder(spriteBorder)
     , _trim(trim)
+    , _pot2(pot2)
+    , _maxTextureSize(maxSize)
     , _scale(scale)
 {
 
@@ -171,61 +182,128 @@ void SpriteAtlas::generate() {
     BinPack2D::ContentAccumulator<PackContent> outputContent;
 
     // find optimal size for atlas
-    int w = sqrt(volume) + _textureBorder*2;
-    int h = sqrt(volume) + _textureBorder*2;
-    qDebug() << w << "x" << h;
-    bool k = true;
-    int step = (w + h) / 20;
-    while (1) {
-        BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
+    int w = qMin(_maxTextureSize, (int)sqrt(volume));
+    int h = qMin(_maxTextureSize, (int)sqrt(volume));
+    if (_pot2) {
+        w = pow2(w);
+        h = pow2(h);
+        qDebug() << w << "x" << h;
 
-        bool success = canvasArray.Place(inputContent, remainder);
-        if (success) {
-            outputContent = BinPack2D::ContentAccumulator<PackContent>();
-            canvasArray.CollectContent(outputContent);
-            break;
-        }
-        if (k) {
-            k = false;
-            w += step;
-        } else {
-            k = true;
-            h += step;
-        }
-        qDebug() << "stage 1:" << w << "x" << h << "step:" << step;
-        QCoreApplication::processEvents();
-    }
-    step = (w + h) / 20;
-    while (w) {
-        w -= step;
-        BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
+        bool k = true;
+        while (1) {
+            BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
 
-        bool success = canvasArray.Place(inputContent, remainder);
-        if (!success) {
-            w += step;
-            if (step > 1) step = qMax(step/2, 1); else break;
-        } else {
-            outputContent = BinPack2D::ContentAccumulator<PackContent>();
-            canvasArray.CollectContent(outputContent);
+            bool success = canvasArray.Place(inputContent, remainder);
+            if (success) {
+                outputContent = BinPack2D::ContentAccumulator<PackContent>();
+                canvasArray.CollectContent(outputContent);
+                break;
+            } else {
+                if ((w == _maxTextureSize) && (h == _maxTextureSize)) {
+                    qDebug() << "Max size Limit!";
+                    return;
+                }
+            }
+            if (k) {
+                k = false;
+                w = qMin(w*2, _maxTextureSize);
+            } else {
+                k = true;
+                h = qMin(h*2, _maxTextureSize);
+            }
+            qDebug() << "stage 1:" << w << "x" << h;
+            QCoreApplication::processEvents();
         }
-        qDebug() << "stage 2:" << w << "x" << h << "step:" << step;
-        QCoreApplication::processEvents();
-    }
-    step = (w + h) / 20;
-    while (h) {
-        h -= step;
-        BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
+        while (w > 2) {
+            w = w/2;
+            BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
 
-        bool success = canvasArray.Place(inputContent, remainder);
-        if (!success) {
-            h += step;
-            if (step > 1) step = qMax(step/2, 1); else break;
-        } else {
-            outputContent = BinPack2D::ContentAccumulator<PackContent>();
-            canvasArray.CollectContent(outputContent);
+            bool success = canvasArray.Place(inputContent, remainder);
+            if (!success) {
+                w = w*2;
+                break;
+            } else {
+                outputContent = BinPack2D::ContentAccumulator<PackContent>();
+                canvasArray.CollectContent(outputContent);
+            }
+            qDebug() << "stage 2:" << w << "x" << h;
+            QCoreApplication::processEvents();
         }
-        qDebug() << "stage 3:" << w << "x" << h << "step:" << step;
-        QCoreApplication::processEvents();
+        while (h > 2) {
+            h = h/2;
+            BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
+
+            bool success = canvasArray.Place(inputContent, remainder);
+            if (!success) {
+                h = h*2;
+                break;
+            } else {
+                outputContent = BinPack2D::ContentAccumulator<PackContent>();
+                canvasArray.CollectContent(outputContent);
+            }
+            qDebug() << "stage 3:" << w << "x" << h;
+            QCoreApplication::processEvents();
+        }
+    } else {
+        qDebug() << w << "x" << h;
+        bool k = true;
+        int step = (w + h) / 20;
+        while (1) {
+            BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
+
+            bool success = canvasArray.Place(inputContent, remainder);
+            if (success) {
+                outputContent = BinPack2D::ContentAccumulator<PackContent>();
+                canvasArray.CollectContent(outputContent);
+                break;
+            } else {
+                if ((w == _maxTextureSize) && (h == _maxTextureSize)) {
+                    qDebug() << "Max size Limit!";
+                    return;
+                }
+            }
+            if (k) {
+                k = false;
+                w = qMin(w + step, _maxTextureSize);
+            } else {
+                k = true;
+                h = qMin(h + step, _maxTextureSize);;
+            }
+            qDebug() << "stage 1:" << w << "x" << h << "step:" << step;
+            QCoreApplication::processEvents();
+        }
+        step = (w + h) / 20;
+        while (w) {
+            w -= step;
+            BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
+
+            bool success = canvasArray.Place(inputContent, remainder);
+            if (!success) {
+                w += step;
+                if (step > 1) step = qMax(step/2, 1); else break;
+            } else {
+                outputContent = BinPack2D::ContentAccumulator<PackContent>();
+                canvasArray.CollectContent(outputContent);
+            }
+            qDebug() << "stage 2:" << w << "x" << h << "step:" << step;
+            QCoreApplication::processEvents();
+        }
+        step = (w + h) / 20;
+        while (h) {
+            h -= step;
+            BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
+
+            bool success = canvasArray.Place(inputContent, remainder);
+            if (!success) {
+                h += step;
+                if (step > 1) step = qMax(step/2, 1); else break;
+            } else {
+                outputContent = BinPack2D::ContentAccumulator<PackContent>();
+                canvasArray.CollectContent(outputContent);
+            }
+            qDebug() << "stage 3:" << w << "x" << h << "step:" << step;
+            QCoreApplication::processEvents();
+        }
     }
 
 

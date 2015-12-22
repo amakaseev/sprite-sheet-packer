@@ -23,7 +23,7 @@ function exportSpriteSheet(destPath, spriteSheetName, scalingVariant, spriteFram
         var cocosFrame = {};
         cocosFrame["frame"] = "{{" +
                 spriteFrame.frame.x + "," +
-                spriteFrame.frame.y + "}," +
+                spriteFrame.frame.y + "},{" +
                 spriteFrame.frame.width + "," +
                 spriteFrame.frame.height + "}}";
 
