@@ -1,16 +1,9 @@
 
 
-function exportSpriteSheet(destPath, spriteSheetName, scalingVariant, spriteFrames) {
-    var destFileName = destPath + "/";
-    if (scalingVariant.folderName) {
-        destFileName += scalingVariant.folderName + "/";
-    }
-    destFileName += spriteSheetName;
-
+function exportSpriteSheet(dataFilePath, imageFilePath, spriteFrames) {
     var jsonFrames = {};
     for (var key in spriteFrames) {
         var spriteFrame = spriteFrames[key];
-        //console.log(" spriteFrame [" + key + "]" + JSON.stringify(spriteFrame));
 
         var cocosFrame = {};
         cocosFrame["frame"] = spriteFrame.frame;
@@ -20,6 +13,8 @@ function exportSpriteSheet(destPath, spriteSheetName, scalingVariant, spriteFram
         jsonFrames[key] = cocosFrame;
     }
 
-    writer.writeData(destFileName + ".json", jsonFrames, "JSON");
-    writer.writeImage(destFileName + ".png");
+    return {
+        data: JSON.stringify(jsonFrames, null, "\t"),
+        format: "json"
+    };
 }

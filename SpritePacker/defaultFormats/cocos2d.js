@@ -1,17 +1,16 @@
 
 
-function exportSpriteSheet(filePath, spriteFrames) {
-
+function exportSpriteSheet(dataFilePath, imageFilePath, spriteFrames) {
     var plist = {};
     plist["metadata"] = {
         "format": 2,
-        "textureFileName": filePath.replace(/^.*[\\\/]/, '') + ".png"
+        "textureFileName": imageFilePath.replace(/^.*[\\\/]/, '')
     };
 
+    console.log("Collect spriteframes for cocos2d plist data");
     var cocosFrames = {};
     for (var key in spriteFrames) {
         var spriteFrame = spriteFrames[key];
-        //console.log(" spriteFrame [" + key + "]" + JSON.stringify(spriteFrame));
 
         var cocosFrame = {};
         cocosFrame["frame"] = "{{" +
@@ -35,6 +34,8 @@ function exportSpriteSheet(filePath, spriteFrames) {
 
     plist["frames"] = cocosFrames;
 
-    writer.writeData(filePath + ".plist", plist, "PLIST");
-    writer.writeImage(filePath + ".png");
+    return {
+        data: plist,
+        format: "plist"
+    };
 }

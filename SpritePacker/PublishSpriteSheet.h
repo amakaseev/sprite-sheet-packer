@@ -17,19 +17,6 @@ public slots:
     void log(QString msg);
 };
 
-class JSWriter: public QObject {
-    Q_OBJECT
-public:
-    explicit JSWriter(const QImage& image): _image(image) { }
-
-public slots:
-    void writeData(const QString& fileName, const QJSValue& data, const QString& format);
-    void writeImage(const QString& fileName);
-
-private:
-    const QImage& _image;
-};
-
 class PublishSpriteSheet {
 public:
     static bool publish(const QString& filePath, const QString& format, const SpriteAtlas& spriteAtlas);

@@ -33,31 +33,6 @@ void JSConsole::log(QString msg) {
     qDebug() << "js:"<< msg;
 }
 
-void JSWriter::writeData(const QString& fileName, const QJSValue& data, const QString& format) {
-    qDebug() << "writeData" << fileName << "format:" << format;
-    if (format == "PLIST") {
-        QFile file(fileName);
-        file.open(QIODevice::WriteOnly | QIODevice::Text);
-        QTextStream out(&file);
-        out << PListSerializer::toPList(data.toVariant());
-    } else if (format == "JSON") {
-        QFile file(fileName);
-        file.open(QIODevice::WriteOnly | QIODevice::Text);
-        file.write(QJsonDocument::fromVariant(data.toVariant()).toJson());
-    } else if (format == "TEXT") {
-        QFile file(fileName);
-        file.open(QIODevice::WriteOnly | QIODevice::Text);
-        QTextStream out(&file);
-        out << data.toString();
-    }
-
-}
-
-void JSWriter::writeImage(const QString& fileName) {
-    qDebug() << "writeImage" << fileName;
-    _image.save(fileName);
-}
-
 bool PublishSpriteSheet::publish(const QString& filePath, const QString& format, const SpriteAtlas& spriteAtlas) {
     QJSEngine engine;
 
@@ -85,11 +60,6 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
     QJSValue consoleObj = engine.newQObject(&console);
     engine.globalObject().setProperty("console", consoleObj);
 
-    // add writer object
-    JSWriter writer(spriteAtlas.image());
-    QJSValue writerObj = engine.newQObject(&writer);
-    engine.globalObject().setProperty("writer", writerObj);
-
     // evaluate export plugin script
     qDebug() << "Run script...";
     QJSValue result = engine.evaluate(contents, scriptFileName);
@@ -103,6 +73,7 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
     if (engine.globalObject().hasOwnProperty("exportSpriteSheet")) {
         QJSValueList args;
         args << QJSValue(filePath);
+        args << QJSValue(filePath + ".png");
 
         // collect sprite frames
         QJSValue spriteFramesValue = engine.newObject();
@@ -128,7 +99,30 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
             qDebug() << errorString;
             QMessageBox::critical(NULL, "Export script error", errorString);
             return false;
+        } else {
+            // write image
+            spriteAtlas.image().save(filePath + ".png");
+
+            // write data
+            if (!result.hasProperty("data") || !result.hasProperty("format")) {
+                QString errorString = "Script function must be return object: {data:data, format:'plist|json|other'}";
+                qDebug() << errorString;
+                QMessageBox::critical(NULL, "Export script error", errorString);
+                return false;
+            } else {
+                QJSValue data = result.property("data");
+                QString format = result.property("format").toString();
+                QFile file(filePath + "." + format);
+                file.open(QIODevice::WriteOnly | QIODevice::Text);
+                QTextStream out(&file);
+                if (format == "plist") {
+                    out << PListSerializer::toPList(data.toVariant());
+                } else {
+                    out << data.toString();
+                }
+            }
         }
+
     } else {
         qDebug() << "Not found global exportSpriteSheet function!";
         QMessageBox::critical(NULL, "Export script error", "Not found global exportSpriteSheet function!");

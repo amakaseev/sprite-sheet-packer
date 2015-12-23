@@ -519,10 +519,11 @@ void MainWindow::on_actionPublish_triggered() {
                 refreshAtlas(&atlas);
             }
 
-            if (PublishSpriteSheet::publish(destFileInfo.filePath(), ui->dataFormatComboBox->currentText(), atlas)) {
-                publishStatusDialog->log("Publish scale variant complete.");
-            } else {
+            if (!PublishSpriteSheet::publish(destFileInfo.filePath(), ui->dataFormatComboBox->currentText(), atlas)) {
                 publishStatusDialog->log("Publish scale variant error! See all logs for details.", Qt::red);
+                continue;
+            } else {
+                publishStatusDialog->log("Publish scale variant complete.");
             }
         }
     }
