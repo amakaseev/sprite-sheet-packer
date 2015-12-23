@@ -326,6 +326,9 @@
                  </item>
                  <item>
                   <widget class="QSpinBox" name="trimSpinBox">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Trim/Crop&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Allowed values: 1 to 255, default is 1.&lt;/p&gt;&lt;p&gt;Pixels with an alpha value below this value will be considered transparent when trimming the sprite.&lt;/p&gt;&lt;p&gt;Very useful for sprites with nearly invisible alpha pixels at the borders.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
                    <property name="maximum">
                     <number>9999</number>
                    </property>
@@ -365,6 +368,9 @@
                  </item>
                  <item>
                   <widget class="QSpinBox" name="textureBorderSpinBox">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Texture border&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Border of the sprite sheet, value adds transparent pixels around the borders of the sprite sheet. Default value is 0.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
                    <property name="maximum">
                     <number>9999</number>
                    </property>
@@ -392,8 +398,14 @@
                  </item>
                  <item>
                   <widget class="QSpinBox" name="spriteBorderSpinBox">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Sprite border&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Sprite border is the space between sprites. Value adds transparent pixels between sprites to avoid artifacts from neighbor sprites. The transparent pixels are not added to the sprites, default is 2.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
                    <property name="maximum">
                     <number>9999</number>
+                   </property>
+                   <property name="value">
+                    <number>2</number>
                    </property>
                   </widget>
                  </item>
@@ -428,6 +440,9 @@
                  </item>
                  <item>
                   <widget class="QComboBox" name="maxTextureSizeComboBox">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Max size&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Sets the maximum size for the texture, default is 8192.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
                    <property name="editable">
                     <bool>true</bool>
                    </property>
@@ -509,6 +524,9 @@
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Size constraints&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Free size&lt;/span&gt; - Allow the texture to have any size. SpriteSheet packer tries to find the minimum size.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Power of 2&lt;/span&gt; - Forces the texture to have power of 2 size (32, 64, 128...)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
                    <property name="currentIndex">
                     <number>0</number>
                    </property>
@@ -556,7 +574,7 @@
                  <bool>false</bool>
                 </property>
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Algorithm&lt;/span&gt;&lt;/p&gt;&lt;p&gt;There are currently 2 algorithms&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;MaxRects&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Currently the best packing algorithm. Tries to use the last texture space by applying different heuristics when placing the sprites.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Basic&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Simple layout by filling sprites from left to right until the maximum width of the texture is reached. Good for fixed-size sprites.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Algorithm&lt;/span&gt;&lt;/p&gt;&lt;p&gt;There are currently one algorithm&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;MaxRects&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Currently the best packing algorithm. Tries to use the last texture space by applying different heuristics when placing the sprites.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <item>
                  <property name="text">
@@ -608,7 +626,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Algorithm&lt;/span&gt;&lt;/p&gt;&lt;p&gt;There are currently 2 algorithms&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;MaxRects&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Currently the best packing algorithm. Tries to use the last texture space by applying different heuristics when placing the sprites.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Basic&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Simple layout by filling sprites from left to right until the maximum width of the texture is reached. Good for fixed-size sprites.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Data format&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Data format - there format for export sprite sheet data, use Java Script.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Custom format&lt;/span&gt;&lt;/p&gt;&lt;p&gt;You are have possibility add custom format for export data, set custom format folder on preferences.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
@@ -618,6 +636,44 @@
                  <iconset resource="resources.qrc">
                   <normaloff>:/res/preferences-system.png</normaloff>:/res/preferences-system.png</iconset>
                 </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_9">
+              <item>
+               <widget class="QLabel" name="label_9">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Image format</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="comboBox_2">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Algorithm&lt;/span&gt;&lt;/p&gt;&lt;p&gt;There are currently 2 algorithms&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;MaxRects&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Currently the best packing algorithm. Tries to use the last texture space by applying different heuristics when placing the sprites.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Basic&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Simple layout by filling sprites from left to right until the maximum width of the texture is reached. Good for fixed-size sprites.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>PNG (.png)</string>
+                 </property>
+                </item>
                </widget>
               </item>
              </layout>
@@ -644,7 +700,11 @@
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="destPathLineEdit"/>
+               <widget class="QLineEdit" name="destPathLineEdit">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Destination:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Forlder for collect data and image&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
               </item>
               <item>
                <widget class="QToolButton" name="destFolderToolButton">
@@ -682,6 +742,9 @@
               </item>
               <item>
                <widget class="QLineEdit" name="spriteSheetLineEdit">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Sprite sheet name&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Name for sprite sheet support {v} for insert scale variant name.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string/>
                 </property>
@@ -712,6 +775,13 @@
              </widget>
             </item>
            </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_5">
+           <property name="title">
+            <string>GroupBox</string>
+           </property>
           </widget>
          </item>
          <item>
@@ -755,20 +825,6 @@
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_2">
     <layout class="QVBoxLayout" name="verticalLayout_2">
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_5">
-       <item>
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>Frame prefix:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="spritesPrefixLineEdit"/>
-       </item>
-      </layout>
-     </item>
      <item>
       <widget class="QTreeWidget" name="spritesTreeWidget">
        <property name="selectionMode">

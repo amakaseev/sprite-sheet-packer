@@ -5,7 +5,7 @@
 #include "GenericObjectFactory.h"
 
 struct ScalingVariant{
-    QString folderName;
+    QString name;
     float   scale;
 };
 
@@ -14,9 +14,6 @@ class SpritePackerProjectFile
 public:
     SpritePackerProjectFile();
 
-
-    void setSpritesPrefix(const QString& spritesPrefix) { _spritesPrefix = spritesPrefix; }
-    const QString& spritesPrefix() const { return _spritesPrefix; }
 
     void setTrimThreshold(int trimThreshold) { _trimThreshold = trimThreshold; }
     int trimThreshold() { return _trimThreshold; }
@@ -56,7 +53,6 @@ public:
     }
 
 protected:
-    QString _spritesPrefix;
     int     _trimThreshold;
     int     _textureBorder;
     int     _spriteBorder;

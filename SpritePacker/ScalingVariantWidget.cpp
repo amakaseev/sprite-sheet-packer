@@ -1,13 +1,13 @@
 #include "ScalingVariantWidget.h"
 #include "ui_ScalingVariantWidget.h"
 
-ScalingVariantWidget::ScalingVariantWidget(QWidget *parent, const QString& folderName, float scale) :
+ScalingVariantWidget::ScalingVariantWidget(QWidget *parent, const QString& name, float scale) :
     QWidget(parent),
     ui(new Ui::ScalingVariantWidget)
 {
     ui->setupUi(this);
 
-    ui->variantNameLineEdit->setText(folderName);
+    ui->nameLineEdit->setText(name);
     ui->scaleComboBox->setCurrentText(QString::number(scale));
 }
 
@@ -25,8 +25,8 @@ bool ScalingVariantWidget::isValideScale() {
     return ok;
 }
 
-QString ScalingVariantWidget::variantFolder() {
-    return ui->variantNameLineEdit->text();
+QString ScalingVariantWidget::name() {
+    return ui->nameLineEdit->text();
 }
 
 float ScalingVariantWidget::scale() {

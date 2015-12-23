@@ -17,7 +17,6 @@ bool SpritePackerProjectFile::read(const QString &fileName) {
 
     QJsonObject json = QJsonDocument::fromJson(file.readAll()).object();
 
-    _spritesPrefix = json["spritesPrefix"].toString();
     _trimThreshold = json["trimThreshold"].toInt();
     _textureBorder = json["textureBorder"].toInt();
     _spriteBorder = json["spriteBorder"].toInt();
@@ -29,7 +28,7 @@ bool SpritePackerProjectFile::read(const QString &fileName) {
     for (int i=0; i<scalingVariants.size(); ++i) {
         QJsonObject scalingVariantObject = scalingVariants[i].toObject();
         ScalingVariant scalingVariant;
-        scalingVariant.folderName = scalingVariantObject["folderName"].toString();
+        scalingVariant.name = scalingVariantObject["name"].toString();
         scalingVariant.scale = scalingVariantObject["scale"].toDouble();
         _scalingVariants.push_back(scalingVariant);
     }
@@ -51,7 +50,6 @@ bool SpritePackerProjectFile::write(const QString &fileName) {
     QDir dir(QFileInfo(fileName).absolutePath());
     QJsonObject json;
 
-    json["spritesPrefix"] = _spritesPrefix;
     json["trimThreshold"] = _trimThreshold;
     json["textureBorder"] = _textureBorder;
     json["spriteBorder"] = _spriteBorder;
@@ -61,7 +59,7 @@ bool SpritePackerProjectFile::write(const QString &fileName) {
     QJsonArray scalingVariants;
     for (auto scalingVariant: _scalingVariants) {
         QJsonObject scalingVariantObject;
-        scalingVariantObject["folderName"] = scalingVariant.folderName;
+        scalingVariantObject["name"] = scalingVariant.name;
         scalingVariantObject["scale"] = scalingVariant.scale;
         scalingVariants.append(scalingVariantObject);
     }
@@ -100,7 +98,6 @@ bool SpritePackerProjectFileOLD::read(const QString &fileName) {
 
     // load property
     QVariantMap propertyMap = plistDict["property"].toMap();
-    _spritesPrefix = propertyMap["spritesPrefix"].toString();
 
     // PACKING
     QVariantMap packingMap = propertyMap["packing"].toMap();
@@ -123,21 +120,21 @@ bool SpritePackerProjectFileOLD::read(const QString &fileName) {
     if (hdrMap["enable"].toBool()) {
         ScalingVariant scalingVariant;
         scalingVariant.scale = hdrMap["scale"].toInt() / 100.f;
-        scalingVariant.folderName = hdrMap["folder"].toString();
+        scalingVariant.name = hdrMap["folder"].toString();
         _scalingVariants.push_back(scalingVariant);
     }
     QVariantMap hdMap = outputMap["HD"].toMap();
     if (hdMap["enable"].toBool()) {
         ScalingVariant scalingVariant;
         scalingVariant.scale = hdMap["scale"].toInt() / 100.f;
-        scalingVariant.folderName = hdMap["folder"].toString();
+        scalingVariant.name = hdMap["folder"].toString();
         _scalingVariants.push_back(scalingVariant);
     }
     QVariantMap sdMap = outputMap["SD"].toMap();
     if (sdMap["enable"].toBool()) {
         ScalingVariant scalingVariant;
         scalingVariant.scale = sdMap["scale"].toInt() / 100.f;
-        scalingVariant.folderName = sdMap["folder"].toString();
+        scalingVariant.name = sdMap["folder"].toString();
         _scalingVariants.push_back(scalingVariant);
     }
 

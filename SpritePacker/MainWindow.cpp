@@ -4,6 +4,7 @@
 #include "PublishSpriteSheet.h"
 #include "ScalingVariantWidget.h"
 #include "SpritePackerProjectFile.h"
+#include "AboutDialog.h"
 #include "PreferencesDialog.h"
 #include "PublishStatusDialog.h"
 #include "ui_MainWindow.h"
@@ -39,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // configure default values
     ui->trimSpinBox->setValue(1);
     ui->textureBorderSpinBox->setValue(0);
-    ui->spriteBorderSpinBox->setValue(1);
+    ui->spriteBorderSpinBox->setValue(2);
 
     on_addScalingVariantPushButton_clicked();
 
@@ -240,7 +241,6 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
         return;
     }
 
-    ui->spritesPrefixLineEdit->setText(projectFile->spritesPrefix());
     ui->trimSpinBox->setValue(projectFile->trimThreshold());
     ui->textureBorderSpinBox->setValue(projectFile->textureBorder());
     ui->spriteBorderSpinBox->setValue(projectFile->spriteBorder());
@@ -256,7 +256,7 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
         delete item;
     }
     for (auto scalingVariant: projectFile->scalingVariants()) {
-        ScalingVariantWidget* scalingVariantWidget = new ScalingVariantWidget(this, scalingVariant.folderName, scalingVariant.scale);
+        ScalingVariantWidget* scalingVariantWidget = new ScalingVariantWidget(this, scalingVariant.name, scalingVariant.scale);
         connect(scalingVariantWidget, SIGNAL(remove()), this, SLOT(removeScalingVariant()));
         ui->scalingVariantsGroupBox->layout()->addWidget(scalingVariantWidget);
 
@@ -289,7 +289,6 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
 void MainWindow::saveSpritePackerProject(const QString& fileName) {
     std::string suffix = QFileInfo(fileName).suffix().toStdString();
     SpritePackerProjectFile* projectFile = SpritePackerProjectFile::factory().get(suffix)();
-    projectFile->setSpritesPrefix(ui->spritesPrefixLineEdit->text());
     projectFile->setTrimThreshold(ui->trimSpinBox->value());
     projectFile->setTextureBorder(ui->textureBorderSpinBox->value());
     projectFile->setSpriteBorder(ui->spriteBorderSpinBox->value());
@@ -304,7 +303,7 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
         ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(ui->scalingVariantsGroupBox->layout()->itemAt(i)->widget());
         if (scalingVariantWidget) {
             ScalingVariant scalingVariant;
-            scalingVariant.folderName = scalingVariantWidget->variantFolder();
+            scalingVariant.name = scalingVariantWidget->name();
             scalingVariant.scale = scalingVariantWidget->scale();
             scalingVariants.push_back(scalingVariant);
         }
@@ -479,7 +478,7 @@ void MainWindow::on_actionPublish_triggered() {
     for (int i=0; i<ui->scalingVariantsGroupBox->layout()->count(); ++i) {
         ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(ui->scalingVariantsGroupBox->layout()->itemAt(i)->widget());
         if (scalingVariantWidget) {
-            QString variantName = scalingVariantWidget->variantFolder();
+            QString variantName = scalingVariantWidget->name();
             float scale = scalingVariantWidget->scale();
 
             QString spriteSheetName = ui->spriteSheetLineEdit->text();
@@ -529,6 +528,12 @@ void MainWindow::on_actionPublish_triggered() {
     }
     publishStatusDialog->log(QString("Publishing is finished."), Qt::blue);
     publishStatusDialog->complete();
+}
+
+void MainWindow::on_actionAbout_triggered() {
+    AboutDialog* aboutDialog = new AboutDialog(this);
+    aboutDialog->setAttribute(Qt::WA_DeleteOnClose);
+    aboutDialog->exec();
 }
 
 void MainWindow::on_actionPreferences_triggered() {
@@ -623,6 +628,7 @@ void MainWindow::on_dataFormatSetupToolButton_clicked() {
 
 void MainWindow::on_addScalingVariantPushButton_clicked() {
     ScalingVariantWidget* scalingVariantWidget = new ScalingVariantWidget();
+    scalingVariantWidget->
     connect(scalingVariantWidget, SIGNAL(remove()), this, SLOT(removeScalingVariant()));
     ui->scalingVariantsGroupBox->layout()->addWidget(scalingVariantWidget);
 

@@ -12,13 +12,13 @@ class ScalingVariantWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit ScalingVariantWidget(QWidget *parent = 0, const QString& folderName = "", float scale = 1);
+    explicit ScalingVariantWidget(QWidget *parent = 0, const QString& name = "", float scale = 1);
     ~ScalingVariantWidget();
 
     void setRemoveEnabled(bool enable);
     bool isValideScale();
 
-    QString variantFolder();
+    QString name();
     float   scale();
 
 signals:
