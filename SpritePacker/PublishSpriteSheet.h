@@ -32,7 +32,8 @@ private:
 
 class PublishSpriteSheet {
 public:
-    static bool publish(const QString& destPath, const QString& spriteSheetName, const QString& format, const ScalingVariant& scalingVariant, const SpriteAtlas& spriteAtlas);
+    static bool publish(const QString& filePath, const QString& format, const SpriteAtlas& spriteAtlas);
+
     static void addFormat(const QString& format, const QString& scriptFileName) { _formats[format] = scriptFileName; }
     static QMap<QString, QString>& formats() { return _formats; }
 

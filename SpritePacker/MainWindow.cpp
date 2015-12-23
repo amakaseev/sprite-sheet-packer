@@ -19,7 +19,12 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+#if defined(Q_OS_WIN)
+    setWindowIcon(QIcon("SpritePacker.ico"));
+#elif defined(Q_OS_MAC)
     setWindowIcon(QIcon("SpritePacker.icns"));
+#endif
+
     setUnifiedTitleAndToolBarOnMac(true);
 
     SpritePackerProjectFile::factory().set<SpritePackerProjectFile>("json");
@@ -477,7 +482,26 @@ void MainWindow::on_actionPublish_triggered() {
             QString variantName = scalingVariantWidget->variantFolder();
             float scale = scalingVariantWidget->scale();
 
-            publishStatusDialog->log(QString("Begin publish scale variant (%1) scale: %2.").arg(variantName).arg(scale));
+            QString spriteSheetName = ui->spriteSheetLineEdit->text();
+            if (spriteSheetName.contains("{v}")) {
+                spriteSheetName.replace("{v}", variantName);
+            } else {
+                spriteSheetName = variantName + spriteSheetName;
+            }
+            while (spriteSheetName.at(0) == '/') {
+                spriteSheetName.remove(0,1);
+            }
+
+            QFileInfo destFileInfo;
+            destFileInfo.setFile(dir, spriteSheetName);
+            if (dir.absolutePath() != destFileInfo.dir().absolutePath()) {
+                if (!dir.mkpath(destFileInfo.dir().absolutePath())) {
+                    publishStatusDialog->log("Imposible create path:" + destFileInfo.dir().absolutePath(), Qt::red);
+                    continue;
+                }
+            }
+
+            publishStatusDialog->log(QString("Begin publish scale variant (%1) scale: %2.").arg(spriteSheetName).arg(scale));
 
             SpriteAtlas atlas(fileListFromTree(),
                               ui->textureBorderSpinBox->value(),
@@ -495,10 +519,7 @@ void MainWindow::on_actionPublish_triggered() {
                 refreshAtlas(&atlas);
             }
 
-            ScalingVariant scalingVariant;
-            scalingVariant.folderName = variantName;
-            scalingVariant.scale = scale;
-            if (PublishSpriteSheet::publish(ui->destPathLineEdit->text(), ui->spriteSheetLineEdit->text(), ui->dataFormatComboBox->currentText(), scalingVariant, atlas)) {
+            if (PublishSpriteSheet::publish(destFileInfo.filePath(), ui->dataFormatComboBox->currentText(), atlas)) {
                 publishStatusDialog->log("Publish scale variant complete.");
             } else {
                 publishStatusDialog->log("Publish scale variant error! See all logs for details.", Qt::red);

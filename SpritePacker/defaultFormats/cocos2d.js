@@ -1,16 +1,11 @@
 
 
-function exportSpriteSheet(destPath, spriteSheetName, scalingVariant, spriteFrames) {
-    var destFileName = destPath + "/";
-    if (scalingVariant.folderName) {
-        destFileName += scalingVariant.folderName + "/";
-    }
-    destFileName += spriteSheetName;
+function exportSpriteSheet(filePath, spriteFrames) {
 
     var plist = {};
     plist["metadata"] = {
         "format": 2,
-        "textureFileName": spriteSheetName + ".png"
+        "textureFileName": filePath.replace(/^.*[\\\/]/, '') + ".png"
     };
 
     var cocosFrames = {};
@@ -40,6 +35,6 @@ function exportSpriteSheet(destPath, spriteSheetName, scalingVariant, spriteFram
 
     plist["frames"] = cocosFrames;
 
-    writer.writeData(destFileName + ".plist", plist, "PLIST");
-    writer.writeImage(destFileName + ".png");
+    writer.writeData(filePath + ".plist", plist, "PLIST");
+    writer.writeImage(filePath + ".png");
 }

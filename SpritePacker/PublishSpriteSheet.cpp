@@ -58,7 +58,7 @@ void JSWriter::writeImage(const QString& fileName) {
     _image.save(fileName);
 }
 
-bool PublishSpriteSheet::publish(const QString& destPath, const QString& spriteSheetName, const QString& format, const ScalingVariant& scalingVariant, const SpriteAtlas& spriteAtlas) {
+bool PublishSpriteSheet::publish(const QString& filePath, const QString& format, const SpriteAtlas& spriteAtlas) {
     QJSEngine engine;
 
     auto it_format = _formats.find(format);
@@ -91,6 +91,7 @@ bool PublishSpriteSheet::publish(const QString& destPath, const QString& spriteS
     engine.globalObject().setProperty("writer", writerObj);
 
     // evaluate export plugin script
+    qDebug() << "Run script...";
     QJSValue result = engine.evaluate(contents, scriptFileName);
     if (result.isError()) {
         QString errorString = "Uncaught exception at line " + result.property("lineNumber").toString() + " : " + result.toString();
@@ -101,13 +102,7 @@ bool PublishSpriteSheet::publish(const QString& destPath, const QString& spriteS
 
     if (engine.globalObject().hasOwnProperty("exportSpriteSheet")) {
         QJSValueList args;
-        args << QJSValue(destPath);
-        args << QJSValue(spriteSheetName);
-
-        QJSValue scalingVariantValue = engine.newObject();
-        scalingVariantValue.setProperty("folderName", scalingVariant.folderName);
-        scalingVariantValue.setProperty("scale", scalingVariant.scale);
-        args << QJSValue(scalingVariantValue);
+        args << QJSValue(filePath);
 
         // collect sprite frames
         QJSValue spriteFramesValue = engine.newObject();
