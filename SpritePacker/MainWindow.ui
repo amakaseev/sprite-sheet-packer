@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Sprite Sheet Packer</string>
+   <string>SpriteSheet Packer</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -201,6 +201,7 @@
     <addaction name="actionPublish"/>
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
+    <addaction name="actionAbout"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -916,6 +917,14 @@
    </property>
    <property name="text">
     <string>Preferences ...</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
    </property>
    <property name="iconVisibleInMenu">
     <bool>false</bool>

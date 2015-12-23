@@ -6,14 +6,11 @@
 
 QT += core widgets xml qml
 
-TARGET = SpritePacker
+TARGET = SpriteSheetPacker
 TEMPLATE = app
 
 CONFIG += c++11
 #QMAKE_CXXFLAGS +=-std=c++11 -stdlib=libc++
-
-ICON = SpritePacker.icns
-RC_FILE = SpritePacker.rc
 
 SOURCES += main.cpp\
     MainWindow.cpp \
@@ -48,6 +45,7 @@ OTHER_FILES += \
     defaultFormats/json.js \
 
 macx {
+    ICON = SpritePacker.icns
     exportData.files += defaultFormats/cocos2d.js defaultFormats/cocos2d.png
     exportData.files += defaultFormats/json.js defaultFormats/json.png
     exportData.path = Contents/MacOS/defaultFormats
@@ -55,6 +53,7 @@ macx {
 }
 
 win32 {
+    RC_ICONS = SpritePacker.ico
     exportData.files = defaultFormats/*.*
     exportData.path = defaultFormats
     DEPLOYMENT += exportData

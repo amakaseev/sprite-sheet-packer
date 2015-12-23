@@ -266,7 +266,7 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
 
 
     _currentProjectFileName = fileName;
-    setWindowTitle(_currentProjectFileName + " - Sprite Sheet Packer");
+    setWindowTitle(_currentProjectFileName + " - SpriteSheet Packer");
 
     // add to recent file
     QSettings settings;
@@ -320,7 +320,7 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
     }
 
     _currentProjectFileName = fileName;
-    setWindowTitle(_currentProjectFileName + " - Sprite Sheet Packer");
+    setWindowTitle(_currentProjectFileName + " - SpriteSheet Packer");
 
     // add to recent file
     QSettings settings;
@@ -340,7 +340,7 @@ void MainWindow::on_actionNew_triggered() {
     ui->spritesTreeWidget->clear();
 
     _currentProjectFileName.clear();
-    setWindowTitle("Sprite Sheet Packer");
+    setWindowTitle("SpriteSheet Packer");
 
     refreshAtlas();
 }
