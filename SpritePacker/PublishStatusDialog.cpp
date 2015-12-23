@@ -46,6 +46,8 @@ PublishStatusDialog::PublishStatusDialog(QWidget *parent) :
         setGeometry(0, 0, width, width/2);
     }
 
+    ui->logsTextEdit->setTextColor(Qt::darkGreen);
+
     gTextEdit = ui->logsTextEdit;
     qInstallMessageHandler(messageOutput);
 
@@ -64,10 +66,19 @@ PublishStatusDialog::~PublishStatusDialog() {
     delete ui;
 }
 
-void PublishStatusDialog::log(const QString& msg) {
+void PublishStatusDialog::log(const QString& msg, const QColor& color) {
+    ui->smartTextEdit->setTextColor(color);
     ui->smartTextEdit->append(msg);
+
+    ui->logsTextEdit->setTextColor((color != Qt::red)? (Qt::yellow):(Qt::red));
     ui->logsTextEdit->append(msg);
+    ui->logsTextEdit->setTextColor(Qt::darkGreen);
+
+    if (color == Qt::red) {
+        ui->hideCheckBox->setChecked(false);
+    }
 }
+
 
 void PublishStatusDialog::complete() {
     ui->buttonBox->setEnabled(true);

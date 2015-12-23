@@ -20,7 +20,7 @@ protected:
     void refreshFormats();
     void refreshOpenRecentMenu();
 
-    void refreshAtlas();
+    void refreshAtlas(SpriteAtlas* atlas = NULL);
     void refreshSpritesTree(const QStringList& fileList);
     void recursiveRefreshFolder(const QString& folder, QTreeWidgetItem* parentItem);
     QStringList fileListFromTree();
@@ -49,6 +49,7 @@ private slots:
     void on_zoomSlider_valueChanged(int value);
 
     void on_spritesTreeWidget_itemSelectionChanged();
+    void on_maxTextureSizeComboBox_currentTextChanged(const QString &arg1);
     void on_destFolderToolButton_clicked();
     void on_dataFormatSetupToolButton_clicked();
     void on_addScalingVariantPushButton_clicked();

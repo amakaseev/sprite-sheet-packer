@@ -113,20 +113,33 @@ void MainWindow::openRecent() {
     openSpritePackerProject(senderAction->text());
 }
 
-void MainWindow::refreshAtlas() {
-    SpriteAtlas atlas(fileListFromTree(),
-                      ui->textureBorderSpinBox->value(),
-                      ui->spriteBorderSpinBox->value(),
-                      ui->trimSpinBox->value(),
-                      ui->pot2ComboBox->currentIndex()? true:false,
-                      ui->maxTextureSizeComboBox->currentText().toInt(),
-                      1.f);
-    if (!atlas.generate()) {
-        QMessageBox::critical(this, "Publish error", "Max texture size limit is small!");
-        return;
+void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
+    bool deleteAtlas = false;
+    if (!atlas) {
+        float scale = 1;
+        if (ui->scalingVariantsGroupBox->layout()->count()) {
+            ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(ui->scalingVariantsGroupBox->layout()->itemAt(0)->widget());
+            if (scalingVariantWidget) {
+                scale = scalingVariantWidget->scale();
+            }
+        }
+
+        atlas = new SpriteAtlas(fileListFromTree(),
+                                ui->textureBorderSpinBox->value(),
+                                ui->spriteBorderSpinBox->value(),
+                                ui->trimSpinBox->value(),
+                                ui->pot2ComboBox->currentIndex()? true:false,
+                                ui->maxTextureSizeComboBox->currentText().toInt(),
+                                scale);
+        if (!atlas->generate()) {
+            QMessageBox::critical(this, "Generate error", "Max texture size limit is small!");
+            delete atlas;
+            return;
+        }
+        deleteAtlas = true;
     }
 
-    const QImage& atlasImage = atlas.image();
+    const QImage& atlasImage = atlas->image();
 
     _scene->clear();
     _scene->addRect(atlasImage.rect(), QPen(Qt::darkRed), QBrush(QPixmap("://res/background_tran.png")));
@@ -140,9 +153,13 @@ void MainWindow::refreshAtlas() {
     _scene->addRect(atlasPixmapItem->boundingRect(), QPen(Qt::darkRed));
     _scene->setSceneRect(atlasPixmapItem->boundingRect());
 
-    //1024x1024x4 (RAM: 18.86MB)
+    //1024x1024x4 (RAM: 4.00MB)
     float ram = (atlasImage.width() * atlasImage.height() * 4) / 1024.f / 1024.f;
     ui->labelAtlasInfo->setText(QString("%1x%2x%3 (RAM: %4MB)").arg(atlasImage.width()).arg(atlasImage.height()).arg(4).arg(ram, 0, 'f', 2));
+
+    if (deleteAtlas) {
+        delete atlas;
+    }
 }
 
 void MainWindow::refreshSpritesTree(const QStringList& fileList) {
@@ -453,11 +470,14 @@ void MainWindow::on_actionPublish_triggered() {
     publishStatusDialog->setAttribute(Qt::WA_DeleteOnClose);
     publishStatusDialog->open();
 
-    publishStatusDialog->log(QString("Publish to: " + dir.canonicalPath()));
+    publishStatusDialog->log(QString("Publish to: " + dir.canonicalPath()), Qt::blue);
     for (int i=0; i<ui->scalingVariantsGroupBox->layout()->count(); ++i) {
         ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(ui->scalingVariantsGroupBox->layout()->itemAt(i)->widget());
         if (scalingVariantWidget) {
+            QString variantName = scalingVariantWidget->variantFolder();
             float scale = scalingVariantWidget->scale();
+
+            publishStatusDialog->log(QString("Begin publish scale variant (%1) scale: %2.").arg(variantName).arg(scale));
 
             SpriteAtlas atlas(fileListFromTree(),
                               ui->textureBorderSpinBox->value(),
@@ -467,16 +487,25 @@ void MainWindow::on_actionPublish_triggered() {
                               ui->maxTextureSizeComboBox->currentText().toInt(),
                               scale);
             if (!atlas.generate()) {
-                QMessageBox::critical(this, "Publish error", "Max texture size limit is small!");
+                QMessageBox::critical(this, "Generate error", "Max texture size limit is small!");
+                publishStatusDialog->log("Generate error: Max texture size limit is small!", Qt::red);
                 continue;
+            } else if (i==0) {
+                refreshSpritesTree(fileListFromTree());
+                refreshAtlas(&atlas);
             }
 
             ScalingVariant scalingVariant;
-            scalingVariant.folderName = scalingVariantWidget->variantFolder();
+            scalingVariant.folderName = variantName;
             scalingVariant.scale = scale;
-            PublishSpriteSheet::publish(ui->destPathLineEdit->text(), ui->spriteSheetLineEdit->text(), ui->dataFormatComboBox->currentText(), scalingVariant, atlas);
+            if (PublishSpriteSheet::publish(ui->destPathLineEdit->text(), ui->spriteSheetLineEdit->text(), ui->dataFormatComboBox->currentText(), scalingVariant, atlas)) {
+                publishStatusDialog->log("Publish scale variant complete.");
+            } else {
+                publishStatusDialog->log("Publish scale variant error! See all logs for details.", Qt::red);
+            }
         }
     }
+    publishStatusDialog->log(QString("Publishing is finished."), Qt::blue);
     publishStatusDialog->complete();
 }
 
@@ -537,6 +566,21 @@ void MainWindow::on_spritesTreeWidget_itemSelectionChanged() {
             return;
         }
     }
+}
+
+void MainWindow::on_maxTextureSizeComboBox_currentTextChanged(const QString &) {
+    bool isValideSaze;
+    if (ui->maxTextureSizeComboBox->currentText().toInt(&isValideSaze) > 8192) {
+        isValideSaze = false;
+    }
+
+    QPalette comboboxPalette = ui->maxTextureSizeComboBox->palette();
+    if (!isValideSaze) {
+        comboboxPalette.setColor(QPalette::Text, Qt::red);
+    } else {
+        comboboxPalette.setColor(QPalette::Text, Qt::black);
+    }
+    ui->maxTextureSizeComboBox->setPalette(comboboxPalette);
 }
 
 void MainWindow::on_destFolderToolButton_clicked() {

@@ -15,7 +15,8 @@ public:
     explicit PublishStatusDialog(QWidget *parent = 0);
     ~PublishStatusDialog();
 
-    void log(const QString& msg);
+    void log(const QString& msg, const QColor& color = Qt::black);
+    void error(const QString& msg);
     void complete();
 
 private:

@@ -427,6 +427,9 @@
                  </item>
                  <item>
                   <widget class="QComboBox" name="maxTextureSizeComboBox">
+                   <property name="editable">
+                    <bool>true</bool>
+                   </property>
                    <property name="currentIndex">
                     <number>8</number>
                    </property>
@@ -473,11 +476,6 @@
                    <item>
                     <property name="text">
                      <string>8192</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>none</string>
                     </property>
                    </item>
                   </widget>
@@ -805,6 +803,9 @@
    <property name="text">
     <string>New project</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionOpen">
    <property name="icon">
@@ -814,6 +815,9 @@
    <property name="text">
     <string>Open project</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionSave">
    <property name="icon">
@@ -822,6 +826,9 @@
    </property>
    <property name="text">
     <string>Save project</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionAddSprites">
@@ -835,6 +842,9 @@
    <property name="toolTip">
     <string>Add Sprites</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionAddFolder">
    <property name="icon">
@@ -843,6 +853,9 @@
    </property>
    <property name="text">
     <string>Add smart folder</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionRemove">
@@ -856,6 +869,9 @@
    <property name="text">
     <string>Remove sprites</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionRefresh">
    <property name="icon">
@@ -864,6 +880,9 @@
    </property>
    <property name="text">
     <string>Refresh preview</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionPublish">
@@ -874,6 +893,9 @@
    <property name="text">
     <string>Publish sprite sheet</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionSaveAs">
    <property name="icon">
@@ -883,6 +905,9 @@
    <property name="text">
     <string>Save As...</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionPreferences">
    <property name="icon">
@@ -891,6 +916,9 @@
    </property>
    <property name="text">
     <string>Preferences ...</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
    </property>
   </action>
  </widget>
