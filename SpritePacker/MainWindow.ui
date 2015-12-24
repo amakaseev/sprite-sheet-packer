@@ -260,10 +260,10 @@
     <bool>false</bool>
    </property>
    <property name="features">
-    <set>QDockWidget::NoDockWidgetFeatures</set>
+    <set>QDockWidget::DockWidgetMovable</set>
    </property>
    <property name="allowedAreas">
-    <set>Qt::LeftDockWidgetArea</set>
+    <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
    </property>
    <property name="windowTitle">
     <string>Property</string>
@@ -778,13 +778,6 @@
           </widget>
          </item>
          <item>
-          <widget class="QGroupBox" name="groupBox_5">
-           <property name="title">
-            <string>GroupBox</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <spacer name="verticalSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -811,11 +804,14 @@
      <height>400</height>
     </size>
    </property>
+   <property name="floating">
+    <bool>false</bool>
+   </property>
    <property name="features">
-    <set>QDockWidget::NoDockWidgetFeatures</set>
+    <set>QDockWidget::DockWidgetMovable</set>
    </property>
    <property name="allowedAreas">
-    <set>Qt::RightDockWidgetArea</set>
+    <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
    </property>
    <property name="windowTitle">
     <string>Sprites</string>

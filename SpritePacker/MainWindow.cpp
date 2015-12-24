@@ -627,8 +627,19 @@ void MainWindow::on_dataFormatSetupToolButton_clicked() {
 
 
 void MainWindow::on_addScalingVariantPushButton_clicked() {
-    ScalingVariantWidget* scalingVariantWidget = new ScalingVariantWidget();
-    scalingVariantWidget->
+    std::vector<std::pair<std::string, float>> defaultScaling = {
+        std::make_pair("hdr/", 1),
+        std::make_pair("hd/", 0.5f),
+        std::make_pair("sd/", 0.25f),
+    };
+
+    int index = ui->scalingVariantsGroupBox->layout()->count();
+    if (index >= defaultScaling.size()) {
+        QMessageBox::warning(this, "Scaling variants", "Scaling variants is limited by 3.");
+        return;
+    }
+
+    ScalingVariantWidget* scalingVariantWidget = new ScalingVariantWidget(this, defaultScaling[index].first.c_str(), defaultScaling[index].second);
     connect(scalingVariantWidget, SIGNAL(remove()), this, SLOT(removeScalingVariant()));
     ui->scalingVariantsGroupBox->layout()->addWidget(scalingVariantWidget);
 

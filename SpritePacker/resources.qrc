@@ -18,5 +18,6 @@
         <file>res/atlas.png</file>
         <file>res/Delete.png</file>
         <file>res/iPhone.png</file>
+        <file>res/icon.png</file>
     </qresource>
 </RCC>
