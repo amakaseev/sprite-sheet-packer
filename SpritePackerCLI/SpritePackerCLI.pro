@@ -1,11 +1,17 @@
 QT += core
 QT -= gui
 
-TARGET = SpritePackerCLI
+TARGET = ssp
 CONFIG += console
 CONFIG -= app_bundle
 
 TEMPLATE = app
 
-SOURCES += main.cpp
+CONFIG += c++11
+
+SOURCES += main.cpp \
+    ../SpritePacker/SpriteAtlas.cpp
+
+HEADERS += \
+    ../SpritePacker/SpriteAtlas.h
 

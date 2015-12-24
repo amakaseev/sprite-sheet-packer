@@ -10,7 +10,8 @@ int main(int argc, char *argv[])
 
     QCoreApplication::setOrganizationName("spicyminds-lab");
     QCoreApplication::setOrganizationDomain("spicyminds-lab.com");
-    QCoreApplication::setApplicationName("SpritePacker");
+    QCoreApplication::setApplicationName("SpriteSheetPacker");
+    QCoreApplication::setApplicationVersion("1.0.0");
     QDir::setCurrent(QApplication::applicationDirPath());
 
     MainWindow w;
