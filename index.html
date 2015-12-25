@@ -1,44 +1,42 @@
 <!doctype html>
+<!-- The Time Machine GitHub pages theme was designed and developed by Jon Rohan, on Feb 7, 2012. -->
+<!-- Follow him for fun. http://twitter.com/jonrohan. Tail his code on https://github.com/jonrohan -->
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>SpriteSheet Packer by amakaseev</title>
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/github-dark.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="javascripts/respond.js"></script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <!--[if lt IE 8]>
-    <link rel="stylesheet" href="stylesheets/ie.css">
-    <![endif]-->
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-  </head>
-  <body>
-      <div id="header">
-        <nav>
-          <li class="fork"><a href="https://github.com/amakaseev/sprite-sheet-packer">View On GitHub</a></li>
-          <li class="downloads"><a href="https://github.com/amakaseev/sprite-sheet-packer/zipball/master">ZIP</a></li>
-          <li class="downloads"><a href="https://github.com/amakaseev/sprite-sheet-packer/tarball/master">TAR</a></li>
-          <li class="title">DOWNLOADS</li>
-        </nav>
-      </div><!-- end header -->
+  <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen">
+  <link rel="stylesheet" href="stylesheets/github-dark.css">
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="javascripts/script.js"></script>
 
-    <div class="wrapper">
+  <title>SpriteSheet Packer</title>
+  <meta name="description" content="Create you sprite atlas with GUI or command line tools.">
 
-      <section>
-        <div id="title">
-          <h1>SpriteSheet Packer</h1>
-          <p>Create you sprite atlas with GUI or command line tools.</p>
-          <hr>
-          <span class="credits left">Project maintained by <a href="https://github.com/amakaseev">amakaseev</a></span>
-          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+</head>
+
+<body>
+
+  <div class="wrapper">
+    <header>
+      <h1 class="title">SpriteSheet Packer</h1>
+    </header>
+    <div id="container">
+      <p class="tagline">Create you sprite atlas with GUI or command line tools.</p>
+      <div id="main" role="main">
+        <div class="download-bar">
+        <div class="inner">
+          <a href="https://github.com/amakaseev/sprite-sheet-packer/tarball/master" class="download-button tar"><span>Download</span></a>
+          <a href="https://github.com/amakaseev/sprite-sheet-packer/zipball/master" class="download-button zip"><span>Download</span></a>
+          <a href="https://github.com/amakaseev/sprite-sheet-packer" class="code">View SpriteSheet Packer on GitHub</a>
         </div>
-
-        <h1>
+        <span class="blc"></span><span class="trc"></span>
+        </div>
+        <article class="markdown-body">
+          <h1>
 <a id="overview" class="anchor" href="#overview" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overview</h1>
 
 <p>SpriteSheet Packer is a GUI and command line tool to create sprite sheets.</p>
@@ -97,35 +95,15 @@ Uses QT with LGPL license.</p>
 </tr>
 <tr>
 <td>--texture-border </td>
-<td>Border of the sprite sheet, value adds transparent</td>
-</tr>
-<tr>
-<td></td>
-<td>pixels around the borders of the sprite sheet. Default value is 0.</td>
+<td>Border of the sprite sheet, value adds transparent pixels around the borders of the sprite sheet. Default value is 0.</td>
 </tr>
 <tr>
 <td>--sprite-border </td>
-<td>Sprite border is the space between sprites. Value adds transparent</td>
-</tr>
-<tr>
-<td></td>
-<td>pixels between sprites to avoid artifacts from neighbor sprites.</td>
-</tr>
-<tr>
-<td></td>
-<td>The transparent pixels are not added to the sprites, default is 2.</td>
+<td>Sprite border is the space between sprites. Value adds transparent pixels between sprites to avoid artifacts from neighbor sprites. The transparent pixels are not added to the sprites, default is 2.</td>
 </tr>
 <tr>
 <td>--trim </td>
-<td>Allowed values: 1 to 255, default is 1. Pixels with an alpha value</td>
-</tr>
-<tr>
-<td></td>
-<td>below this value will be considered transparent when trimming the sprite.</td>
-</tr>
-<tr>
-<td></td>
-<td>Very useful for sprites with nearly invisible alpha pixels at the borders.</td>
+<td>Allowed values: 1 to 255, default is 1. Pixels with an alpha value below this value will be considered transparent when trimming the sprite. Very useful for sprites with nearly invisible alpha pixels at the borders.</td>
 </tr>
 <tr>
 <td>--powerOf2</td>
@@ -170,10 +148,26 @@ Uses QT with LGPL license.</p>
 <a id="gui" class="anchor" href="#gui" aria-hidden="true"><span class="octicon octicon-link"></span></a>GUI</h2>
 
 <p><img src="images/Screenshot-main.png" alt="icon"></p>
-      </section>
-
+        </article>
+      </div>
     </div>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-    
-  </body>
+    <footer>
+      <div class="owner">
+      <p><a href="https://github.com/amakaseev" class="avatar"><img src="https://avatars1.githubusercontent.com/u/9881001?v=3&amp;s=60" width="48" height="48"></a> <a href="https://github.com/amakaseev">amakaseev</a> maintains <a href="https://github.com/amakaseev/sprite-sheet-packer">SpriteSheet Packer</a></p>
+
+
+      </div>
+      <div class="creds">
+        <small>This page generated using <a href="https://pages.github.com/">GitHub Pages</a><br>theme by <a href="https://twitter.com/jonrohan/">Jon Rohan</a></small>
+      </div>
+    </footer>
+  </div>
+  <div class="current-section">
+    <a href="#top">Scroll to top</a>
+    <a href="https://github.com/amakaseev/sprite-sheet-packer/tarball/master" class="tar">tar</a><a href="https://github.com/amakaseev/sprite-sheet-packer/zipball/master" class="zip">zip</a><a href="" class="code">source code</a>
+    <p class="name"></p>
+  </div>
+
+  
+</body>
 </html>
