@@ -2,7 +2,7 @@
 Sprite sheet generator base on Qt created by amakaseev.
 
 Include GUI and command-line interface.
-Use [Qt - Digia Plc](http://qt-project.org), LGPL license.
+Uses [Qt - Digia Plc](http://qt-project.org), LGPL license.
 
 
 ###Supported publish spritesheet formats###

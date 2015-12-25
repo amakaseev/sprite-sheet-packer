@@ -33,14 +33,14 @@ void JSConsole::log(QString msg) {
     qDebug() << "js:"<< msg;
 }
 
-bool PublishSpriteSheet::publish(const QString& filePath, const QString& format, const SpriteAtlas& spriteAtlas) {
+bool PublishSpriteSheet::publish(const QString& filePath, const QString& format, const SpriteAtlas& spriteAtlas, bool errorMessage) {
     QJSEngine engine;
 
     auto it_format = _formats.find(format);
     if (it_format == _formats.end()) {
         QString errorString = QString("Not found script file for [%1] format").arg(format);
         qDebug() << errorString;
-        QMessageBox::critical(NULL, "Export script error", errorString);
+        if (errorMessage) QMessageBox::critical(NULL, "Export script error", errorString);
         return false;
     }
 
@@ -66,7 +66,7 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
     if (result.isError()) {
         QString errorString = "Uncaught exception at line " + result.property("lineNumber").toString() + " : " + result.toString();
         qDebug() << errorString;
-        QMessageBox::critical(NULL, "Export script error", errorString);
+        if (errorMessage) QMessageBox::critical(NULL, "Export script error", errorString);
         return false;
     }
 
@@ -97,7 +97,7 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
         if (result.isError()) {
             QString errorString = "Uncaught exception at line " + result.property("lineNumber").toString() + " : " + result.toString();
             qDebug() << errorString;
-            QMessageBox::critical(NULL, "Export script error", errorString);
+            if (errorMessage) QMessageBox::critical(NULL, "Export script error", errorString);
             return false;
         } else {
             // write image
@@ -107,7 +107,7 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
             if (!result.hasProperty("data") || !result.hasProperty("format")) {
                 QString errorString = "Script function must be return object: {data:data, format:'plist|json|other'}";
                 qDebug() << errorString;
-                QMessageBox::critical(NULL, "Export script error", errorString);
+                if (errorMessage) QMessageBox::critical(NULL, "Export script error", errorString);
                 return false;
             } else {
                 QJSValue data = result.property("data");
@@ -125,7 +125,7 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
 
     } else {
         qDebug() << "Not found global exportSpriteSheet function!";
-        QMessageBox::critical(NULL, "Export script error", "Not found global exportSpriteSheet function!");
+        if (errorMessage) QMessageBox::critical(NULL, "Export script error", "Not found global exportSpriteSheet function!");
         return false;
     }
 

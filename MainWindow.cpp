@@ -70,7 +70,7 @@ MainWindow::~MainWindow() {
 void MainWindow::refreshFormats() {
     QSettings settings;
     QStringList formatsFolder;
-    formatsFolder.push_back(qApp->applicationDirPath() + "/defaultFormats");
+    formatsFolder.push_back(QCoreApplication::applicationDirPath() + "/defaultFormats");
     formatsFolder.push_back(settings.value("Preferences/customFormatFolder").toString());
 
     // load formats
@@ -289,6 +289,10 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
 void MainWindow::saveSpritePackerProject(const QString& fileName) {
     std::string suffix = QFileInfo(fileName).suffix().toStdString();
     SpritePackerProjectFile* projectFile = SpritePackerProjectFile::factory().get(suffix)();
+    if (!projectFile) {
+        QMessageBox::critical(this, "ERROR", "Unknown project file format!");
+        return;
+    }
     projectFile->setTrimThreshold(ui->trimSpinBox->value());
     projectFile->setTextureBorder(ui->textureBorderSpinBox->value());
     projectFile->setSpriteBorder(ui->spriteBorderSpinBox->value());
@@ -309,17 +313,10 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
         }
     }
     projectFile->setScalingVariants(scalingVariants);
-
     projectFile->setSrcList(fileListFromTree());
 
-    if (projectFile) {
-        if (!projectFile->write(fileName)) {
-            QMessageBox::critical(this, "ERROR", QString("Not support write to [%1] format.").arg(suffix.c_str()));
-            return;
-        }
-    } else {
-        QMessageBox::critical(this, "ERROR", "Unknown project file format!");
-
+    if (!projectFile->write(fileName)) {
+        QMessageBox::critical(this, "ERROR", QString("Not support write to [%1] format.").arg(suffix.c_str()));
         return;
     }
 

@@ -19,7 +19,7 @@ public slots:
 
 class PublishSpriteSheet {
 public:
-    static bool publish(const QString& filePath, const QString& format, const SpriteAtlas& spriteAtlas);
+    static bool publish(const QString& filePath, const QString& format, const SpriteAtlas& spriteAtlas, bool errorMessage = true);
 
     static void addFormat(const QString& format, const QString& scriptFileName) { _formats[format] = scriptFileName; }
     static QMap<QString, QString>& formats() { return _formats; }

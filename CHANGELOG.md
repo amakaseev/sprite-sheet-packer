@@ -1,3 +1,7 @@
+v1.0.1
+======
+* Add command line
+
 v1.0.0
 ======
 * Add MIT License
