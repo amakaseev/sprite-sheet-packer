@@ -1,34 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-us">
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <meta charset="UTF-8">
+    <title>SpriteSheet Packer by amakaseev</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
-
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-
-    <title>SpriteSheet Packer by amakaseev</title>
   </head>
-
   <body>
-    <header>
-      <div class="inner">
-        <h1>SpriteSheet Packer</h1>
-        <h2>Create you sprite atlas with GUI or command line tools.</h2>
-        <a href="https://github.com/amakaseev/sprite-sheet-packer" class="button"><small>View project on</small> GitHub</a>
-      </div>
-    </header>
+    <section class="page-header">
+      <h1 class="project-name">SpriteSheet Packer</h1>
+      <h2 class="project-tagline">Create you sprite atlas with GUI or command line tools.</h2>
+      <a href="https://github.com/amakaseev/sprite-sheet-packer" class="btn">View on GitHub</a>
+      <a href="https://github.com/amakaseev/sprite-sheet-packer/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/amakaseev/sprite-sheet-packer/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
 
-    <div id="content-wrapper">
-      <div class="inner clearfix">
-        <section id="main-content">
-          <h1>
+    <section class="main-content">
+      <h1>
 <a id="overview" class="anchor" href="#overview" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overview</h1>
 
 <p>SpriteSheet Packer is a GUI and command line tool to create sprite sheets.</p>
@@ -60,35 +51,109 @@ Uses QT with LGPL license.</p>
 <a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h1>
 
 <ul>
-<li>
-<strong>Command Line</strong>
-<code>bash
-$ SpriteSheetPacker [options] source destination
-</code>
-Options:
--h, --help              Displays this help.
--v, --version           Displays version information.
--f, --format    Format for export sprite sheet data. Default is
-                        cocos2d.
---texture-border   Border of the sprite sheet, value adds transparent
-                        pixels around the borders of the sprite sheet. Default
-                        value is 0.
---sprite-border    Sprite border is the space between sprites. Value
-                        adds transparent pixels between sprites to avoid
-                        artifacts from neighbor sprites. The transparent
-                        pixels are not added to the sprites, default is 2.
---trim             Allowed values: 1 to 255, default is 1. Pixels with
-                        an alpha value below this value will be considered
-                        transparent when trimming the sprite. Very useful for
-                        sprites with nearly invisible alpha pixels at the
-                        borders.
---powerOf2              Forces the texture to have power of 2 size (32, 64,
-                        128...). Default is disable.
---max-size        Sets the maximum size for the texture, default is
-                        8192.
---scale          Scales all images before creating the sheet. E.g. use
-                        0.5 for half size, default is 0.5.</li>
+<li><strong>Command Line</strong></li>
 </ul>
+
+<div class="highlight highlight-source-shell"><pre>$ SpriteSheetPacker [options] <span class="pl-c1">source</span> destination</pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Options</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-h, --help</td>
+<td>Displays this help.</td>
+</tr>
+<tr>
+<td>-v, --version</td>
+<td>Displays version information.</td>
+</tr>
+<tr>
+<td>-f, --format </td>
+<td>Format for export sprite sheet data. Default is</td>
+</tr>
+<tr>
+<td></td>
+<td>cocos2d.</td>
+</tr>
+<tr>
+<td>--texture-border </td>
+<td>Border of the sprite sheet, value adds transparent</td>
+</tr>
+<tr>
+<td></td>
+<td>pixels around the borders of the sprite sheet. Default</td>
+</tr>
+<tr>
+<td></td>
+<td>value is 0.</td>
+</tr>
+<tr>
+<td>--sprite-border </td>
+<td>Sprite border is the space between sprites. Value</td>
+</tr>
+<tr>
+<td></td>
+<td>adds transparent pixels between sprites to avoid</td>
+</tr>
+<tr>
+<td></td>
+<td>artifacts from neighbor sprites. The transparent</td>
+</tr>
+<tr>
+<td></td>
+<td>pixels are not added to the sprites, default is 2.</td>
+</tr>
+<tr>
+<td>--trim </td>
+<td>Allowed values: 1 to 255, default is 1. Pixels with</td>
+</tr>
+<tr>
+<td></td>
+<td>an alpha value below this value will be considered</td>
+</tr>
+<tr>
+<td></td>
+<td>transparent when trimming the sprite. Very useful for</td>
+</tr>
+<tr>
+<td></td>
+<td>sprites with nearly invisible alpha pixels at the</td>
+</tr>
+<tr>
+<td></td>
+<td>borders.</td>
+</tr>
+<tr>
+<td>--powerOf2</td>
+<td>Forces the texture to have power of 2 size (32, 64,</td>
+</tr>
+<tr>
+<td></td>
+<td>128...). Default is disable.</td>
+</tr>
+<tr>
+<td>--max-size </td>
+<td>Sets the maximum size for the texture, default is</td>
+</tr>
+<tr>
+<td></td>
+<td>8192.</td>
+</tr>
+<tr>
+<td>--scale </td>
+<td>Scales all images before creating the sheet. E.g. use</td>
+</tr>
+<tr>
+<td></td>
+<td>0.5 for half size, default is 0.5.</td>
+</tr>
+</tbody>
+</table>
 
 <p>Arguments:
   source                  Source folder with sprites for packing.
@@ -99,24 +164,14 @@ Options:
 </ul>
 
 <p><img src="images/Screenshot-main.png" alt="icon"></p>
-        </section>
 
-        <aside id="sidebar">
-          <a href="https://github.com/amakaseev/sprite-sheet-packer/zipball/master" class="button">
-            <small>Download</small>
-            .zip file
-          </a>
-          <a href="https://github.com/amakaseev/sprite-sheet-packer/tarball/master" class="button">
-            <small>Download</small>
-            .tar.gz file
-          </a>
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/amakaseev/sprite-sheet-packer">SpriteSheet Packer</a> is maintained by <a href="https://github.com/amakaseev">amakaseev</a>.</span>
 
-          <p class="repo-owner"><a href="https://github.com/amakaseev/sprite-sheet-packer"></a> is maintained by <a href="https://github.com/amakaseev">amakaseev</a>.</p>
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
 
-          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
-        </aside>
-      </div>
-    </div>
+    </section>
 
   
   </body>
