@@ -57,10 +57,46 @@ Uses QT with LGPL license.</p>
 </ul>
 
 <h1>
-<a id="usage-command-line-version" class="anchor" href="#usage-command-line-version" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage Command line version</h1>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h1>
 
-<h1>
-<a id="gui-documentation" class="anchor" href="#gui-documentation" aria-hidden="true"><span class="octicon octicon-link"></span></a>GUI documentation</h1>
+<ul>
+<li>
+<strong>Command Line</strong>
+<code>bash
+$ SpriteSheetPacker [options] source destination
+</code>
+Options:
+-h, --help              Displays this help.
+-v, --version           Displays version information.
+-f, --format    Format for export sprite sheet data. Default is
+                        cocos2d.
+--texture-border   Border of the sprite sheet, value adds transparent
+                        pixels around the borders of the sprite sheet. Default
+                        value is 0.
+--sprite-border    Sprite border is the space between sprites. Value
+                        adds transparent pixels between sprites to avoid
+                        artifacts from neighbor sprites. The transparent
+                        pixels are not added to the sprites, default is 2.
+--trim             Allowed values: 1 to 255, default is 1. Pixels with
+                        an alpha value below this value will be considered
+                        transparent when trimming the sprite. Very useful for
+                        sprites with nearly invisible alpha pixels at the
+                        borders.
+--powerOf2              Forces the texture to have power of 2 size (32, 64,
+                        128...). Default is disable.
+--max-size        Sets the maximum size for the texture, default is
+                        8192.
+--scale          Scales all images before creating the sheet. E.g. use
+                        0.5 for half size, default is 0.5.</li>
+</ul>
+
+<p>Arguments:
+  source                  Source folder with sprites for packing.
+  destination             Destination folder where saving the sprite sheet.</p>
+
+<ul>
+<li><strong>GUI</strong></li>
+</ul>
 
 <p><img src="images/Screenshot-main.png" alt="icon"></p>
         </section>
