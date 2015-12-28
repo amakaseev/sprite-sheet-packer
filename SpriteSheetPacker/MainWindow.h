@@ -26,6 +26,10 @@ protected:
     void openSpritePackerProject(const QString& fileName);
     void saveSpritePackerProject(const QString& fileName);
 
+protected:
+    void dragEnterEvent(QDragEnterEvent *event);
+    void dropEvent(QDropEvent* event);
+
 private slots:
     void openRecent();
     void on_actionNew_triggered();

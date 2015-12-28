@@ -35,10 +35,10 @@ MainWindow::MainWindow(QWidget *parent) :
     _scene = new QGraphicsScene(this);
     _scene->setBackgroundBrush(QBrush(Qt::darkGray));
     ui->graphicsView->setScene(_scene);
+    ui->graphicsView->setAcceptDrops(false);
 
     _spritesTreeWidget = new SpritesTreeWidget(ui->spritesDockWidgetContents);
     connect(_spritesTreeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(spritesTreeWidgetItemSelectionChanged()));
-    connect(_spritesTreeWidget, SIGNAL(dropComplete()), this, SLOT(on_actionRefresh_triggered()));
     ui->spritesDockWidgetLayout->addWidget(_spritesTreeWidget);
 
     // configure default values
@@ -55,6 +55,8 @@ MainWindow::MainWindow(QWidget *parent) :
     _openButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     connect(_openButton, SIGNAL(pressed()), this, SLOT(on_actionOpen_triggered()));
     ui->mainToolBar->insertWidget(ui->actionSave, _openButton);
+
+    setAcceptDrops(true);
 
     refreshFormats();
     refreshOpenRecentMenu();
@@ -281,6 +283,29 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
     settings.setValue("openRecentList", openRecentList);
     settings.sync();
     refreshOpenRecentMenu();
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
+    if (event->mimeData()) {
+        if (event->mimeData()->hasUrls()) {
+            event->acceptProposedAction();
+            return;
+        }
+    }
+    event->ignore();
+}
+
+void MainWindow::dropEvent(QDropEvent* event) {
+    QStringList filesList;
+    for (auto url: event->mimeData()->urls()) {
+        QFileInfo fi(url.toLocalFile());
+        filesList.push_back(fi.canonicalFilePath());
+    }
+    if (filesList.size()) {
+        _spritesTreeWidget->addContent(filesList);
+        on_actionRefresh_triggered();
+    }
+    event->accept();
 }
 
 void MainWindow::on_actionNew_triggered() {

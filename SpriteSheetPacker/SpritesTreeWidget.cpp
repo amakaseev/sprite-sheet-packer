@@ -1,7 +1,6 @@
 #include "SpritesTreeWidget.h"
 
 SpritesTreeWidget::SpritesTreeWidget(QWidget* parent): QTreeWidget(parent) {
-    setAcceptDrops(true);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
     setIconSize(QSize(24, 24));
     setRootIsDecorated(true);
@@ -53,36 +52,4 @@ void SpritesTreeWidget::refresh() {
     auto content = contentList();
     clear();
     addContent(content);
-}
-
-void SpritesTreeWidget::dragEnterEvent(QDragEnterEvent *event) {
-    if (event->mimeData()) {
-        if (event->mimeData()->hasUrls()) {
-            event->accept();
-            return;
-        }
-    }
-    event->ignore();
-}
-
-void SpritesTreeWidget::dragMoveEvent(QDragMoveEvent* event) {
-    if (event->mimeData()) {
-        if (event->mimeData()->hasUrls()) {
-            event->accept();
-            return;
-        }
-    }
-    event->ignore();
-}
-
-void SpritesTreeWidget::dropEvent(QDropEvent* event) {
-    QStringList filesList;
-    for (auto url: event->mimeData()->urls()) {
-        QFileInfo fi(url.toLocalFile());
-        filesList.push_back(fi.canonicalFilePath());
-    }
-    addContent(filesList);
-    event->accept();
-
-    emit dropComplete();
 }
