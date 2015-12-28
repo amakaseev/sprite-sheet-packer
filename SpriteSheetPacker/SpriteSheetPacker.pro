@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     PreferencesDialog.cpp \
     PublishStatusDialog.cpp \
     AboutDialog.cpp \
-    comman-line.cpp
+    SpritesTreeWidget.cpp \
+    command-line.cpp
 
 HEADERS += MainWindow.h \
     ImageRotate.h \
@@ -32,7 +33,8 @@ HEADERS += MainWindow.h \
     PublishSpriteSheet.h \
     PreferencesDialog.h \
     PublishStatusDialog.h \
-    AboutDialog.h
+    AboutDialog.h \
+    SpritesTreeWidget.h
 
 FORMS += MainWindow.ui \
     ScalingVariantWidget.ui \

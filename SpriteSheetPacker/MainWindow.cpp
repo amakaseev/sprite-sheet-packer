@@ -34,8 +34,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _scene = new QGraphicsScene(this);
     _scene->setBackgroundBrush(QBrush(Qt::darkGray));
-
     ui->graphicsView->setScene(_scene);
+
+    _spritesTreeWidget = new SpritesTreeWidget(ui->spritesDockWidgetContents);
+    connect(_spritesTreeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(spritesTreeWidgetItemSelectionChanged()));
+    connect(_spritesTreeWidget, SIGNAL(dropComplete()), this, SLOT(on_actionRefresh_triggered()));
+    ui->spritesDockWidgetLayout->addWidget(_spritesTreeWidget);
 
     // configure default values
     ui->trimSpinBox->setValue(1);
@@ -130,7 +134,7 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
             }
         }
 
-        atlas = new SpriteAtlas(fileListFromTree(),
+        atlas = new SpriteAtlas(_spritesTreeWidget->contentList(),
                                 ui->textureBorderSpinBox->value(),
                                 ui->spriteBorderSpinBox->value(),
                                 ui->trimSpinBox->value(),
@@ -166,65 +170,8 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
     if (deleteAtlas) {
         delete atlas;
     }
-}
 
-void MainWindow::refreshSpritesTree(const QStringList& fileList) {
-    ui->spritesTreeWidget->clear();
-
-    // refresh file path list
-    foreach(QString filePath, fileList) {
-        QFileInfo fi(filePath);
-
-        if (!fi.exists()) {
-            QTreeWidgetItem* item = new QTreeWidgetItem(ui->spritesTreeWidget->invisibleRootItem());
-            item->setText(0, fi.baseName());
-            item->setData(0, Qt::UserRole, fi.absoluteFilePath());
-            item->setTextColor(0, Qt::red);
-
-            continue;
-        }
-
-        if (fi.isDir()) {
-            QTreeWidgetItem* item = new QTreeWidgetItem(ui->spritesTreeWidget->invisibleRootItem());
-            item->setText(0, fi.baseName());
-            item->setIcon(0, QFileIconProvider().icon(QFileIconProvider::Folder));
-            item->setData(0, Qt::UserRole, fi.absoluteFilePath());
-
-            recursiveRefreshFolder(fi.absoluteFilePath(), item);
-        } else {
-            QTreeWidgetItem* item = new QTreeWidgetItem(ui->spritesTreeWidget->invisibleRootItem());
-            item->setText(0, fi.baseName());
-            item->setIcon(0, QIcon(fi.absoluteFilePath()));
-            item->setData(0, Qt::UserRole, fi.absoluteFilePath());
-        }
-    }
-}
-
-void MainWindow::recursiveRefreshFolder(const QString& folder, QTreeWidgetItem* parentItem) {
-    QDir dir(folder);
-
-    // scan folder(s)
-    QFileInfoList entryList = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot | QDir::NoSymLinks, QDir::Name);
-    foreach(QFileInfo fi, entryList) {
-        QTreeWidgetItem* item = new QTreeWidgetItem(parentItem);
-        item->setText(0, fi.baseName());
-        item->setIcon(0, QFileIconProvider().icon(QFileIconProvider::Folder));
-        item->setData(0, Qt::UserRole, fi.absoluteFilePath()); // absoluteFilePath
-
-        recursiveRefreshFolder(fi.absoluteFilePath(), item);
-    }
-
-    QStringList nameFilter;
-    nameFilter << "*.png" << "*.jpg" << "*.jpeg" << "*.gif" << "*.bmp";
-
-    // find files
-    entryList = dir.entryInfoList(nameFilter, QDir::Files, QDir::Name);
-    foreach(QFileInfo fi, entryList) {
-        QTreeWidgetItem* item = new QTreeWidgetItem(parentItem);
-        item->setText(0, fi.baseName());
-        item->setIcon(0, QIcon(fi.absoluteFilePath()));
-        item->setData(0, Qt::UserRole, fi.absoluteFilePath());
-    }
+    on_toolButtonZoomFit_clicked();
 }
 
 void MainWindow::openSpritePackerProject(const QString& fileName) {
@@ -265,9 +212,9 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
         }
     }
 
-    refreshSpritesTree(projectFile->srcList());
+    _spritesTreeWidget->clear();
+    _spritesTreeWidget->addContent(projectFile->srcList());
     refreshAtlas();
-    on_toolButtonZoomFit_clicked();
 
 
     _currentProjectFileName = fileName;
@@ -313,7 +260,7 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
         }
     }
     projectFile->setScalingVariants(scalingVariants);
-    projectFile->setSrcList(fileListFromTree());
+    projectFile->setSrcList(_spritesTreeWidget->contentList());
 
     if (!projectFile->write(fileName)) {
         QMessageBox::critical(this, "ERROR", QString("Not support write to [%1] format.").arg(suffix.c_str()));
@@ -338,7 +285,7 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
 
 void MainWindow::on_actionNew_triggered() {
     ui->spriteSheetLineEdit->setText("");
-    ui->spritesTreeWidget->clear();
+    _spritesTreeWidget->clear();
 
     _currentProjectFileName.clear();
     setWindowTitle("SpriteSheet Packer");
@@ -398,18 +345,9 @@ void MainWindow::on_actionAddSprites_triggered() {
                                                           settings.value("spritesPath", QDir::currentPath()).toString(),
                                                           tr("Images (*.bmp *.jpg *.jpeg *.gif *.png)"));
     if (fileNames.size()) {
-        foreach(const QString& fileName, fileNames) {
-            QFileInfo fi(fileName);
-            qDebug() << fileName;
-
-            QTreeWidgetItem* item = new QTreeWidgetItem(ui->spritesTreeWidget->invisibleRootItem());
-            item->setText(0, fi.baseName());
-            item->setIcon(0, QIcon(fi.absoluteFilePath()));
-            item->setData(0, Qt::UserRole, fi.absoluteFilePath());
-        }
         settings.setValue("spritesPath", fileNames.back());
 
-        refreshSpritesTree(fileListFromTree());
+        _spritesTreeWidget->addContent(fileNames);
         refreshAtlas();
     }
 }
@@ -421,34 +359,24 @@ void MainWindow::on_actionAddFolder_triggered() {
                                                          settings.value("spritesPath", QDir::currentPath()).toString(),
                                                          QFileDialog::DontResolveSymlinks);
     if (!pathName.isEmpty()) {
-        QFileInfo fi(pathName);
         settings.setValue("spritesPath", pathName);
-        qDebug() << pathName;
-
-        QTreeWidgetItem* item = new QTreeWidgetItem(ui->spritesTreeWidget->invisibleRootItem());
-        item->setText(0, fi.baseName());
-        item->setIcon(0, QFileIconProvider().icon(QFileIconProvider::Folder));
-        item->setData(0, Qt::UserRole, fi.absoluteFilePath());
-
-        refreshSpritesTree(fileListFromTree());
+        _spritesTreeWidget->addContent(QStringList() << pathName);
         refreshAtlas();
     }
 }
 
 void MainWindow::on_actionRemove_triggered() {
-    foreach (QTreeWidgetItem* item, ui->spritesTreeWidget->selectedItems()) {
+    foreach (QTreeWidgetItem* item, _spritesTreeWidget->selectedItems()) {
         if (!item->parent()) {
-            ui->spritesTreeWidget->removeItemWidget(item, 0);
+            _spritesTreeWidget->removeItemWidget(item, 0);
             delete item;
         }
     }
-
-    refreshSpritesTree(fileListFromTree());
     refreshAtlas();
 }
 
 void MainWindow::on_actionRefresh_triggered() {
-    refreshSpritesTree(fileListFromTree());
+    _spritesTreeWidget->refresh();
     refreshAtlas();
 }
 
@@ -499,7 +427,7 @@ void MainWindow::on_actionPublish_triggered() {
 
             publishStatusDialog->log(QString("Begin publish scale variant (%1) scale: %2.").arg(spriteSheetName).arg(scale));
 
-            SpriteAtlas atlas(fileListFromTree(),
+            SpriteAtlas atlas(_spritesTreeWidget->contentList(),
                               ui->textureBorderSpinBox->value(),
                               ui->spriteBorderSpinBox->value(),
                               ui->trimSpinBox->value(),
@@ -511,7 +439,6 @@ void MainWindow::on_actionPublish_triggered() {
                 publishStatusDialog->log("Generate error: Max texture size limit is small!", Qt::red);
                 continue;
             } else if (i==0) {
-                refreshSpritesTree(fileListFromTree());
                 refreshAtlas(&atlas);
             }
 
@@ -539,15 +466,6 @@ void MainWindow::on_actionPreferences_triggered() {
     if (preferencesDialog->exec()) {
         refreshFormats();
     }
-}
-
-QStringList MainWindow::fileListFromTree() {
-    QStringList fileList;
-    for(int i = 0; i < ui->spritesTreeWidget->topLevelItemCount(); i++) {
-        QTreeWidgetItem* item = ui->spritesTreeWidget->topLevelItem(i);
-        fileList.push_back(item->data(0, Qt::UserRole).toString());
-    }
-    return fileList;
 }
 
 void MainWindow::on_toolButtonZoomOut_clicked() {
@@ -582,9 +500,9 @@ void MainWindow::on_zoomSlider_valueChanged(int value) {
     ui->labelZoomPercent->setText(QString::number((int)(scale * 100)) + " %");
 }
 
-void MainWindow::on_spritesTreeWidget_itemSelectionChanged() {
+void MainWindow::spritesTreeWidgetItemSelectionChanged() {
     ui->actionRemove->setEnabled(false);
-    foreach (QTreeWidgetItem* item, ui->spritesTreeWidget->selectedItems()) {
+    foreach (QTreeWidgetItem* item, _spritesTreeWidget->selectedItems()) {
         if (!item->parent()) {
             ui->actionRemove->setEnabled(true);
             return;

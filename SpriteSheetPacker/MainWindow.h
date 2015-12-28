@@ -3,6 +3,7 @@
 
 #include <QtWidgets>
 #include "SpriteAtlas.h"
+#include "SpritesTreeWidget.h"
 
 namespace Ui {
 class MainWindow;
@@ -21,9 +22,6 @@ protected:
     void refreshOpenRecentMenu();
 
     void refreshAtlas(SpriteAtlas* atlas = NULL);
-    void refreshSpritesTree(const QStringList& fileList);
-    void recursiveRefreshFolder(const QString& folder, QTreeWidgetItem* parentItem);
-    QStringList fileListFromTree();
 
     void openSpritePackerProject(const QString& fileName);
     void saveSpritePackerProject(const QString& fileName);
@@ -49,16 +47,18 @@ private slots:
     void on_toolButtonZoomFit_clicked();
     void on_zoomSlider_valueChanged(int value);
 
-    void on_spritesTreeWidget_itemSelectionChanged();
     void on_maxTextureSizeComboBox_currentTextChanged(const QString &arg1);
     void on_destFolderToolButton_clicked();
     void on_dataFormatSetupToolButton_clicked();
     void on_addScalingVariantPushButton_clicked();
+
+    void spritesTreeWidgetItemSelectionChanged();
     void removeScalingVariant();
 
 private:
     Ui::MainWindow*      ui;
     QGraphicsScene*     _scene;
+    SpritesTreeWidget*  _spritesTreeWidget;
     QString             _currentProjectFileName;
     QToolButton*        _openButton;
 };
