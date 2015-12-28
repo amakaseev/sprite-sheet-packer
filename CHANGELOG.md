@@ -1,7 +1,7 @@
 v1.0.2
 ======
 * Implement drag and drop files and folders intro spritesheet from finder
-* Open TexturePacker format
+* Open TexturePacker project format
 
 v1.0.1
 ======

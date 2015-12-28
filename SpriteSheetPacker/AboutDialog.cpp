@@ -7,6 +7,8 @@ AboutDialog::AboutDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowFlags( (windowFlags() | Qt::CustomizeWindowHint) & ~Qt::WindowMaximizeButtonHint);
+
+    ui->versionLabel->setText(QCoreApplication::applicationVersion());
 }
 
 AboutDialog::~AboutDialog()

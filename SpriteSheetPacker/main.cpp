@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("amakaseev");
     QCoreApplication::setOrganizationDomain("spicyminds-lab.com");
     QCoreApplication::setApplicationName("SpriteSheetPacker");
-    QCoreApplication::setApplicationVersion("1.0.1");
+    QCoreApplication::setApplicationVersion("1.0.2");
     //QDir::setCurrent(QApplication::applicationDirPath());
 
     if (argc > 1) {

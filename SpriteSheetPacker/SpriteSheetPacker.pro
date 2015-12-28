@@ -90,5 +90,5 @@ CONFIG(release,debug|release) {
     DEPLOY_TARGET = $$shell_quote($$shell_path($${OUT_PWD}/$${TARGET}$${TARGET_CUSTOM_EXT}))
 
     warning($${DEPLOY_COMMAND} $${DEPLOY_TARGET})
-    QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}
+    QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET} -dmg
 }
