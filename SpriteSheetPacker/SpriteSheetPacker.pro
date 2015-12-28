@@ -45,6 +45,7 @@ FORMS += MainWindow.ui \
 RESOURCES += resources.qrc
 
 include(qtplist-master/qtplist-master.pri)
+include(TPSParser/TPSParser.pri)
 
 OTHER_FILES += \
     defaultFormats/cocos2d.js \

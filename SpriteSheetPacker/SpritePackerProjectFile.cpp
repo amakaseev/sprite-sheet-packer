@@ -1,12 +1,17 @@
 #include "SpritePackerProjectFile.h"
 
+#include "TPSParser.h"
 #include "PListParser.h"
 #include "PListSerializer.h"
 
 GenericObjectFactory<std::string, SpritePackerProjectFile> SpritePackerProjectFile::_factory;
 
 SpritePackerProjectFile::SpritePackerProjectFile() {
-
+    _trimThreshold = 1;
+    _textureBorder = 0;
+    _spriteBorder = 2;
+    _maxTextureSize = 8192;
+    _pot2 = false;
 }
 
 
@@ -90,10 +95,6 @@ bool SpritePackerProjectFileOLD::read(const QString &fileName) {
         return false;
     }
 
-    // unsupported variables
-    _maxTextureSize = 2048;
-    _pot2 = false;
-
     QVariantMap plistDict = plist.toMap();
 
     // load property
@@ -148,5 +149,74 @@ bool SpritePackerProjectFileOLD::read(const QString &fileName) {
 }
 
 bool SpritePackerProjectFileTPS::read(const QString &fileName) {
+    QDir dir(QFileInfo(fileName).absolutePath());
+    QFile file(fileName);
+    file.open(QIODevice::ReadOnly);
+    QVariant tps = TPSParser::parse(&file);
+
+    if (!tps.isValid()) {
+        return false;
+    }
+
+    QVariantMap tpsMap = tps.toMap();
+
+    if (tpsMap.find("globalSpriteSettings") != tpsMap.end()) {
+        QVariantMap globalSpriteSettings = tpsMap["globalSpriteSettings"].toMap();
+        _trimThreshold = globalSpriteSettings["trimThreshold"].toInt();
+    }
+    if (tpsMap.find("borderPadding") != tpsMap.end()) {
+        _textureBorder = tpsMap["borderPadding"].toInt();
+    }
+    if (tpsMap.find("shapePadding") != tpsMap.end()) {
+        _spriteBorder = tpsMap["shapePadding"].toInt();
+    }
+    if (tpsMap.find("maxTextureSize") != tpsMap.end()) {
+        _maxTextureSize = qMax(tpsMap["maxTextureSize"].toMap()["width"].toInt(), tpsMap["maxTextureSize"].toMap()["height"].toInt());
+    }
+
+    if (tpsMap.find("globalSpriteSettings") != tpsMap.end()) {
+        QVariantMap globalSpriteSettings = tpsMap["globalSpriteSettings"].toMap();
+        _trimThreshold = globalSpriteSettings["trimThreshold"].toInt();
+    }
+    if (tpsMap.find("algorithmSettings") != tpsMap.end()) {
+        QVariantMap algorithmSettings = tpsMap["algorithmSettings"].toMap();
+        if (algorithmSettings["sizeConstraints"].toString() == "POT") {
+            _pot2 = true;
+        } else {
+            _pot2 = false;
+        }
+    }
+
+    if (tpsMap.find("dataFileNames") != tpsMap.end()) {
+        QVariantMap dataFileNames = tpsMap["dataFileNames"].toMap();
+        if (dataFileNames.find("data") != dataFileNames.end()) {
+            QVariantMap data = dataFileNames["data"].toMap();
+            if (data.find("name") != data.end()) {
+                QFileInfo fi(dir.absoluteFilePath(data["name"].toString()));
+                _destPath = fi.dir().canonicalPath();
+                _spriteSheetName = fi.baseName();
+            }
+        }
+    }
+
+    if (tpsMap.find("autoSDSettings") != tpsMap.end()) {
+        QVariantList autoSDSettings = tpsMap["autoSDSettings"].toList();
+        for (auto autoSDSettingVariant: autoSDSettings) {
+            QVariantMap autoSDSetting = autoSDSettingVariant.toMap();
+            ScalingVariant scalingVariant;
+            scalingVariant.name = autoSDSetting["extension"].toString();
+            scalingVariant.scale = autoSDSetting["scale"].toFloat();
+            _scalingVariants.push_back(scalingVariant);
+        }
+    }
+
+    _srcList.clear();
+    QVariantList spritesList = tpsMap["fileList"].toList();
+    foreach (QVariant spriteFile, spritesList) {
+        _srcList.append(dir.absoluteFilePath(spriteFile.toString()));
+    }
+
+    qDebug() << tps;
+
     return true;
 }
