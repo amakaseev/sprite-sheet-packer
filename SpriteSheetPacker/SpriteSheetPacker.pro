@@ -50,6 +50,7 @@ include(qtplist-master/qtplist-master.pri)
 include(TPSParser/TPSParser.pri)
 include(clipper/clipper.pri)
 include(poly2tri/poly2tri.pri)
+include(Box2D/Box2D.pri)
 
 OTHER_FILES += \
     defaultFormats/cocos2d.js \
