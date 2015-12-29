@@ -16,19 +16,29 @@ struct Triangles {
     QVector<V2F_T2F> verts;
     /**Index data pointer.*/
     QVector<unsigned short> indices;
+
+    QVector<b2PolygonShape> shapes;
+
+    void add(const Triangles& other) {
+        unsigned short idx = verts.size();
+        verts += other.verts;
+        for (int i=0; i<other.indices.size(); ++i) {
+            indices.push_back(other.indices[i] + idx);
+        }
+        shapes += other.shapes;
+    }
 };
 
 class PolygonImage
 {
 public:
-    static Triangles generateTriangles(const QImage& image, const QRectF& rect, const float epsilon = 2.f, const float threshold = 0.05f);
+    static Triangles generateTriangles(const QImage& image, const QRectF& rect, const float epsilon = 2.f, const float threshold = 0.0f);
 
 protected:
     PolygonImage(const QImage& image, const float epsilon, const float threshold);
 
-    std::vector<QPointF> traceAll(const QRectF& rect, const float& threshold);
-    std::vector<QPointF> trace(const QRectF& rect, const float& threshold);
-    QPointF findFirstNoneTransparentPixel(const QRectF& rect, const float& threshold);
+    std::vector<QPointF> trace(const QRectF& rect, const float& threshold, Triangles* triangles = NULL);
+    QPair<bool, QPointF> findFirstNoneTransparentPixel(const QRectF& rect, const float& threshold, Triangles* triangles = NULL);
 
     unsigned char getAlphaByIndex(const unsigned int& i);
     unsigned char getAlphaByPos(const QPointF& pos);
