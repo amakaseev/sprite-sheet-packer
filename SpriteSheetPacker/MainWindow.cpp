@@ -157,9 +157,17 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
     _scene->addRect(atlasImage.rect(), QPen(Qt::darkRed), QBrush(QPixmap("://res/background_tran.png")));
     QGraphicsPixmapItem* atlasPixmapItem = _scene->addPixmap(QPixmap::fromImage(atlasImage));
 
-    QVector<QRect> rects;
-    foreach(QRect rect, rects) {
-        _scene->addRect(rect, QPen(Qt::darkGreen));
+    QColor brushColor(Qt::blue);
+    brushColor.setAlpha(100);
+    for(auto spriteFrame: atlas->spriteFrames()) {
+        for (int i=0; i<spriteFrame.triangles.indices.size(); i+=3) {
+            QPointF v1 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+0]].v;
+            QPointF v2 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+1]].v;
+            QPointF v3 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+2]].v;
+            _scene->addPolygon(QPolygonF() << v1 << v2 << v3, QPen(Qt::white), QBrush(brushColor));
+            //_scene->addEllipse(QRectF(vert.x()-1, vert.y()-1, 2, 2), QPen(Qt::red), QBrush(Qt::red));
+        }
+        //_scene->addRect(rect, QPen(Qt::darkGreen));
     }
 
     _scene->addRect(atlasPixmapItem->boundingRect(), QPen(Qt::darkRed));

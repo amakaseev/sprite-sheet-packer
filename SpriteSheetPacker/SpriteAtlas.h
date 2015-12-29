@@ -4,6 +4,8 @@
 #include <QtCore>
 #include <QImage>
 
+#include "PolygonImage.h"
+
 struct SpriteFrameInfo {
 public:
     QRect   mFrame;
@@ -11,6 +13,8 @@ public:
     bool    mRotated;
     QRect   mSourceColorRect;
     QSize   mSourceSize;
+
+    Triangles triangles;
 };
 
 class SpriteAtlas

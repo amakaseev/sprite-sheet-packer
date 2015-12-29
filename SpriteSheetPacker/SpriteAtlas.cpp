@@ -2,6 +2,7 @@
 
 #include "binpack2d.hpp"
 #include "ImageRotate.h"
+#include "PolygonImage.h"
 
 int pow2(int len) {
     int order = 1;
@@ -81,6 +82,7 @@ public:
     QString mName;
     QImage  mImage;
     QRect   mRect;
+    Triangles triangles;
 };
 
 SpriteAtlas::SpriteAtlas(const QStringList& sourceList, int textureBorder, int spriteBorder, int trim, bool pot2, int maxSize, float scale)
@@ -147,6 +149,7 @@ bool SpriteAtlas::generate() {
         // Trim / Crop
         if (_trim) {
             packContent.trim(_trim);
+            //packContent.triangles = PolygonImage::generateTriangles(packContent.mImage, packContent.mRect);
         }
 
         bool findIdentical = false;
@@ -336,6 +339,12 @@ bool SpriteAtlas::generate() {
         }
 
         SpriteFrameInfo spriteFrame;
+        spriteFrame.triangles = packContent.triangles;
+        for (int v=0; v<spriteFrame.triangles.verts.size(); ++v) {
+            spriteFrame.triangles.verts[v].v.setY(packContent.mRect.height() - spriteFrame.triangles.verts[v].v.y());
+            spriteFrame.triangles.verts[v].v.rx() += content.coord.x + _textureBorder;
+            spriteFrame.triangles.verts[v].v.ry() += content.coord.y + _textureBorder;
+        }
         spriteFrame.mFrame = QRect(content.coord.x + _textureBorder, content.coord.y + _textureBorder, content.size.w-_spriteBorder, content.size.h-_spriteBorder);
         spriteFrame.mOffset = QPoint(
                     (packContent.mRect.left() + (-packContent.mImage.width() + content.size.w - _spriteBorder) * 0.5f),

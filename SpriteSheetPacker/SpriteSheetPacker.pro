@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     PublishStatusDialog.cpp \
     AboutDialog.cpp \
     SpritesTreeWidget.cpp \
-    command-line.cpp
+    command-line.cpp \
+    PolygonImage.cpp
 
 HEADERS += MainWindow.h \
     ImageRotate.h \
@@ -34,7 +35,8 @@ HEADERS += MainWindow.h \
     PreferencesDialog.h \
     PublishStatusDialog.h \
     AboutDialog.h \
-    SpritesTreeWidget.h
+    SpritesTreeWidget.h \
+    PolygonImage.h
 
 FORMS += MainWindow.ui \
     ScalingVariantWidget.ui \
@@ -46,6 +48,8 @@ RESOURCES += resources.qrc
 
 include(qtplist-master/qtplist-master.pri)
 include(TPSParser/TPSParser.pri)
+include(clipper/clipper.pri)
+include(poly2tri/poly2tri.pri)
 
 OTHER_FILES += \
     defaultFormats/cocos2d.js \
