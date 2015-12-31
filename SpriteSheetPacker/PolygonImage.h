@@ -53,7 +53,7 @@ protected:
     std::vector<QPointF> expand(const std::vector<QPointF>& points, const QRectF &rect, const float& epsilon);
 
     Triangles triangulate(const std::vector<QPointF>& points);
-    void calculateUV(const QRectF& rect, V2F_T2F* verts, const ssize_t& count);
+    void calculateUV(const QRectF& rect, V2F_T2F* verts, const size_t& count);
 
 private:
     const QImage& _image;

@@ -28,10 +28,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setUnifiedTitleAndToolBarOnMac(true);
 
-    SpritePackerProjectFile::factory().set<SpritePackerProjectFile>("json");
-    SpritePackerProjectFile::factory().set<SpritePackerProjectFileOLD>("sp");
-    SpritePackerProjectFile::factory().set<SpritePackerProjectFileTPS>("tps");
-
     _scene = new QGraphicsScene(this);
     _scene->setBackgroundBrush(QBrush(Qt::darkGray));
     ui->graphicsView->setScene(_scene);
