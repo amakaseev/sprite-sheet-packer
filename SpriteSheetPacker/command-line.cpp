@@ -24,21 +24,8 @@ int commandLine(QCoreApplication& app) {
     //--texture-border 10 /Users/alekseymakaseev/Documents/Work/run-and-jump/Assets/ART/Character /Users/alekseymakaseev/Documents/Work/run-and-jump/RunAndJump/testResources --trim 2
     parser.process(app);
 
-    /*
-    // check arguments
-    if (parser.positionalArguments().size() != 2) {
-        if (parser.positionalArguments().size() > 2) {
-            qDebug() << "Too many arguments, see help for information.";
-        } else {
-            qDebug() << "Arguments must have source and destination, see help for information.";
-        }
-        parser.showHelp();
-        return -1;
-    }
-    */
     bool destinationSet = true;
     SpritePackerProjectFile* projectFile = nullptr;
-
 
     if (parser.positionalArguments().size() > 2) {
         qDebug() << "Too many arguments, see help for information.";
@@ -68,7 +55,6 @@ int commandLine(QCoreApplication& app) {
         parser.showHelp();
         return -1;
     }
-
 
     qDebug() << "arguments:" << parser.positionalArguments();
     qDebug() << "options:" << parser.optionNames();
@@ -115,7 +101,6 @@ int commandLine(QCoreApplication& app) {
     }
 
     // you can override project file options
-
     if (parser.isSet("texture-border")) {
         textureBorder = parser.value("texture-border").toInt();
     }
@@ -193,13 +178,13 @@ int commandLine(QCoreApplication& app) {
             // Generate sprite atlas
             SpriteAtlas atlas(QStringList() << projectFile->srcList(), textureBorder, spriteBorder, trim, pow2, maxSize, scale);
             if (!atlas.generate()) {
-                qCritical() << "ERROR: Generate atlass!";
+                qCritical() << "ERROR: Generate atlas!";
                 return -1;
             }
 
             // Publish data
             if (!PublishSpriteSheet::publish(destFileInfo.filePath(), format, atlas, false)) {
-                qCritical() << "ERROR: publish atlass!";
+                qCritical() << "ERROR: publish atlas!";
                 return -1;
             }
         }
@@ -208,13 +193,13 @@ int commandLine(QCoreApplication& app) {
         // Generate sprite atlas
         SpriteAtlas atlas(QStringList() << source.filePath(), textureBorder, spriteBorder, trim, pow2, maxSize, scale);
         if (!atlas.generate()) {
-            qCritical() << "ERROR: Generate atlass!";
+            qCritical() << "ERROR: Generate atlas!";
             return -1;
         }
 
         // Publish data
         if (!PublishSpriteSheet::publish(destination.filePath() + source.fileName(), format, atlas, false)) {
-            qCritical() << "ERROR: publish atlass!";
+            qCritical() << "ERROR: publish atlas!";
             return -1;
         }
     }
