@@ -474,7 +474,7 @@ Triangles PolygonImage::triangulate(const std::vector<QPointF>& points) {
     return triangles;
 }
 
-void PolygonImage::calculateUV(const QRectF& rect, V2F_T2F* verts, const ssize_t& count) {
+void PolygonImage::calculateUV(const QRectF& rect, V2F_T2F* verts, const size_t& count) {
     /*
      whole texture UV coordination
      0,0                  1,0

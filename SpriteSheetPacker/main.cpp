@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "SpritePackerProjectFile.h"
 #include <QApplication>
 
 int commandLine(QCoreApplication& app);
@@ -15,6 +16,10 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("SpriteSheetPacker");
     QCoreApplication::setApplicationVersion("1.0.2");
     //QDir::setCurrent(QApplication::applicationDirPath());
+
+    SpritePackerProjectFile::factory().set<SpritePackerProjectFile>("json");
+    SpritePackerProjectFile::factory().set<SpritePackerProjectFileOLD>("sp");
+    SpritePackerProjectFile::factory().set<SpritePackerProjectFileTPS>("tps");
 
     if (argc > 1) {
         return commandLine(app);
