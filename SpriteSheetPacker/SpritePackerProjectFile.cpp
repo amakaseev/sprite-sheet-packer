@@ -22,6 +22,10 @@ bool SpritePackerProjectFile::read(const QString &fileName) {
 
     QJsonObject json = QJsonDocument::fromJson(file.readAll()).object();
 
+    if (json.isEmpty()) {
+        return false;
+    }
+
     _trimThreshold = json["trimThreshold"].toInt();
     _textureBorder = json["textureBorder"].toInt();
     _spriteBorder = json["spriteBorder"].toInt();

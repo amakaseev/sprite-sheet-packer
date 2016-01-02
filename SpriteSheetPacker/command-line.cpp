@@ -8,8 +8,8 @@ int commandLine(QCoreApplication& app) {
     parser.setApplicationDescription("");
     parser.addHelpOption();
     parser.addVersionOption();
-    parser.addPositionalArgument("source", "Sprites for packing or project file.");
-    parser.addPositionalArgument("destination", "Destination folder where saving the sprite sheet. Optional when using project file");
+    parser.addPositionalArgument("source", "Sprites for packing or project file (You can override project file options with [options]).");
+    parser.addPositionalArgument("destination", "Destination folder where you're saving the sprite sheet. Optional when using project file");
 
     parser.addOptions({
         {{"f", "format"}, "Format for export sprite sheet data. Default is cocos2d.", "format"},
@@ -18,7 +18,7 @@ int commandLine(QCoreApplication& app) {
         {"trim", "Allowed values: 1 to 255, default is 1. Pixels with an alpha value below this value will be considered transparent when trimming the sprite. Very useful for sprites with nearly invisible alpha pixels at the borders.", "int", "1"},
         {"powerOf2", "Forces the texture to have power of 2 size (32, 64, 128...). Default is disable."},
         {"max-size", "Sets the maximum size for the texture, default is 8192.", "size", "8192"},
-        {"scale", "Scales all images before creating the sheet. E.g. use 0.5 for half size, default is 0.5.", "float", "1"},
+        {"scale", "Scales all images before creating the sheet. E.g. use 0.5 for half size, default is 0.5 (Scale has no effect when source is a project file).", "float", "1"},
     });
 
     //--texture-border 10 /Users/alekseymakaseev/Documents/Work/run-and-jump/Assets/ART/Character /Users/alekseymakaseev/Documents/Work/run-and-jump/RunAndJump/testResources --trim 2
@@ -36,14 +36,49 @@ int commandLine(QCoreApplication& app) {
         return -1;
     }
     */
+    bool destinationSet = true;
+    SpritePackerProjectFile* projectFile = nullptr;
 
+
+    if (parser.positionalArguments().size() > 2) {
+        qDebug() << "Too many arguments, see help for information.";
+        parser.showHelp();
+        return -1;
+    } else if ((parser.positionalArguments().size() == 1) || (parser.positionalArguments().size() == 2)) {
+        QFileInfo src(parser.positionalArguments().at(0));
+        if (!src.isDir()) {
+            std::string suffix = src.suffix().toStdString();
+            projectFile = SpritePackerProjectFile::factory().get(suffix)();
+        }
+
+        if (parser.positionalArguments().size() == 1) {
+            if (!projectFile) {
+                qDebug() << "Arguments must have source and destination, see help for information.";
+                parser.showHelp();
+                return -1;
+            } else {
+                destinationSet = false; // we should already have our destination saved in our project file
+            }
+        } else if (parser.positionalArguments().size() == 2) {
+            destinationSet = true;
+        }
+
+    } else {
+        qDebug() << "Arguments must have source and destination, see help for information.";
+        parser.showHelp();
+        return -1;
+    }
 
 
     qDebug() << "arguments:" << parser.positionalArguments();
     qDebug() << "options:" << parser.optionNames();
 
     QFileInfo source(parser.positionalArguments().at(0));
-    QFileInfo destination(parser.positionalArguments().at(1));
+    QFileInfo destination;
+
+    if (destinationSet) {
+        destination.setFile(parser.positionalArguments().at(1));
+    }
 
     // initialize [options]
     int textureBorder = 0;
@@ -53,29 +88,33 @@ int commandLine(QCoreApplication& app) {
     int maxSize = 8192;
     float scale = 1;
     QString format = "cocos2d";
-    SpritePackerProjectFile* projectFile = nullptr;
 
-    if (!source.isDir()) {
-        std::string suffix = source.suffix().toStdString();
-        projectFile = SpritePackerProjectFile::factory().get(suffix)();
+    if (projectFile) {
+        if (!projectFile->read(source.filePath())) {
+            qCritical() << "File format error.";
+        } else {
+            textureBorder = projectFile->textureBorder();
+            spriteBorder = projectFile->spriteBorder();
+            trim = projectFile->trimThreshold();
+            pow2 = projectFile->pot2();
+            maxSize = projectFile->maxTextureSize();
 
-        if (projectFile) {
-            if (!projectFile->read(source.filePath())) {
-                qCritical() << "File format error.";
-            } else {
-                textureBorder = projectFile->textureBorder();
-                spriteBorder = projectFile->spriteBorder();
-                trim = projectFile->trimThreshold();
-                pow2 = projectFile->pot2();
-                maxSize = projectFile->maxTextureSize();
+            if (!destinationSet) {
+                destination.setFile(projectFile->destPath());
             }
         }
+    }
+
+    if (!destination.filePath().endsWith("/")) {
+        destination.setFile(destination.filePath() + "/");
     }
 
     if (!destination.isDir()) {
         qDebug() << "Incorrect destination folder";
         return -1;
     }
+
+    // you can override project file options
 
     if (parser.isSet("texture-border")) {
         textureBorder = parser.value("texture-border").toInt();
@@ -164,9 +203,6 @@ int commandLine(QCoreApplication& app) {
                 return -1;
             }
         }
-
-        delete projectFile;
-        projectFile = nullptr;
     } else {
 
         // Generate sprite atlas
@@ -177,7 +213,7 @@ int commandLine(QCoreApplication& app) {
         }
 
         // Publish data
-        if (!PublishSpriteSheet::publish(destination.filePath() + "/" + source.fileName(), format, atlas, false)) {
+        if (!PublishSpriteSheet::publish(destination.filePath() + source.fileName(), format, atlas, false)) {
             qCritical() << "ERROR: publish atlass!";
             return -1;
         }
@@ -188,6 +224,10 @@ int commandLine(QCoreApplication& app) {
 //    qDebug() << source.fileName() << source.isDir();
 //    qDebug() << destination.filePath() << destination.isDir();
 
+    if (projectFile) {
+        delete projectFile;
+        projectFile = nullptr;
+    }
 
     return 1;
 }
