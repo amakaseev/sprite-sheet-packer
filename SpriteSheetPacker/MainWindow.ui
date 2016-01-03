@@ -173,7 +173,7 @@
      <x>0</x>
      <y>0</y>
      <width>1222</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="defaultUp">
@@ -243,6 +243,7 @@
    <addaction name="actionRefresh"/>
    <addaction name="actionPublish"/>
    <addaction name="separator"/>
+   <addaction name="actionPreferences"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="propertyDockWidget">
@@ -266,7 +267,7 @@
     <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
    </property>
    <property name="windowTitle">
-    <string>Property</string>
+    <string>Properties</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
@@ -283,8 +284,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>314</width>
-          <height>839</height>
+          <width>320</width>
+          <height>848</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_6">
