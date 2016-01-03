@@ -6,7 +6,7 @@ Uses [Qt - Digia Plc](http://qt-project.org), LGPL license.
 
 ![preview](/../gh-pages/screens/main.png?raw=true "Main screen")
 
-###Supported publish spritesheet formats###
+### Supported publish spritesheet formats###
 * [cocos2d-x](http://www.cocos2d-x.org) (plist)
 * json
 
