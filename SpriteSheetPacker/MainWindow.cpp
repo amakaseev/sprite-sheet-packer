@@ -141,6 +141,7 @@ void MainWindow::createRefreshButton() {
     auto vLayout = new QVBoxLayout(refreshFrame);
     // button
     auto refreshButton = new QToolButton(this);
+    refreshButton->setAutoRaise(true);
     refreshButton->setIconSize(QSize(24, 24));
     refreshButton->setIcon(QIcon(":/res/refresh-32.png"));
     connect(refreshButton, &QToolButton::pressed, [this](){
@@ -149,7 +150,7 @@ void MainWindow::createRefreshButton() {
     // checkbox
     auto autoRefreshCheckbox = new QCheckBox("Auto refresh", this);
     auto font = autoRefreshCheckbox->font();
-    font.setPointSize(10);
+    font.setPointSize(8);
     autoRefreshCheckbox->setFont(font);
     autoRefreshCheckbox->setChecked(settings.value("Preferences/automaticPreview", true).toBool());
     connect(autoRefreshCheckbox, &QCheckBox::toggled, [](bool value) {
