@@ -20,7 +20,4 @@ See the [Documentation](http://amakaseev.github.io/sprite-sheet-packer) for use.
 See the [LICENSE](LICENSE.md) file for license rights and limitations (MIT).
 
 
-## Developers
-Core developer: [amakaseev](https://github.com/amakaseev)
-
-Special thanks: [musikov](https://github.com/musikov)
+## [Developers](AUTHORS.md)
