@@ -64,6 +64,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_openButton, SIGNAL(pressed()), this, SLOT(on_actionOpen_triggered()));
     ui->mainToolBar->insertWidget(ui->actionSave, _openButton);
 
+    // layout preferences action on right side in toolbar
+    QWidget* empty = new QWidget();
+    empty->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+    ui->mainToolBar->insertWidget(ui->actionPreferences ,empty);
+
     createRefreshButton();
     setAcceptDrops(true);
 
