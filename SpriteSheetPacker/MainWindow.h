@@ -20,6 +20,7 @@ public:
 protected:
     void refreshFormats();
     void refreshOpenRecentMenu();
+    void createRefreshButton();
 
     void refreshAtlas(SpriteAtlas* atlas = NULL);
 
@@ -39,7 +40,6 @@ private slots:
     void on_actionAddSprites_triggered();
     void on_actionAddFolder_triggered();
     void on_actionRemove_triggered();
-    void on_actionRefresh_triggered();
     void on_actionPublish_triggered();
     void on_actionAbout_triggered();
     void on_actionPreferences_triggered();

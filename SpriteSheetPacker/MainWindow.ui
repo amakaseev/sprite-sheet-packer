@@ -240,7 +240,6 @@
    <addaction name="actionAddFolder"/>
    <addaction name="actionRemove"/>
    <addaction name="separator"/>
-   <addaction name="actionRefresh"/>
    <addaction name="actionPublish"/>
    <addaction name="separator"/>
    <addaction name="actionPreferences"/>
@@ -961,18 +960,6 @@
    </property>
    <property name="text">
     <string>Remove sprites</string>
-   </property>
-   <property name="iconVisibleInMenu">
-    <bool>false</bool>
-   </property>
-  </action>
-  <action name="actionRefresh">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/refresh-32.png</normaloff>:/res/refresh-32.png</iconset>
-   </property>
-   <property name="text">
-    <string>Refresh preview</string>
    </property>
    <property name="iconVisibleInMenu">
     <bool>false</bool>

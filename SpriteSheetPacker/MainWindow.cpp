@@ -61,6 +61,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_openButton, SIGNAL(pressed()), this, SLOT(on_actionOpen_triggered()));
     ui->mainToolBar->insertWidget(ui->actionSave, _openButton);
 
+    createRefreshButton();
     setAcceptDrops(true);
 
     refreshFormats();
@@ -128,6 +129,34 @@ void MainWindow::refreshOpenRecentMenu() {
 void MainWindow::openRecent() {
     QAction* senderAction = dynamic_cast<QAction*>(sender());
     openSpritePackerProject(senderAction->text());
+}
+
+void MainWindow::createRefreshButton() {
+    QSettings settings;
+    //setup enable/disable auto refresh atlas checkbox
+    auto refreshFrame = new QFrame(this);
+    auto vLayout = new QVBoxLayout(refreshFrame);
+    // button
+    auto refreshButton = new QToolButton(this);
+    refreshButton->setIconSize(QSize(24, 24));
+    refreshButton->setIcon(QIcon(":/res/refresh-32.png"));
+    connect(refreshButton, &QToolButton::pressed, [this](){
+        refreshAtlas();
+    });
+    // checkbox
+    auto autoRefreshCheckbox = new QCheckBox("Auto refresh", this);
+    auto font = autoRefreshCheckbox->font();
+    font.setPointSize(10);
+    autoRefreshCheckbox->setFont(font);
+    autoRefreshCheckbox->setChecked(settings.value("Preferences/automaticPreview", true).toBool());
+    connect(autoRefreshCheckbox, &QCheckBox::toggled, [](bool value) {
+        QSettings settings;
+        settings.setValue("Preferences/automaticPreview", value);
+    });
+    // layout
+    vLayout->addWidget(refreshButton, 0, Qt::AlignHCenter);
+    vLayout->addWidget(autoRefreshCheckbox, 0, Qt::AlignHCenter);
+    ui->mainToolBar->insertWidget(ui->actionPublish, refreshFrame);
 }
 
 void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
@@ -316,7 +345,7 @@ void MainWindow::dropEvent(QDropEvent* event) {
     }
     if (filesList.size()) {
         _spritesTreeWidget->addContent(filesList);
-        on_actionRefresh_triggered();
+        refreshAtlas();
     }
     event->accept();
 }
@@ -410,11 +439,6 @@ void MainWindow::on_actionRemove_triggered() {
             delete item;
         }
     }
-    refreshAtlas();
-}
-
-void MainWindow::on_actionRefresh_triggered() {
-    //_spritesTreeWidget->refresh(); //Unnecessary refresh (just closes open items)
     refreshAtlas();
 }
 

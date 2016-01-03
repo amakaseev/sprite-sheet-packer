@@ -10,9 +10,7 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) :
 
     QSettings settings;
     QString customFormatFolder = settings.value("Preferences/customFormatFolder").toString();
-    bool automaticPreview = settings.value("Preferences/automaticPreview", true).toBool();
     ui->customFormatFolderEdit->setText(customFormatFolder);
-    ui->automaticPreviewRadioBtn->setChecked(automaticPreview);
 }
 
 PreferencesDialog::~PreferencesDialog() {
@@ -35,7 +33,6 @@ void PreferencesDialog::on_toolButton_clicked() {
 void PreferencesDialog::on_buttonBox_accepted() {
     QSettings settings;
     settings.setValue("Preferences/customFormatFolder", ui->customFormatFolderEdit->text());
-    settings.setValue("Preferences/automaticPreview", ui->automaticPreviewRadioBtn->isChecked());
 }
 
 void PreferencesDialog::on_resetAllPushButton_clicked() {
