@@ -59,6 +59,8 @@ private slots:
     void spritesTreeWidgetItemSelectionChanged();
     void removeScalingVariant();
 
+    void propertiesValueChanged(int val);
+
 private:
     Ui::MainWindow*      ui;
     QGraphicsScene*     _scene;

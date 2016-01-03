@@ -42,6 +42,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->textureBorderSpinBox->setValue(0);
     ui->spriteBorderSpinBox->setValue(2);
 
+    connect(ui->trimSpinBox, SIGNAL(valueChanged(int)), this, SLOT(propertiesValueChanged(int)));
+    connect(ui->textureBorderSpinBox, SIGNAL(valueChanged(int)), this, SLOT(propertiesValueChanged(int)));
+    connect(ui->spriteBorderSpinBox, SIGNAL(valueChanged(int)), this, SLOT(propertiesValueChanged(int)));
+    connect(ui->pot2ComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(propertiesValueChanged(int)));
+    connect(ui->maxTextureSizeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(propertiesValueChanged(int)));
+
     on_addScalingVariantPushButton_clicked();
 
     // setup open button
@@ -176,8 +182,6 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
     if (deleteAtlas) {
         delete atlas;
     }
-
-    on_toolButtonZoomFit_clicked();
 }
 
 void MainWindow::openSpritePackerProject(const QString& fileName) {
@@ -405,7 +409,7 @@ void MainWindow::on_actionRemove_triggered() {
 }
 
 void MainWindow::on_actionRefresh_triggered() {
-    _spritesTreeWidget->refresh();
+    //_spritesTreeWidget->refresh(); //Unnecessary refresh (just closes open items)
     refreshAtlas();
 }
 
@@ -519,6 +523,11 @@ void MainWindow::on_toolButtonZoomFit_clicked() {
     } else {
         value = (floor(value/5.f))*5;
     }
+
+    // fix bug when pressing fit twice
+    float sc = (value + 50.f) / 50.f;
+    ui->graphicsView->setTransform(QTransform::fromScale(sc, sc));
+
     ui->zoomSlider->setValue(value);
 }
 
@@ -603,4 +612,12 @@ void MainWindow::removeScalingVariant() {
         delete scalingVariantWidget;
     }
 //    QAction* senderAction = dynamic_cast<QAction*>(sender());
+}
+
+void MainWindow::propertiesValueChanged(int val) {
+    QSettings settings;
+
+    if (settings.value("Preferences/automaticPreview", true).toBool()) {
+        refreshAtlas();
+    }
 }
