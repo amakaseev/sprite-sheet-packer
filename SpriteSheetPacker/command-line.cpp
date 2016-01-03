@@ -72,7 +72,7 @@ int commandLine(QCoreApplication& app) {
     int trim = 1;
     bool pow2 = false;
     int maxSize = 8192;
-    float scale = 1;
+    float imageScale = 1;
     QString format = "cocos2d";
 
     if (projectFile) {
@@ -117,7 +117,7 @@ int commandLine(QCoreApplication& app) {
         maxSize = parser.value("max-size").toInt();
     }
     if (parser.isSet("scale") && !projectFile) {
-        scale = parser.value("scale").toFloat();
+        imageScale = parser.value("scale").toFloat();
     }
     if (parser.isSet("format")) {
         format = parser.value("format");
@@ -128,7 +128,7 @@ int commandLine(QCoreApplication& app) {
     qDebug() << "trim:" << trim;
     qDebug() << "pow2:" << pow2;
     qDebug() << "maxSize:" << maxSize;
-    qDebug() << "scale:" << scale;
+    qDebug() << "scale:" << imageScale;
 
     // load formats
     QSettings settings;
@@ -188,10 +188,13 @@ int commandLine(QCoreApplication& app) {
                 return -1;
             }
         }
+
+        delete projectFile;
+        projectFile = nullptr;
     } else {
 
         // Generate sprite atlas
-        SpriteAtlas atlas(QStringList() << source.filePath(), textureBorder, spriteBorder, trim, pow2, maxSize, scale);
+        SpriteAtlas atlas(QStringList() << source.filePath(), textureBorder, spriteBorder, trim, pow2, maxSize, imageScale);
         if (!atlas.generate()) {
             qCritical() << "ERROR: Generate atlas!";
             return -1;
@@ -208,11 +211,6 @@ int commandLine(QCoreApplication& app) {
 
 //    qDebug() << source.fileName() << source.isDir();
 //    qDebug() << destination.filePath() << destination.isDir();
-
-    if (projectFile) {
-        delete projectFile;
-        projectFile = nullptr;
-    }
 
     return 1;
 }
