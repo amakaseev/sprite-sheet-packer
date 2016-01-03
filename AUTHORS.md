@@ -8,6 +8,7 @@
 ## Developers:
 * [TheCodez](https://github.com/TheCodez)
     * Generate spritesheet from commandline using existing project file.
+    * Added automatically refreshed preview.
 		
 Thanks to all developers who report & trace bugs, discuss the sprite tools usage in forum!
 

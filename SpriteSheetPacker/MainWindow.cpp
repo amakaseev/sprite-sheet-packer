@@ -13,6 +13,8 @@
 #include "PListSerializer.h"
 
 #define MAX_RECENT 10
+#define MAX_SCALE 10.f
+#define MIN_SCALE 0.1f
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -226,6 +228,8 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     _spritesTreeWidget->clear();
     _spritesTreeWidget->addContent(projectFile->srcList());
     refreshAtlas();
+    // fit scene before open project
+    on_toolButtonZoomFit_clicked();
 
 
     _currentProjectFileName = fileName;
@@ -517,23 +521,32 @@ void MainWindow::on_toolButtonZoom1x1_clicked() {
 void MainWindow::on_toolButtonZoomFit_clicked() {
     ui->graphicsView->fitInView(_scene->sceneRect(), Qt::KeepAspectRatio);
     QTransform tr = ui->graphicsView->transform();
-    float scale = tr.m11();
-    int value = 50 * scale - 50;
-    if (value > 0) {
-        value = ((int)(value/5.f))*5;
+    float scale = tr.m11() - 1;
+    int value = 0;
+    if (scale > 0) {
+        value = (scale / (MAX_SCALE - 1.f)) * ui->zoomSlider->maximum();
     } else {
-        value = (floor(value/5.f))*5;
+        value = (scale / (MIN_SCALE - 1.f)) * ui->zoomSlider->minimum();
+    }
+    if (value > 0) {
+        value = ((int)(value/(float)ui->zoomSlider->singleStep()))*ui->zoomSlider->singleStep();
+    } else {
+        value = (floor(value/(float)ui->zoomSlider->singleStep()))*ui->zoomSlider->singleStep();
     }
 
-    // fix bug when pressing fit twice
-    float sc = (value + 50.f) / 50.f;
-    ui->graphicsView->setTransform(QTransform::fromScale(sc, sc));
-
     ui->zoomSlider->setValue(value);
+    on_zoomSlider_valueChanged(value);
 }
 
 void MainWindow::on_zoomSlider_valueChanged(int value) {
-    float scale = (value + 50.f) / 50.f;
+    float scale = 1;
+    if (value < 0) {
+        float t = (float)value / ui->zoomSlider->minimum();
+        scale = 1.f + (MIN_SCALE - 1.f) * t;
+    } else if (value > 0) {
+        float t = (float)value / ui->zoomSlider->maximum();
+        scale = 1.f + (MAX_SCALE - 1.f) * t;
+    }
     ui->graphicsView->setTransform(QTransform::fromScale(scale, scale));
 
     ui->labelZoomPercent->setText(QString::number((int)(scale * 100)) + " %");

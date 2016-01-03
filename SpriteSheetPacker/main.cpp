@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("amakaseev");
     QCoreApplication::setOrganizationDomain("spicyminds-lab.com");
     QCoreApplication::setApplicationName("SpriteSheetPacker");
-    QCoreApplication::setApplicationVersion("1.0.2");
+    QCoreApplication::setApplicationVersion("1.0.3");
     //QDir::setCurrent(QApplication::applicationDirPath());
 
     SpritePackerProjectFile::factory().set<SpritePackerProjectFile>("json");

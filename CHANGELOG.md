@@ -1,3 +1,9 @@
+v1.0.3
+======
+* Change zoom slider range (min: 10, max: 1000)
+* Added automatically refreshed preview
+* Generate spritesheet from commandline using existing project file
+
 v1.0.2
 ======
 * Implement drag and drop files and folders intro spritesheet from finder

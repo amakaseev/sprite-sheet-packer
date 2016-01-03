@@ -30,10 +30,10 @@
       <item>
        <widget class="QSlider" name="zoomSlider">
         <property name="minimum">
-         <number>-40</number>
+         <number>-45</number>
         </property>
         <property name="maximum">
-         <number>40</number>
+         <number>45</number>
         </property>
         <property name="singleStep">
          <number>5</number>
