@@ -26,7 +26,6 @@ public:
 protected:
     PolygonImage(const QImage& image, const float epsilon, const float threshold);
 
-    std::vector<QPointF> traceAll(const QRectF& rect, const float& threshold);
     std::vector<QPointF> trace(const QRectF& rect, const float& threshold);
     QPointF findFirstNoneTransparentPixel(const QRectF& rect, const float& threshold);
 

@@ -27,20 +27,6 @@ PolygonImage::PolygonImage(const QImage& image, const float epsilon, const float
 
 }
 
-std::vector<QPointF> PolygonImage::traceAll(const QRectF& rect, const float& threshold) {
-    std::vector<QPointF> _points;
-    QPointF i;
-    for(i.ry() = rect.top(); i.y() <= rect.bottom(); i.ry()++) {
-        for(i.rx() = rect.left(); i.x() <= rect.right(); i.rx()++) {
-            auto alpha = getAlphaByPos(i);
-            if(alpha > 2) {
-                _points.push_back(QPointF(i.x() - rect.left(), rect.size().height() - i.y() + rect.top()));
-            }
-        }
-    }
-    return _points;
-}
-
 std::vector<QPointF> PolygonImage::trace(const QRectF& rect, const float& threshold) {
     QPointF first = findFirstNoneTransparentPixel(rect, threshold);
     return marchSquare(rect, first, threshold);
@@ -499,8 +485,8 @@ Triangles PolygonImage::generateTriangles(const QImage& image, const QRectF& rec
 
     std::vector<QPointF> p;
 
-    p = polygonImage.traceAll(realRect, threshold);
-    //p = polygonImage.reduce(p, realRect, epsilon);
+    p = polygonImage.trace(realRect, threshold);
+    p = polygonImage.reduce(p, realRect, epsilon);
     p = polygonImage.expand(p, realRect, epsilon);
 
     auto tri = polygonImage.triangulate(p);
