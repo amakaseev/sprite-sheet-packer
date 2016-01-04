@@ -19,8 +19,9 @@ public slots:
 
 class PublishSpriteSheet {
 public:
-    static bool publish(const QString& filePath, const QString& format, const SpriteAtlas& spriteAtlas, bool errorMessage = true);
-    static bool optimizePNG(const QString& fileName);
+    static bool publish(const QString& filePath, const QString& format, int optLevel, const SpriteAtlas& spriteAtlas, bool errorMessage = true);
+    static bool optimizePNG(const QString& fileName, int optLevel);
+    static void optimizePNGInThread(const QString& fileName, int optLevel);
 
     static void addFormat(const QString& format, const QString& scriptFileName) { _formats[format] = scriptFileName; }
     static QMap<QString, QString>& formats() { return _formats; }

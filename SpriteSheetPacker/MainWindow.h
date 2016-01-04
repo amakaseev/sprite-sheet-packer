@@ -51,6 +51,8 @@ private slots:
     void on_toolButtonZoomFit_clicked();
     void on_zoomSlider_valueChanged(int value);
 
+    void on_optLevelSlider_valueChanged(int value);
+
     void on_maxTextureSizeComboBox_currentTextChanged(const QString &arg1);
     void on_destFolderToolButton_clicked();
     void on_dataFormatSetupToolButton_clicked();

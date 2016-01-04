@@ -766,6 +766,37 @@
              </layout>
             </item>
             <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_12">
+              <item>
+               <widget class="QLabel" name="label_11">
+                <property name="text">
+                 <string>PNG Opt Level:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSlider" name="optLevelSlider">
+                <property name="maximum">
+                 <number>7</number>
+                </property>
+                <property name="pageStep">
+                 <number>1</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="optLevelText">
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
              <layout class="QHBoxLayout" name="horizontalLayout_13">
               <item>
                <widget class="QLabel" name="label_13">
