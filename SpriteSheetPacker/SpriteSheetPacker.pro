@@ -12,6 +12,8 @@ TEMPLATE = app
 CONFIG += c++11
 #QMAKE_CXXFLAGS +=-std=c++11 -stdlib=libc++
 
+INCLUDEPATH += 3rdparty
+
 SOURCES += main.cpp\
     MainWindow.cpp \
     SpriteAtlas.cpp \
@@ -46,12 +48,12 @@ FORMS += MainWindow.ui \
 
 RESOURCES += resources.qrc
 
-include(optipng/optipng.pri)
-include(qtplist-master/qtplist-master.pri)
 include(TPSParser/TPSParser.pri)
-include(clipper/clipper.pri)
-include(poly2tri/poly2tri.pri)
-include(Box2D/Box2D.pri)
+include(3rdparty/optipng/optipng.pri)
+include(3rdparty/qtplist-master/qtplist-master.pri)
+include(3rdparty/clipper/clipper.pri)
+include(3rdparty/poly2tri/poly2tri.pri)
+include(3rdparty/Box2D/Box2D.pri)
 
 OTHER_FILES += \
     defaultFormats/cocos2d.js \
