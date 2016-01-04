@@ -127,7 +127,7 @@ int commandLine(QCoreApplication& app) {
     }
 
     if (parser.isSet("opt-level")) {
-        format = parser.value("opt-level").toInt();
+        optLevel = parser.value("opt-level").toInt();
     }
 
     qDebug() << "textureBorder:" << textureBorder;
