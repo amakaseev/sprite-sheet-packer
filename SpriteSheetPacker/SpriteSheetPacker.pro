@@ -46,6 +46,7 @@ FORMS += MainWindow.ui \
 
 RESOURCES += resources.qrc
 
+include(optipng/optipng.pri)
 include(qtplist-master/qtplist-master.pri)
 include(TPSParser/TPSParser.pri)
 include(clipper/clipper.pri)
