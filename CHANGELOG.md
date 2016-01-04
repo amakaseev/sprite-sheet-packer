@@ -1,5 +1,6 @@
 v1.0.3
 ======
+* UI and command line implementation of image optimization
 * Change zoom slider range (min: 10, max: 1000)
 * Added automatically refreshed preview
 * Generate spritesheet from commandline using existing project file
