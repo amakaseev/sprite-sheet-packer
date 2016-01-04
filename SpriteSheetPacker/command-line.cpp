@@ -18,6 +18,7 @@ int commandLine(QCoreApplication& app) {
         {"trim", "Allowed values: 1 to 255, default is 1. Pixels with an alpha value below this value will be considered transparent when trimming the sprite. Very useful for sprites with nearly invisible alpha pixels at the borders.", "int", "1"},
         {"powerOf2", "Forces the texture to have power of 2 size (32, 64, 128...). Default is disable."},
         {"max-size", "Sets the maximum size for the texture, default is 8192.", "size", "8192"},
+        {"opt-level", "Optimizes the image's file size. Allowed values: 1 to 7 (Higher values take noticeably longer.", "int", "0"},
         {"scale", "Scales all images before creating the sheet. E.g. use 0.5 for half size, default is 0.5 (Scale has no effect when source is a project file).", "float", "1"},
     });
 
@@ -74,6 +75,7 @@ int commandLine(QCoreApplication& app) {
     int maxSize = 8192;
     float imageScale = 1;
     QString format = "cocos2d";
+    int optLevel = 0;
 
     if (projectFile) {
         if (!projectFile->read(source.filePath())) {
@@ -84,6 +86,7 @@ int commandLine(QCoreApplication& app) {
             trim = projectFile->trimThreshold();
             pow2 = projectFile->pot2();
             maxSize = projectFile->maxTextureSize();
+            optLevel = projectFile->optLevel();
 
             if (!destinationSet) {
                 destination.setFile(projectFile->destPath());
@@ -123,12 +126,17 @@ int commandLine(QCoreApplication& app) {
         format = parser.value("format");
     }
 
+    if (parser.isSet("opt-level")) {
+        format = parser.value("opt-level").toInt();
+    }
+
     qDebug() << "textureBorder:" << textureBorder;
     qDebug() << "spriteBorder:" << spriteBorder;
     qDebug() << "trim:" << trim;
     qDebug() << "pow2:" << pow2;
     qDebug() << "maxSize:" << maxSize;
     qDebug() << "scale:" << imageScale;
+    qDebug() << "opt-level:" << optLevel;
 
     // load formats
     QSettings settings;
@@ -183,7 +191,7 @@ int commandLine(QCoreApplication& app) {
             }
 
             // Publish data
-            if (!PublishSpriteSheet::publish(destFileInfo.filePath(), format, atlas, false)) {
+            if (!PublishSpriteSheet::publish(destFileInfo.filePath(), format, optLevel, atlas, false)) {
                 qCritical() << "ERROR: publish atlas!";
                 return -1;
             }
@@ -201,7 +209,7 @@ int commandLine(QCoreApplication& app) {
         }
 
         // Publish data
-        if (!PublishSpriteSheet::publish(destination.filePath() + source.fileName(), format, atlas, false)) {
+        if (!PublishSpriteSheet::publish(destination.filePath() + source.fileName(), format, optLevel, atlas, false)) {
             qCritical() << "ERROR: publish atlas!";
             return -1;
         }

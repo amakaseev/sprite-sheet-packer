@@ -16,19 +16,22 @@ public:
 
 
     void setTrimThreshold(int trimThreshold) { _trimThreshold = trimThreshold; }
-    int trimThreshold() { return _trimThreshold; }
+    int trimThreshold() const { return _trimThreshold; }
 
     void setTextureBorder(int textureBorder) { _textureBorder = textureBorder; }
-    int textureBorder() { return _textureBorder; }
+    int textureBorder() const { return _textureBorder; }
 
     void setSpriteBorder(int spriteBorder) { _spriteBorder = spriteBorder; }
-    int spriteBorder() { return _spriteBorder; }
+    int spriteBorder() const { return _spriteBorder; }
 
     void setMaxTextureSize(int maxTextureSize) { _maxTextureSize = maxTextureSize; }
-    int maxTextureSize() { return _maxTextureSize; }
+    int maxTextureSize() const { return _maxTextureSize; }
 
     void setPot2(bool pot2) { _pot2 = pot2; }
-    bool pot2() { return _pot2; }
+    bool pot2() const { return _pot2; }
+
+    void setOptLevel(int optLevel) { _optLevel = optLevel; }
+    int optLevel() const { return _optLevel; }
 
     void setScalingVariants(const QVector<ScalingVariant>& scalingVariants) { _scalingVariants = scalingVariants; }
     const QVector<ScalingVariant>& scalingVariants() const { return _scalingVariants; }
@@ -58,6 +61,7 @@ protected:
     int     _spriteBorder;
     int     _maxTextureSize;
     bool    _pot2;
+    int     _optLevel;
 
     QVector<ScalingVariant> _scalingVariants;
     QString _dataFormat;
