@@ -27,46 +27,40 @@ PolygonImage::PolygonImage(const QImage& image, const float epsilon, const float
 
 }
 
-std::vector<QPointF> PolygonImage::trace(const QRectF& rect, const float& threshold, Triangles* triangles) {
-    auto result = findFirstNoneTransparentPixel(rect, threshold, triangles);
-    if (result.first) {
-        return marchSquare(rect, result.second, threshold);
-    } return std::vector<QPointF>();
-}
-
-QPair<bool, QPointF> PolygonImage::findFirstNoneTransparentPixel(const QRectF& rect, const float& threshold, Triangles* triangles) {
-    bool found = false;
+std::vector<QPointF> PolygonImage::traceAll(const QRectF& rect, const float& threshold) {
+    std::vector<QPointF> _points;
     QPointF i;
-    b2Transform idleTran;
-    idleTran.SetIdentity();
     for(i.ry() = rect.top(); i.y() <= rect.bottom(); i.ry()++) {
         for(i.rx() = rect.left(); i.x() <= rect.right(); i.rx()++) {
             auto alpha = getAlphaByPos(i);
+            if(alpha > 2) {
+                _points.push_back(QPointF(i.x() - rect.left(), rect.size().height() - i.y() + rect.top()));
+            }
+        }
+    }
+    return _points;
+}
+
+std::vector<QPointF> PolygonImage::trace(const QRectF& rect, const float& threshold) {
+    QPointF first = findFirstNoneTransparentPixel(rect, threshold);
+    return marchSquare(rect, first, threshold);
+}
+
+QPointF PolygonImage::findFirstNoneTransparentPixel(const QRectF& rect, const float& threshold) {
+    bool found = false;
+    QPointF i;
+    for(i.ry() = rect.top(); i.y() <= rect.bottom(); i.ry()++) {
+        if (found) break;
+        for(i.rx() = rect.left(); i.x() <= rect.right(); i.rx()++) {
+            auto alpha = getAlphaByPos(i);
             if(alpha > threshold) {
-                if (triangles) {
-                    bool found = false;
-                    for (int s=0; s<triangles->shapes.size(); ++s) {
-                        b2Manifold manifold;
-                        b2CircleShape circleShape;
-                        circleShape.m_p = b2Vec2(i.x() - rect.left(), rect.size().height() - i.y() + rect.top());
-                        circleShape.m_radius = 10;
-                        b2CollidePolygonAndCircle(&manifold, &triangles->shapes.at(s), idleTran, &circleShape, idleTran);
-                        if (manifold.pointCount > 0) {
-//                        if (triangles->shapes.at(s).TestPoint(idleTran, b2Vec2(i.x() - rect.left(), rect.size().height() - i.y() + rect.top()))) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (found) { // point already on polygon find next
-                        continue;
-                    }
-                }
-                return qMakePair(true, i);
+                found = true;
+                break;
             }
         }
     }
     qWarning() << "Image is all transparent!";
-    return qMakePair(false, i);
+    return i;
 }
 
 unsigned char PolygonImage::getAlphaByIndex(const unsigned int& i) {
@@ -99,7 +93,7 @@ unsigned int PolygonImage::getSquareValue(const unsigned int& x, const unsigned 
     sv += (fixedRect.contains(bl) && getAlphaByPos(bl) > threshold)? 4 : 0;
     QPointF br = QPointF(x, y);
     sv += (fixedRect.contains(br) && getAlphaByPos(br) > threshold)? 8 : 0;
-    //Q_ASSERT_X(sv != 0 && sv != 15, "square value should not be 0, or 15", "");
+    Q_ASSERT_X(sv != 0 && sv != 15, "square value should not be 0, or 15", "");
     return sv;
 }
 
@@ -244,7 +238,6 @@ std::vector<QPointF> PolygonImage::marchSquare(const QRectF& rect, const QPointF
                 break;
             default:
                 qDebug() << "this shouldn't happen.";
-                return _points;
         }
         //little optimization
         // if previous direction is same as current direction,
@@ -434,7 +427,6 @@ Triangles PolygonImage::triangulate(const std::vector<QPointF>& points) {
     unsigned short vdx = 0;
 
     for(std::vector<p2t::Triangle*>::const_iterator ite = tris.begin(); ite < tris.end(); ite++) {
-        b2Vec2 shapeVert[3];
         for(int i = 0; i < 3; i++) {
             auto p = (*ite)->GetPoint(i);
             auto v2 = QPointF(p->x, p->y);
@@ -460,12 +452,7 @@ Triangles PolygonImage::triangulate(const std::vector<QPointF>& points) {
                 idx++;
                 vdx++;
             }
-
-            shapeVert[i] = b2Vec2(triangles.verts[triangles.indices[idx-1]].v.x(), triangles.verts[triangles.indices[idx-1]].v.y());
         }
-        b2PolygonShape shape;
-        shape.Set(shapeVert, 3);
-        triangles.shapes.push_back(shape);
     }
     for(auto j : p2points)
     {
@@ -512,18 +499,11 @@ Triangles PolygonImage::generateTriangles(const QImage& image, const QRectF& rec
 
     std::vector<QPointF> p;
 
-    Triangles triangles;
-    while (1) {
-        p = polygonImage.trace(realRect, threshold, &triangles);
-        if (p.size() < 3) break;
-        qDebug() << "STEP!";
-        p = polygonImage.reduce(p, realRect, epsilon);
-        if (p.size() < 3) break;
-        p = polygonImage.expand(p, realRect, epsilon);
-        if (p.size() < 3) break;
+    p = polygonImage.traceAll(realRect, threshold);
+    //p = polygonImage.reduce(p, realRect, epsilon);
+    p = polygonImage.expand(p, realRect, epsilon);
 
-        auto tri = polygonImage.triangulate(p);
-        triangles.add(tri);
-    }
-    return triangles;
+    auto tri = polygonImage.triangulate(p);
+
+    return tri;
 }
