@@ -251,6 +251,7 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     ui->dataFormatComboBox->setCurrentText(projectFile->dataFormat());
     ui->destPathLineEdit->setText(projectFile->destPath());
     ui->spriteSheetLineEdit->setText(projectFile->spriteSheetName());
+    ui->optLevelSlider->setValue(projectFile->optLevel());
 
     while(ui->scalingVariantsGroupBox->layout()->count() > 0){
         QLayoutItem *item = ui->scalingVariantsGroupBox->layout()->takeAt(0);
@@ -305,6 +306,7 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
     projectFile->setDataFormat(ui->dataFormatComboBox->currentText());
     projectFile->setDestPath(ui->destPathLineEdit->text());
     projectFile->setSpriteSheetName(ui->spriteSheetLineEdit->text());
+    projectFile->setOptLevel(ui->optLevelSlider->value());
 
     QVector<ScalingVariant> scalingVariants;
     for (int i=0; i<ui->scalingVariantsGroupBox->layout()->count(); ++i) {
@@ -517,7 +519,7 @@ void MainWindow::on_actionPublish_triggered() {
                 refreshAtlas(&atlas);
             }
 
-            if (!PublishSpriteSheet::publish(destFileInfo.filePath(), ui->dataFormatComboBox->currentText(), atlas)) {
+            if (!PublishSpriteSheet::publish(destFileInfo.filePath(), ui->dataFormatComboBox->currentText(), ui->optLevelSlider->value(), atlas)) {
                 publishStatusDialog->log("Publish scale variant error! See all logs for details.", Qt::red);
                 continue;
             } else {
@@ -587,6 +589,10 @@ void MainWindow::on_zoomSlider_valueChanged(int value) {
     ui->graphicsView->setTransform(QTransform::fromScale(scale, scale));
 
     ui->labelZoomPercent->setText(QString::number((int)(scale * 100)) + " %");
+}
+
+void MainWindow::on_optLevelSlider_valueChanged(int value) {
+    ui->optLevelText->setText(QString::number(value));
 }
 
 void MainWindow::spritesTreeWidgetItemSelectionChanged() {

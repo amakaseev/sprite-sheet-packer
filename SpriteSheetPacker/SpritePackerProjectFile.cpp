@@ -12,6 +12,7 @@ SpritePackerProjectFile::SpritePackerProjectFile() {
     _spriteBorder = 2;
     _maxTextureSize = 8192;
     _pot2 = false;
+    _optLevel = 0;
 }
 
 
@@ -31,6 +32,7 @@ bool SpritePackerProjectFile::read(const QString &fileName) {
     _spriteBorder = json["spriteBorder"].toInt();
     _maxTextureSize = json["maxTextureSize"].toInt();
     _pot2 = json["pot2"].toBool();
+    _optLevel = json["optLevel"].toInt();
 
     _scalingVariants.clear();
     QJsonArray scalingVariants = json["scalingVariants"].toArray();
@@ -64,6 +66,7 @@ bool SpritePackerProjectFile::write(const QString &fileName) {
     json["spriteBorder"] = _spriteBorder;
     json["maxTextureSize"] = _maxTextureSize;
     json["pot2"] = _pot2;
+    json["optLevel"] = _optLevel;
 
     QJsonArray scalingVariants;
     for (auto scalingVariant: _scalingVariants) {
@@ -189,6 +192,10 @@ bool SpritePackerProjectFileTPS::read(const QString &fileName) {
         } else {
             _pot2 = false;
         }
+    }
+
+    if (tpsMap.find("pngOptimizationLevel") != tpsMap.end()) {
+         _optLevel = tpsMap["pngOptimizationLevel"].toInt();
     }
 
     if (tpsMap.find("dataFileNames") != tpsMap.end()) {

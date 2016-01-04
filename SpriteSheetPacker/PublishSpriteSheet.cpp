@@ -34,7 +34,7 @@ void JSConsole::log(QString msg) {
     qDebug() << "js:"<< msg;
 }
 
-bool PublishSpriteSheet::publish(const QString& filePath, const QString& format, const SpriteAtlas& spriteAtlas, bool errorMessage) {
+bool PublishSpriteSheet::publish(const QString& filePath, const QString& format, int optLevel, const SpriteAtlas& spriteAtlas, bool errorMessage) {
     QJSEngine engine;
 
     auto it_format = _formats.find(format);
@@ -103,8 +103,11 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
         } else {
             // write image
             spriteAtlas.image().save(filePath + ".png");
-            // TODO: optimize in QThread and enable/disable on preferences
-            //optimizePNG(filePath + ".png");
+
+            if (optLevel > 0) {
+                // TODO: optimize in QThread and enable/disable on preferences
+                optimizePNG(filePath + ".png", optLevel);
+            }
 
             // write data
             if (!result.hasProperty("data") || !result.hasProperty("format")) {
@@ -160,12 +163,15 @@ static void panic(const char *msg) {
     qCritical("** INTERNAL ERROR: %s", msg);
 }
 
-bool PublishSpriteSheet::optimizePNG(const QString& fileName) {
+bool PublishSpriteSheet::optimizePNG(const QString& fileName, int optLevel) {
     /* Initialize the optimization engine. */
     opng_options options;
     memset(&options, 0, sizeof(options));
-    options.optim_level = -1;
+    options.optim_level = optLevel;
     options.interlace = -1;
+    options.strip_all = 1;
+    //options.compr_level_set |= 9;
+    //options.mem_level_set |= 9;
 
     opng_ui ui;
     ui.printf_fn      = app_printf;
@@ -186,4 +192,10 @@ bool PublishSpriteSheet::optimizePNG(const QString& fileName) {
         qCritical() << "Can't finalize optimization engine";
     }
     return true;
+}
+
+void PublishSpriteSheet::optimizePNGInThread(const QString& fileName, int optLevel) {
+    //QThread* generateThread = new QThread(this)
+
+    //generateThread->start();
 }
