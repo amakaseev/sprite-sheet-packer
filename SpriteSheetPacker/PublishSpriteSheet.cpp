@@ -2,6 +2,7 @@
 #include "SpritePackerProjectFile.h"
 #include "SpriteAtlas.h"
 #include "PListSerializer.h"
+#include "optipng.h"
 #include <QMessageBox>
 
 QMap<QString, QString> PublishSpriteSheet::_formats;
@@ -102,6 +103,8 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
         } else {
             // write image
             spriteAtlas.image().save(filePath + ".png");
+            // TODO: optimize in QThread and enable/disable on preferences
+            //optimizePNG(filePath + ".png");
 
             // write data
             if (!result.hasProperty("data") || !result.hasProperty("format")) {
@@ -129,5 +132,58 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
         return false;
     }
 
+    return true;
+}
+
+/** Application-defined printf callback **/
+static void app_printf(const char *fmt, ...) {
+//    va_list args;
+//    va_start(args, fmt);
+//    printf(fmt, args);
+//    va_end(args);
+}
+
+/** Application-defined control print callback **/
+static void app_print_cntrl(int cntrl_code) {
+    // TODO: implement
+}
+
+/** Application-defined progress update callback **/
+static void app_progress(unsigned long current_step, unsigned long total_steps) {
+    // TODO: implement
+    //qDebug("current_step: %d (total_steps: %d)\n", (int)current_step, (int)total_steps);
+}
+
+/** Panic handling **/
+static void panic(const char *msg) {
+    /* Print the panic message to stderr and terminate abnormally. */
+    qCritical("** INTERNAL ERROR: %s", msg);
+}
+
+bool PublishSpriteSheet::optimizePNG(const QString& fileName) {
+    /* Initialize the optimization engine. */
+    opng_options options;
+    memset(&options, 0, sizeof(options));
+    options.optim_level = -1;
+    options.interlace = -1;
+
+    opng_ui ui;
+    ui.printf_fn      = app_printf;
+    ui.print_cntrl_fn = app_print_cntrl;
+    ui.progress_fn    = app_progress;
+    ui.panic_fn       = panic;
+    if (opng_initialize(&options, &ui) != 0) {
+        qCritical() << "Can't initialize optimization engine";
+        return false;
+    }
+
+    if (opng_optimize(fileName.toStdString().c_str()) != 0) {
+        return false;
+    }
+
+    /* Finalize the optimization engine. */
+    if (opng_finalize() != 0) {
+        qCritical() << "Can't finalize optimization engine";
+    }
     return true;
 }
