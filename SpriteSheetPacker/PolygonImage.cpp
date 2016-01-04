@@ -28,25 +28,25 @@ PolygonImage::PolygonImage(const QImage& image, const float epsilon, const float
 }
 
 std::vector<QPointF> PolygonImage::trace(const QRectF& rect, const float& threshold) {
-    QPointF first = findFirstNoneTransparentPixel(rect, threshold);
-    return marchSquare(rect, first, threshold);
+    auto result = findFirstNoneTransparentPixel(rect, threshold);
+    if (result.first) {
+        return marchSquare(rect, result.second, threshold);
+    } else {
+        return std::vector<QPointF>();
+    }
 }
 
-QPointF PolygonImage::findFirstNoneTransparentPixel(const QRectF& rect, const float& threshold) {
-    bool found = false;
+QPair<bool, QPointF> PolygonImage::findFirstNoneTransparentPixel(const QRectF& rect, const float& threshold) {
     QPointF i;
     for(i.ry() = rect.top(); i.y() <= rect.bottom(); i.ry()++) {
-        if (found) break;
         for(i.rx() = rect.left(); i.x() <= rect.right(); i.rx()++) {
             auto alpha = getAlphaByPos(i);
             if(alpha > threshold) {
-                found = true;
-                break;
+                return qMakePair(true, i);
             }
         }
     }
-    qWarning() << "Image is all transparent!";
-    return i;
+    return qMakePair(false, i);
 }
 
 unsigned char PolygonImage::getAlphaByIndex(const unsigned int& i) {
@@ -230,15 +230,16 @@ std::vector<QPointF> PolygonImage::marchSquare(const QRectF& rect, const QPointF
         // then we should modify the last vec to current
         curx += stepx;
         cury += stepy;
+//        _points.push_back(QPointF(curx - rect.left(), rect.size().height() - cury + rect.top()));
         if(stepx == prevx && stepy == prevy) {
-            _points.back().setX(curx-rect.left());
-            _points.back().setY(rect.size().height() - cury + rect.top());
+            _points.back().setX(curx - rect.left());
+            _points.back().setY(cury - rect.top());
         } else if(problem) {
             //TODO: we triangulation cannot work collinear points, so we need to modify same point a little
             //TODO: maybe we can detect if we go into a hole and coming back the hole, we should extract those points and remove them
-            _points.push_back(QPointF(curx - rect.left(), rect.size().height() - cury + rect.top()));
+            _points.push_back(QPointF(curx - rect.left(), cury - rect.top()));
         } else {
-            _points.push_back(QPointF(curx - rect.left(), rect.size().height() - cury + rect.top()));
+            _points.push_back(QPointF(curx - rect.left(), cury - rect.top()));
         }
 
         count++;
@@ -483,13 +484,34 @@ Triangles PolygonImage::generateTriangles(const QImage& image, const QRectF& rec
     PolygonImage polygonImage(image, epsilon, threshold);
     QRectF realRect = rect;
 
-    std::vector<QPointF> p;
+    Triangles triangles;
+    while (1) {
+        auto p = polygonImage.trace(realRect, threshold);
+        if (p.size() < 3) break;
 
-    p = polygonImage.trace(realRect, threshold);
-    p = polygonImage.reduce(p, realRect, epsilon);
-    p = polygonImage.expand(p, realRect, epsilon);
+        // erase contour for find next
+        QPolygonF fillPolygon(QVector<QPointF>::fromStdVector(p));
+        fillPolygon.translate(rect.x(), rect.y());
+        QColor fillColor(0, 0, 0, 0);
+        QPainter painer(&polygonImage._image);
+        painer.setPen(QPen(fillColor));
+        painer.setBrush(QBrush(fillColor));
+        painer.setCompositionMode(QPainter::CompositionMode_Source);
+        painer.drawPolygon(fillPolygon);
+        painer.end();
+        polygonImage._image.save("/Users/alekseymakaseev/Documents/Work/sprite-sheet-packer/test.png");
 
-    auto tri = polygonImage.triangulate(p);
 
-    return tri;
+        p = polygonImage.reduce(p, realRect, epsilon);
+        p = polygonImage.expand(p, realRect, epsilon);
+
+        auto tri = polygonImage.triangulate(p);
+        if (tri.indices.size()) {
+            triangles.add(tri);
+        }
+
+        triangles.debugPoints.insert(triangles.debugPoints.end(), p.begin(), p.end());
+    }
+
+    return triangles;
 }

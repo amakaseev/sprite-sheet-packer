@@ -204,11 +204,15 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
     brushColor.setAlpha(100);
     for(auto spriteFrame: atlas->spriteFrames()) {
         for (int i=0; i<spriteFrame.triangles.indices.size(); i+=3) {
-            QPointF v1 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+0]].v;
-            QPointF v2 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+1]].v;
-            QPointF v3 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+2]].v;
+            QPointF v1 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+0]].v + spriteFrame.mFrame.topLeft();
+            QPointF v2 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+1]].v + spriteFrame.mFrame.topLeft();
+            QPointF v3 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+2]].v + spriteFrame.mFrame.topLeft();
+
             _scene->addPolygon(QPolygonF() << v1 << v2 << v3, QPen(Qt::white), QBrush(brushColor));
             //_scene->addEllipse(QRectF(vert.x()-1, vert.y()-1, 2, 2), QPen(Qt::red), QBrush(Qt::red));
+        }
+        for (auto point: spriteFrame.triangles.debugPoints) {
+            _scene->addRect(QRectF(point.x(), point.y(), 1, 1), QPen(Qt::red), QBrush(Qt::red));
         }
         //_scene->addRect(rect, QPen(Qt::darkGreen));
     }

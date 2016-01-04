@@ -2,7 +2,7 @@
 #define POLYGONIMAGE_H
 
 #include <QtCore>
-#include <QImage>
+#include <QtGui>
 
 #include <Box2D.h>
 
@@ -16,6 +16,16 @@ struct Triangles {
     QVector<V2F_T2F> verts;
     /**Index data pointer.*/
     QVector<unsigned short> indices;
+
+    std::vector<QPointF> debugPoints;
+
+    void add(const Triangles& other) {
+        unsigned short idx = verts.size();
+        verts += other.verts;
+        for (int i=0; i<other.indices.size(); ++i) {
+            indices.push_back(other.indices[i] + idx);
+        }
+    }
 };
 
 class PolygonImage
@@ -27,7 +37,7 @@ protected:
     PolygonImage(const QImage& image, const float epsilon, const float threshold);
 
     std::vector<QPointF> trace(const QRectF& rect, const float& threshold);
-    QPointF findFirstNoneTransparentPixel(const QRectF& rect, const float& threshold);
+    QPair<bool, QPointF> findFirstNoneTransparentPixel(const QRectF& rect, const float& threshold);
 
     unsigned char getAlphaByIndex(const unsigned int& i);
     unsigned char getAlphaByPos(const QPointF& pos);
@@ -45,7 +55,7 @@ protected:
     void calculateUV(const QRectF& rect, V2F_T2F* verts, const size_t& count);
 
 private:
-    const QImage& _image;
+    QImage        _image;
     std::string   _filename;
     unsigned int  _width;
     unsigned int  _height;
