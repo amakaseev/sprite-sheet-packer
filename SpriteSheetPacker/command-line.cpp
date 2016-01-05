@@ -84,7 +84,7 @@ int commandLine(QCoreApplication& app) {
             textureBorder = projectFile->textureBorder();
             spriteBorder = projectFile->spriteBorder();
             trim = projectFile->trimThreshold();
-            pow2 = projectFile->pot2();
+            pow2 = projectFile->pow2();
             maxSize = projectFile->maxTextureSize();
             optLevel = projectFile->optLevel();
 

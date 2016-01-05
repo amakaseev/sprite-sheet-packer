@@ -27,8 +27,8 @@ public:
     void setMaxTextureSize(int maxTextureSize) { _maxTextureSize = maxTextureSize; }
     int maxTextureSize() const { return _maxTextureSize; }
 
-    void setPot2(bool pot2) { _pot2 = pot2; }
-    bool pot2() const { return _pot2; }
+    void setPow2(bool pow2) { _pow2 = pow2; }
+    bool pow2() const { return _pow2; }
 
     void setOptLevel(int optLevel) { _optLevel = optLevel; }
     int optLevel() const { return _optLevel; }
@@ -60,7 +60,7 @@ protected:
     int     _textureBorder;
     int     _spriteBorder;
     int     _maxTextureSize;
-    bool    _pot2;
+    bool    _pow2;
     int     _optLevel;
 
     QVector<ScalingVariant> _scalingVariants;

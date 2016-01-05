@@ -85,12 +85,12 @@ public:
     Triangles triangles;
 };
 
-SpriteAtlas::SpriteAtlas(const QStringList& sourceList, int textureBorder, int spriteBorder, int trim, bool pot2, int maxSize, float scale)
+SpriteAtlas::SpriteAtlas(const QStringList& sourceList, int textureBorder, int spriteBorder, int trim, bool pow2, int maxSize, float scale)
     : _sourceList(sourceList)
     , _textureBorder(textureBorder)
     , _spriteBorder(spriteBorder)
     , _trim(trim)
-    , _pot2(pot2)
+    , _pow2(pow2)
     , _maxTextureSize(maxSize)
     , _scale(scale)
 {
@@ -192,7 +192,7 @@ bool SpriteAtlas::generate() {
     // find optimal size for atlas
     int w = qMin(_maxTextureSize, (int)sqrt(volume));
     int h = qMin(_maxTextureSize, (int)sqrt(volume));
-    if (_pot2) {
+    if (_pow2) {
         w = pow2(w);
         h = pow2(h);
         qDebug() << "Volume size:" << w << "x" << h;

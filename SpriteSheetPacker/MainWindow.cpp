@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->spriteBorderSpinBox, SIGNAL(valueChanged(int)), this, SLOT(propertiesValueChanged(int)));
     connect(ui->trimSpinBox, SIGNAL(valueChanged(int)), this, SLOT(propertiesValueChanged(int)));
     connect(ui->epsilonHorizontalSlider, SIGNAL(sliderMoved(int)), this, SLOT(propertiesValueChanged(int)));
-    connect(ui->pot2ComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(propertiesValueChanged(int)));
+    connect(ui->pow2ComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(propertiesValueChanged(int)));
     connect(ui->maxTextureSizeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(propertiesValueChanged(int)));
     connect(ui->algorithmComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(propertiesValueChanged(int)));
     connect(ui->trimModeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(propertiesValueChanged(int)));
@@ -183,7 +183,7 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
                                 ui->textureBorderSpinBox->value(),
                                 ui->spriteBorderSpinBox->value(),
                                 ui->trimSpinBox->value(),
-                                ui->pot2ComboBox->currentIndex()? true:false,
+                                ui->pow2ComboBox->currentIndex()? true:false,
                                 ui->maxTextureSizeComboBox->currentText().toInt(),
                                 scale);
         if (!atlas->generate()) {
@@ -203,16 +203,17 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
     QColor brushColor(Qt::blue);
     brushColor.setAlpha(100);
     for(auto spriteFrame: atlas->spriteFrames()) {
+        QPoint delta = spriteFrame.mFrame.topLeft();
         for (int i=0; i<spriteFrame.triangles.indices.size(); i+=3) {
-            QPointF v1 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+0]].v + spriteFrame.mFrame.topLeft();
-            QPointF v2 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+1]].v + spriteFrame.mFrame.topLeft();
-            QPointF v3 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+2]].v + spriteFrame.mFrame.topLeft();
+            QPointF v1 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+0]].v + delta;
+            QPointF v2 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+1]].v + delta;
+            QPointF v3 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+2]].v + delta;
 
             _scene->addPolygon(QPolygonF() << v1 << v2 << v3, QPen(Qt::white), QBrush(brushColor));
             //_scene->addEllipse(QRectF(vert.x()-1, vert.y()-1, 2, 2), QPen(Qt::red), QBrush(Qt::red));
         }
         for (auto point: spriteFrame.triangles.debugPoints) {
-            _scene->addRect(QRectF(point.x(), point.y(), 1, 1), QPen(Qt::red), QBrush(Qt::red));
+            _scene->addRect(QRectF(point.x() + delta.x(), point.y() + delta.y(), 1, 1), QPen(Qt::red), QBrush(Qt::red));
         }
         //_scene->addRect(rect, QPen(Qt::darkGreen));
     }
@@ -247,7 +248,7 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     ui->textureBorderSpinBox->setValue(projectFile->textureBorder());
     ui->spriteBorderSpinBox->setValue(projectFile->spriteBorder());
     ui->maxTextureSizeComboBox->setCurrentText(QString::number(projectFile->maxTextureSize()));
-    ui->pot2ComboBox->setCurrentIndex(projectFile->pot2()? 1:0);
+    ui->pow2ComboBox->setCurrentIndex(projectFile->pow2()? 1:0);
     ui->dataFormatComboBox->setCurrentText(projectFile->dataFormat());
     ui->destPathLineEdit->setText(projectFile->destPath());
     ui->spriteSheetLineEdit->setText(projectFile->spriteSheetName());
@@ -302,7 +303,7 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
     projectFile->setTextureBorder(ui->textureBorderSpinBox->value());
     projectFile->setSpriteBorder(ui->spriteBorderSpinBox->value());
     projectFile->setMaxTextureSize(ui->maxTextureSizeComboBox->currentText().toInt());
-    projectFile->setPot2(ui->pot2ComboBox->currentIndex()? true:false);
+    projectFile->setPow2(ui->pow2ComboBox->currentIndex()? true:false);
     projectFile->setDataFormat(ui->dataFormatComboBox->currentText());
     projectFile->setDestPath(ui->destPathLineEdit->text());
     projectFile->setSpriteSheetName(ui->spriteSheetLineEdit->text());
@@ -508,7 +509,7 @@ void MainWindow::on_actionPublish_triggered() {
                               ui->textureBorderSpinBox->value(),
                               ui->spriteBorderSpinBox->value(),
                               ui->trimSpinBox->value(),
-                              ui->pot2ComboBox->currentIndex()? true:false,
+                              ui->pow2ComboBox->currentIndex()? true:false,
                               ui->maxTextureSizeComboBox->currentText().toInt(),
                               scale);
             if (!atlas.generate()) {
