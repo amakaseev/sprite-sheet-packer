@@ -18,13 +18,12 @@ inline float clampf(float value, float min_inclusive, float max_inclusive)
 }
 
 PolygonImage::PolygonImage(const QImage& image, const float epsilon, const float threshold)
-    : _image(image)
-    , _width(image.width())
+    : _width(image.width())
     , _height(image.height())
     , _threshold(threshold)
     , _filename("unknow")
 {
-
+    _image = image.convertToFormat(QImage::Format_RGBA8888);
 }
 
 std::vector<QPointF> PolygonImage::trace(const QRectF& rect, const float& threshold) {
@@ -38,8 +37,8 @@ std::vector<QPointF> PolygonImage::trace(const QRectF& rect, const float& thresh
 
 QPair<bool, QPointF> PolygonImage::findFirstNoneTransparentPixel(const QRectF& rect, const float& threshold) {
     QPointF i;
-    for(i.ry() = rect.top(); i.y() <= rect.bottom(); i.ry()++) {
-        for(i.rx() = rect.left(); i.x() <= rect.right(); i.rx()++) {
+    for(i.ry() = rect.top(); i.y() < rect.bottom(); i.ry()++) {
+        for(i.rx() = rect.left(); i.x() < rect.right(); i.rx()++) {
             auto alpha = getAlphaByPos(i);
             if(alpha > threshold) {
                 return qMakePair(true, i);
@@ -79,7 +78,7 @@ unsigned int PolygonImage::getSquareValue(const unsigned int& x, const unsigned 
     sv += (fixedRect.contains(bl) && getAlphaByPos(bl) > threshold)? 4 : 0;
     QPointF br = QPointF(x, y);
     sv += (fixedRect.contains(br) && getAlphaByPos(br) > threshold)? 8 : 0;
-    Q_ASSERT_X(sv != 0 && sv != 15, "square value should not be 0, or 15", "");
+//    Q_ASSERT_X(sv != 0 && sv != 15, "square value should not be 0, or 15", "");
     return sv;
 }
 
@@ -103,8 +102,7 @@ std::vector<QPointF> PolygonImage::marchSquare(const QRectF& rect, const QPointF
     std::vector<QPointF> _points;
     do{
         int sv = getSquareValue(curx, cury, rect, threshold);
-        switch(sv){
-
+        switch(sv) {
             case 1:
             case 5:
             case 13:
@@ -119,8 +117,6 @@ std::vector<QPointF> PolygonImage::marchSquare(const QRectF& rect, const QPointF
                 stepx = 0;
                 stepy = -1;
                 break;
-
-
             case 8:
             case 10:
             case 11:
@@ -135,8 +131,6 @@ std::vector<QPointF> PolygonImage::marchSquare(const QRectF& rect, const QPointF
                 stepx = 0;
                 stepy = 1;
                 break;
-
-
             case 4:
             case 12:
             case 14:
@@ -151,8 +145,6 @@ std::vector<QPointF> PolygonImage::marchSquare(const QRectF& rect, const QPointF
                 stepx = -1;
                 stepy = 0;
                 break;
-
-
             case 2 :
             case 3 :
             case 7 :
@@ -224,6 +216,7 @@ std::vector<QPointF> PolygonImage::marchSquare(const QRectF& rect, const QPointF
                 break;
             default:
                 qDebug() << "this shouldn't happen.";
+                return _points;
         }
         //little optimization
         // if previous direction is same as current direction,
@@ -231,7 +224,7 @@ std::vector<QPointF> PolygonImage::marchSquare(const QRectF& rect, const QPointF
         curx += stepx;
         cury += stepy;
 //        _points.push_back(QPointF(curx - rect.left(), rect.size().height() - cury + rect.top()));
-        if(stepx == prevx && stepy == prevy) {
+        if(stepx == prevx && stepy == prevy && _points.size()) {
             _points.back().setX(curx - rect.left());
             _points.back().setY(cury - rect.top());
         } else if(problem) {
@@ -400,7 +393,6 @@ Triangles PolygonImage::triangulate(const std::vector<QPointF>& points) {
         p2t::Point * p = new p2t::Point(it->x(), it->y());
         p2points.push_back(p);
     }
-    qDebug() << "!!!!!!!" << points.size();
 
     p2t::CDT cdt(p2points);
     cdt.Triangulate();
@@ -487,30 +479,38 @@ Triangles PolygonImage::generateTriangles(const QImage& image, const QRectF& rec
     Triangles triangles;
     while (1) {
         auto p = polygonImage.trace(realRect, threshold);
-        if (p.size() < 3) break;
-
-        // erase contour for find next
-        QPolygonF fillPolygon(QVector<QPointF>::fromStdVector(p));
-        fillPolygon.translate(rect.x(), rect.y());
-        QColor fillColor(0, 0, 0, 0);
-        QPainter painer(&polygonImage._image);
-        painer.setPen(QPen(fillColor));
-        painer.setBrush(QBrush(fillColor));
-        painer.setCompositionMode(QPainter::CompositionMode_Source);
-        painer.drawPolygon(fillPolygon);
-        painer.end();
-        polygonImage._image.save("/Users/alekseymakaseev/Documents/Work/sprite-sheet-packer/test.png");
-
-
-        p = polygonImage.reduce(p, realRect, epsilon);
-        p = polygonImage.expand(p, realRect, epsilon);
-
-        auto tri = polygonImage.triangulate(p);
-        if (tri.indices.size()) {
-            triangles.add(tri);
+        if (p.size() >= 3) {
+            // erase contour for find next
+            QPolygonF fillPolygon(QVector<QPointF>::fromStdVector(p));
+            fillPolygon.translate(rect.x(), rect.y());
+            QColor fillColor(0, 0, 0, 0);
+            QPen pen(fillColor);
+            pen.setWidthF(qMax(epsilon, 2.f));
+            QPainter painer(&polygonImage._image);
+            painer.setPen(pen);
+            painer.setBrush(QBrush(fillColor));
+            painer.setCompositionMode(QPainter::CompositionMode_Source);
+            painer.drawPolygon(fillPolygon);
+            painer.end();
+            //polygonImage._image.save("/Users/alekseymakaseev/Documents/Work/sprite-sheet-packer/test.png");
+        } else {
+            break;
         }
 
-        triangles.debugPoints.insert(triangles.debugPoints.end(), p.begin(), p.end());
+        if (p.size() >= 9) {
+            p = polygonImage.reduce(p, realRect, epsilon);
+        }
+        if (p.size() >= 3) {
+            p = polygonImage.expand(p, realRect, epsilon);
+        }
+
+        if (p.size() >= 3) {
+            auto tri = polygonImage.triangulate(p);
+            if (tri.indices.size()) {
+                triangles.add(tri);
+            }
+            triangles.debugPoints.insert(triangles.debugPoints.end(), p.begin(), p.end());
+        }
     }
 
     return triangles;

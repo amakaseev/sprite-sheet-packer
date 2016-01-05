@@ -18,6 +18,7 @@ struct Triangles {
     QVector<unsigned short> indices;
 
     std::vector<QPointF> debugPoints;
+    std::vector<int> debugPartInfo;
 
     void add(const Triangles& other) {
         unsigned short idx = verts.size();
@@ -25,6 +26,7 @@ struct Triangles {
         for (int i=0; i<other.indices.size(); ++i) {
             indices.push_back(other.indices[i] + idx);
         }
+        debugPartInfo.push_back(other.indices.size() / 3);
     }
 };
 
