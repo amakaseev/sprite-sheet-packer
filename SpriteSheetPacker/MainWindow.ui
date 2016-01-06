@@ -164,6 +164,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="displayOutlinesCheckBox">
+        <property name="text">
+         <string>Display outlines</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -196,7 +203,7 @@
      <x>0</x>
      <y>0</y>
      <width>1222</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <property name="defaultUp">
@@ -306,8 +313,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>320</width>
-          <height>848</height>
+          <width>314</width>
+          <height>839</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_6">

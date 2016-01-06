@@ -63,12 +63,15 @@ private slots:
 
     void propertiesValueChanged(int val);
 
+    void on_displayOutlinesCheckBox_clicked(bool checked);
+
 private:
     Ui::MainWindow*      ui;
     QGraphicsScene*     _scene;
     SpritesTreeWidget*  _spritesTreeWidget;
     QString             _currentProjectFileName;
     QToolButton*        _openButton;
+    QGraphicsItemGroup* _outlinesGroup;
 };
 
 #endif // MAINWINDOW_H

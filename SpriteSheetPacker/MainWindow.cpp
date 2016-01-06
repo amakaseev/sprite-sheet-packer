@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _scene->setBackgroundBrush(QBrush(Qt::darkGray));
     ui->graphicsView->setScene(_scene);
     ui->graphicsView->setAcceptDrops(false);
+    _outlinesGroup = NULL;
 
     _spritesTreeWidget = new SpritesTreeWidget(ui->spritesDockWidgetContents);
     connect(_spritesTreeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(spritesTreeWidgetItemSelectionChanged()));
@@ -196,29 +197,43 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
 
     const QImage& atlasImage = atlas->image();
 
+    if (_outlinesGroup)
+        _scene->destroyItemGroup(_outlinesGroup);
     _scene->clear();
     _scene->addRect(atlasImage.rect(), QPen(Qt::darkRed), QBrush(QPixmap("://res/background_tran.png")));
+
     QGraphicsPixmapItem* atlasPixmapItem = _scene->addPixmap(QPixmap::fromImage(atlasImage));
 
+    QList<QGraphicsItem*> outlineItems;
     QColor brushColor(Qt::blue);
     brushColor.setAlpha(100);
     for(auto spriteFrame: atlas->spriteFrames()) {
         QPoint delta = spriteFrame.mFrame.topLeft();
+
+        outlineItems.push_back(_scene->addRect(spriteFrame.mFrame, QPen(Qt::white), QBrush(brushColor)));
+
         for (int i=0; i<spriteFrame.triangles.indices.size(); i+=3) {
             QPointF v1 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+0]].v + delta;
             QPointF v2 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+1]].v + delta;
             QPointF v3 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+2]].v + delta;
 
-            _scene->addPolygon(QPolygonF() << v1 << v2 << v3, QPen(Qt::white), QBrush(brushColor));
-            //_scene->addEllipse(QRectF(vert.x()-1, vert.y()-1, 2, 2), QPen(Qt::red), QBrush(Qt::red));
+            auto polygonItem = _scene->addPolygon(QPolygonF() << v1 << v2 << v3);
+            polygonItem->setPen(QPen(Qt::white));
+            polygonItem->setBrush(QBrush(brushColor));
+            outlineItems.push_back(polygonItem);
         }
         for (auto point: spriteFrame.triangles.debugPoints) {
-            _scene->addRect(QRectF(point.x() + delta.x(), point.y() + delta.y(), 1, 1), QPen(Qt::red), QBrush(Qt::red));
+            auto rectItem = _scene->addRect(QRectF(point.x() + delta.x(), point.y() + delta.y(), 1, 1));
+            rectItem->setPen(QPen(Qt::red));
+            rectItem->setBrush(QBrush(Qt::red));
+            outlineItems.push_back(rectItem);
         }
-        //_scene->addRect(rect, QPen(Qt::darkGreen));
     }
+    outlineItems.push_back(_scene->addRect(atlasPixmapItem->boundingRect(), QPen(Qt::darkRed)));
 
-    _scene->addRect(atlasPixmapItem->boundingRect(), QPen(Qt::darkRed));
+    _outlinesGroup = _scene->createItemGroup(outlineItems);
+    _outlinesGroup->setVisible(ui->displayOutlinesCheckBox->isChecked());
+
     _scene->setSceneRect(atlasPixmapItem->boundingRect());
 
     //1024x1024x4 (RAM: 4.00MB)
@@ -678,4 +693,9 @@ void MainWindow::propertiesValueChanged(int val) {
     if (settings.value("Preferences/automaticPreview", true).toBool()) {
         refreshAtlas();
     }
+}
+
+void MainWindow::on_displayOutlinesCheckBox_clicked(bool checked) {
+    if (_outlinesGroup)
+        _outlinesGroup->setVisible(checked);
 }
