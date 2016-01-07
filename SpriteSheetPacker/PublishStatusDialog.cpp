@@ -43,7 +43,8 @@ PublishStatusDialog::PublishStatusDialog(QWidget *parent) :
 
     if (parent) {
         int width = parent->width() / 2;
-        setGeometry(0, 0, width, width/2);
+        int height = parent->height() / 2;
+        setGeometry(width/2, height/2, width, width/2);
     }
 
     ui->logsTextEdit->setTextColor(Qt::darkGreen);
