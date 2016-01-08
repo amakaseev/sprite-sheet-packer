@@ -1,5 +1,6 @@
 v1.0.3
 ======
+* Win32: Polished publish dialog (Window title, position)
 * Add display outlines on preview
 * UI and command line implementation of image optimization
 * Change zoom slider range (min: 10, max: 1000)

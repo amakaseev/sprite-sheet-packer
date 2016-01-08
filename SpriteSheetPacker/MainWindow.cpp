@@ -187,6 +187,7 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
                                 ui->pow2ComboBox->currentIndex()? true:false,
                                 ui->maxTextureSizeComboBox->currentText().toInt(),
                                 scale);
+        //trimModeComboBox
         if (!atlas->generate()) {
             QMessageBox::critical(this, "Generate error", "Max texture size limit is small!");
             delete atlas;
