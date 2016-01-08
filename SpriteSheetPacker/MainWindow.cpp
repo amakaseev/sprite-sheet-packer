@@ -95,21 +95,21 @@ void MainWindow::refreshFormats() {
     formatsFolder.push_back(settings.value("Preferences/customFormatFolder").toString());
 
     // load formats
-    PublishSpriteSheet::formats().clear();
+    PublishSpriteSheet::instance()->formats().clear();
     for (auto folder: formatsFolder) {
         if (QDir(folder).exists()) {
             QDirIterator fileNames(folder, QStringList() << "*.js", QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot);
             while(fileNames.hasNext()) {
                 fileNames.next();
-                PublishSpriteSheet::addFormat(fileNames.fileInfo().baseName(), fileNames.filePath());
+                PublishSpriteSheet::instance()->addFormat(fileNames.fileInfo().baseName(), fileNames.filePath());
             }
         }
     }
 
     QString prevFormat = ui->dataFormatComboBox->currentText();
     ui->dataFormatComboBox->clear();
-    for (auto format: PublishSpriteSheet::formats().keys()) {
-        QString fileName(PublishSpriteSheet::formats()[format]);
+    for (auto format: PublishSpriteSheet::instance()->formats().keys()) {
+        QString fileName(PublishSpriteSheet::instance()->formats()[format]);
         ui->dataFormatComboBox->addItem(QIcon(fileName.left(fileName.lastIndexOf(".")) + ".png"), format);
     }
     ui->dataFormatComboBox->setCurrentText(prevFormat);
@@ -492,6 +492,9 @@ void MainWindow::on_actionPublish_triggered() {
     publishStatusDialog->setAttribute(Qt::WA_DeleteOnClose);
     publishStatusDialog->open();
 
+    connect(PublishSpriteSheet::instance(), SIGNAL(logOutputted(QString, QColor)), publishStatusDialog, SLOT(log(QString,QColor)));
+    connect(PublishSpriteSheet::instance(), SIGNAL(completed()), publishStatusDialog, SLOT(complete()));
+
     publishStatusDialog->log(QString("Publish to: " + dir.canonicalPath()), Qt::blue);
     for (int i=0; i<ui->scalingVariantsGroupBox->layout()->count(); ++i) {
         ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(ui->scalingVariantsGroupBox->layout()->itemAt(i)->widget());
@@ -535,7 +538,7 @@ void MainWindow::on_actionPublish_triggered() {
                 refreshAtlas(&atlas);
             }
 
-            if (!PublishSpriteSheet::publish(destFileInfo.filePath(), ui->dataFormatComboBox->currentText(), ui->optLevelSlider->value(), atlas)) {
+            if (!PublishSpriteSheet::instance()->publish(destFileInfo.filePath(), ui->dataFormatComboBox->currentText(), ui->optLevelSlider->value(), atlas)) {
                 publishStatusDialog->log("Publish scale variant error! See all logs for details.", Qt::red);
                 continue;
             } else {
@@ -543,8 +546,8 @@ void MainWindow::on_actionPublish_triggered() {
             }
         }
     }
-    publishStatusDialog->log(QString("Publishing is finished."), Qt::blue);
-    publishStatusDialog->complete();
+    //publishStatusDialog->log(QString("Publishing is finished."), Qt::blue);
+    //publishStatusDialog->complete();
 }
 
 void MainWindow::on_actionAbout_triggered() {

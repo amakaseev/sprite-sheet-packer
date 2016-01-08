@@ -145,17 +145,17 @@ int commandLine(QCoreApplication& app) {
     formatsFolder.push_back(settings.value("Preferences/customFormatFolder").toString());
 
     // load formats
-    PublishSpriteSheet::formats().clear();
+    PublishSpriteSheet::instance()->formats().clear();
     for (auto folder: formatsFolder) {
         if (QDir(folder).exists()) {
             QDirIterator fileNames(folder, QStringList() << "*.js", QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot);
             while(fileNames.hasNext()) {
                 fileNames.next();
-                PublishSpriteSheet::addFormat(fileNames.fileInfo().baseName(), fileNames.filePath());
+                PublishSpriteSheet::instance()->addFormat(fileNames.fileInfo().baseName(), fileNames.filePath());
             }
         }
     }
-    qDebug() << "Support Formats:" << PublishSpriteSheet::formats().keys();
+    qDebug() << "Support Formats:" << PublishSpriteSheet::instance()->formats().keys();
 
     if (projectFile) {
         for (int i=0; i<projectFile->scalingVariants().size(); ++i) {
@@ -191,7 +191,7 @@ int commandLine(QCoreApplication& app) {
             }
 
             // Publish data
-            if (!PublishSpriteSheet::publish(destFileInfo.filePath(), format, optLevel, atlas, false)) {
+            if (!PublishSpriteSheet::instance()->publish(destFileInfo.filePath(), format, optLevel, atlas, false)) {
                 qCritical() << "ERROR: publish atlas!";
                 return -1;
             }
@@ -209,7 +209,7 @@ int commandLine(QCoreApplication& app) {
         }
 
         // Publish data
-        if (!PublishSpriteSheet::publish(destination.filePath() + source.fileName(), format, optLevel, atlas, false)) {
+        if (!PublishSpriteSheet::instance()->publish(destination.filePath() + source.fileName(), format, optLevel, atlas, false)) {
             qCritical() << "ERROR: publish atlas!";
             return -1;
         }

@@ -6,6 +6,7 @@
 #include <QMessageBox>
 
 QMap<QString, QString> PublishSpriteSheet::_formats;
+PublishSpriteSheet* PublishSpriteSheet::_instance = nullptr;
 
 QJSValue jsValue(QJSEngine& engine, const QRect& rect) {
     QJSValue value = engine.newObject();
@@ -104,9 +105,14 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
             // write image
             spriteAtlas.image().save(filePath + ".png");
 
+            emit log("Atlas image generated.", Qt::black);
+
             if (optLevel > 0) {
                 // TODO: optimize in QThread and enable/disable on preferences
-                optimizePNG(filePath + ".png", optLevel);
+                //optimizePNG(filePath + ".png", optLevel);
+                optimizePNGInThread(filePath + ".png", optLevel);
+            } else {
+                _customComplete = true;
             }
 
             // write data
@@ -126,13 +132,19 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
                 } else {
                     out << data.toString();
                 }
+
+                emit log("Writing data finished.", Qt::black);
             }
         }
-
     } else {
         qDebug() << "Not found global exportSpriteSheet function!";
         if (errorMessage) QMessageBox::critical(NULL, "Export script error", "Not found global exportSpriteSheet function!");
         return false;
+    }
+
+    if (_customComplete) {
+        emit log("Publishing is finished.", Qt::blue);
+        emit completed();
     }
 
     return true;
@@ -140,10 +152,10 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
 
 /** Application-defined printf callback **/
 static void app_printf(const char *fmt, ...) {
-//    va_list args;
-//    va_start(args, fmt);
-//    printf(fmt, args);
-//    va_end(args);
+    va_list args;
+    va_start(args, fmt);
+    printf(fmt, args);
+    va_end(args);
 }
 
 /** Application-defined control print callback **/
@@ -154,7 +166,7 @@ static void app_print_cntrl(int cntrl_code) {
 /** Application-defined progress update callback **/
 static void app_progress(unsigned long current_step, unsigned long total_steps) {
     // TODO: implement
-    //qDebug("current_step: %d (total_steps: %d)\n", (int)current_step, (int)total_steps);
+    qDebug("current_step: %d (total_steps: %d)\n", (int)current_step, (int)total_steps);
 }
 
 /** Panic handling **/
@@ -170,8 +182,10 @@ bool PublishSpriteSheet::optimizePNG(const QString& fileName, int optLevel) {
     options.optim_level = optLevel;
     options.interlace = -1;
     options.strip_all = 1;
-    //options.compr_level_set |= 9;
-    //options.mem_level_set |= 9;
+
+    options.strategy_set |= (1U << 3);
+    options.compr_level_set |= (1U << 9);
+    options.mem_level_set |= (1U << 8);
 
     opng_ui ui;
     ui.printf_fn      = app_printf;
@@ -195,7 +209,93 @@ bool PublishSpriteSheet::optimizePNG(const QString& fileName, int optLevel) {
 }
 
 void PublishSpriteSheet::optimizePNGInThread(const QString& fileName, int optLevel) {
-    //QThread* generateThread = new QThread(this)
+    QThread* generateThread = new QThread(this);
+    OptimizationWorker* worker;
 
-    //generateThread->start();
+    worker = new OptimizationWorker(this, fileName, optLevel);
+    worker->moveToThread(generateThread);
+
+    QObject::connect(generateThread, SIGNAL(started()), worker, SLOT(doWork()));
+    QObject::connect(worker, SIGNAL(finished()), generateThread, SLOT(quit()));
+    QObject::connect(worker, SIGNAL(finished()), this, SLOT(on_completed()));
+    QObject::connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
+    QObject::connect(generateThread, SIGNAL(finished()), generateThread, SLOT(deleteLater()));
+
+    generateThread->start();
+}
+
+void PublishSpriteSheet::on_completed() {
+    emit log("Publishing is finished.", Qt::blue);
+    emit completed();
+}
+
+OptimizationWorker::OptimizationWorker(PublishSpriteSheet* parent, const QString& fileName, int optLevel) {
+    _parent = parent;
+    _fileName = fileName;
+    _optLevel = optLevel;
+}
+
+void OptimizationWorker::doWork()
+{
+    emit _parent->log("Optimizing png started.", Qt::black);
+
+    /* Initialize the optimization engine. */
+    opng_options options;
+    memset(&options, 0, sizeof(options));
+    options.optim_level = _optLevel;
+    options.interlace = -1;
+    options.strip_all = 1;
+
+    options.strategy_set |= (1U << 3);
+    options.compr_level_set |= (1U << 9);
+    options.mem_level_set |= (1U << 8);
+
+    opng_ui ui;
+    ui.printf_fn      = &OptimizationWorker::app_printf;
+    ui.print_cntrl_fn = &OptimizationWorker::app_print_cntrl;
+    ui.progress_fn    = &OptimizationWorker::app_progress;
+    ui.panic_fn       = &OptimizationWorker::panic;
+    if (opng_initialize(&options, &ui) != 0) {
+        //qCritical() << "Can't initialize optimization engine";
+    }
+
+    if (opng_optimize(_fileName.toStdString().c_str()) != 0) {
+        emit _parent->log("Optimizing png failed.", Qt::red);
+    }
+
+    //QCoreApplication::processEvents();
+
+    /* Finalize the optimization engine. */
+    if (opng_finalize() != 0) {
+        //qCritical() << "Can't finalize optimization engine";
+    }
+
+    emit _parent->log("Optimizing png finished.", Qt::black);
+
+    emit finished();
+}
+
+/** Application-defined printf callback **/
+void OptimizationWorker::app_printf(const char *fmt, ...) {
+    //va_list args;
+    //va_start(args, fmt);
+    //printf(fmt, args);
+    //va_end(args);
+}
+
+/** Application-defined control print callback **/
+void OptimizationWorker::app_print_cntrl(int cntrl_code) {
+    // TODO: implement
+}
+
+/** Application-defined progress update callback **/
+void OptimizationWorker::app_progress(unsigned long current_step, unsigned long total_steps) {
+    // TODO: implement
+    //qDebug("current_step: %d (total_steps: %d)\n", (int)current_step, (int)total_steps);
+}
+
+/** Panic handling **/
+void OptimizationWorker::panic(const char *msg) {
+    /* Print the panic message to stderr and terminate abnormally. */
+    //qCritical("** INTERNAL ERROR: %s", msg);
 }
