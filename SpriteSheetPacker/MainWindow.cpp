@@ -492,7 +492,7 @@ void MainWindow::on_actionPublish_triggered() {
     publishStatusDialog->setAttribute(Qt::WA_DeleteOnClose);
     publishStatusDialog->open();
 
-    connect(PublishSpriteSheet::instance(), SIGNAL(logOutputted(QString, QColor)), publishStatusDialog, SLOT(log(QString,QColor)));
+    connect(PublishSpriteSheet::instance(), SIGNAL(log(QString, QColor)), publishStatusDialog, SLOT(log(QString,QColor)));
     connect(PublishSpriteSheet::instance(), SIGNAL(completed()), publishStatusDialog, SLOT(complete()));
 
     publishStatusDialog->log(QString("Publish to: " + dir.canonicalPath()), Qt::blue);
