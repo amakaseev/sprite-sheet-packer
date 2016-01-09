@@ -145,17 +145,17 @@ int commandLine(QCoreApplication& app) {
     formatsFolder.push_back(settings.value("Preferences/customFormatFolder").toString());
 
     // load formats
-    PublishSpriteSheet::instance()->formats().clear();
+    PublishSpriteSheet::formats().clear();
     for (auto folder: formatsFolder) {
         if (QDir(folder).exists()) {
             QDirIterator fileNames(folder, QStringList() << "*.js", QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot);
             while(fileNames.hasNext()) {
                 fileNames.next();
-                PublishSpriteSheet::instance()->addFormat(fileNames.fileInfo().baseName(), fileNames.filePath());
+                PublishSpriteSheet::addFormat(fileNames.fileInfo().baseName(), fileNames.filePath());
             }
         }
     }
-    qDebug() << "Support Formats:" << PublishSpriteSheet::instance()->formats().keys();
+    qDebug() << "Support Formats:" << PublishSpriteSheet::formats().keys();
 
     if (projectFile) {
         for (int i=0; i<projectFile->scalingVariants().size(); ++i) {
@@ -190,8 +190,9 @@ int commandLine(QCoreApplication& app) {
                 return -1;
             }
 
+            PublishSpriteSheet publisher;
             // Publish data
-            if (!PublishSpriteSheet::instance()->publish(destFileInfo.filePath(), format, optLevel, atlas, false)) {
+            if (!publisher.publish(destFileInfo.filePath(), format, optLevel, atlas, false)) {
                 qCritical() << "ERROR: publish atlas!";
                 return -1;
             }
@@ -208,8 +209,9 @@ int commandLine(QCoreApplication& app) {
             return -1;
         }
 
+        PublishSpriteSheet publisher;
         // Publish data
-        if (!PublishSpriteSheet::instance()->publish(destination.filePath() + source.fileName(), format, optLevel, atlas, false)) {
+        if (!publisher.publish(destination.filePath() + source.fileName(), format, optLevel, atlas, false)) {
             qCritical() << "ERROR: publish atlas!";
             return -1;
         }

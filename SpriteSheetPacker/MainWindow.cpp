@@ -95,21 +95,21 @@ void MainWindow::refreshFormats() {
     formatsFolder.push_back(settings.value("Preferences/customFormatFolder").toString());
 
     // load formats
-    PublishSpriteSheet::instance()->formats().clear();
+    PublishSpriteSheet::formats().clear();
     for (auto folder: formatsFolder) {
         if (QDir(folder).exists()) {
             QDirIterator fileNames(folder, QStringList() << "*.js", QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot);
             while(fileNames.hasNext()) {
                 fileNames.next();
-                PublishSpriteSheet::instance()->addFormat(fileNames.fileInfo().baseName(), fileNames.filePath());
+                PublishSpriteSheet::addFormat(fileNames.fileInfo().baseName(), fileNames.filePath());
             }
         }
     }
 
     QString prevFormat = ui->dataFormatComboBox->currentText();
     ui->dataFormatComboBox->clear();
-    for (auto format: PublishSpriteSheet::instance()->formats().keys()) {
-        QString fileName(PublishSpriteSheet::instance()->formats()[format]);
+    for (auto format: PublishSpriteSheet::formats().keys()) {
+        QString fileName(PublishSpriteSheet::formats()[format]);
         ui->dataFormatComboBox->addItem(QIcon(fileName.left(fileName.lastIndexOf(".")) + ".png"), format);
     }
     ui->dataFormatComboBox->setCurrentText(prevFormat);
@@ -187,6 +187,7 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
                                 ui->pow2ComboBox->currentIndex()? true:false,
                                 ui->maxTextureSizeComboBox->currentText().toInt(),
                                 scale);
+        //trimModeComboBox
         if (!atlas->generate()) {
             QMessageBox::critical(this, "Generate error", "Max texture size limit is small!");
             delete atlas;
@@ -492,9 +493,6 @@ void MainWindow::on_actionPublish_triggered() {
     publishStatusDialog->setAttribute(Qt::WA_DeleteOnClose);
     publishStatusDialog->open();
 
-    connect(PublishSpriteSheet::instance(), SIGNAL(log(QString, QColor)), publishStatusDialog, SLOT(log(QString,QColor)));
-    connect(PublishSpriteSheet::instance(), SIGNAL(completed()), publishStatusDialog, SLOT(complete()));
-
     publishStatusDialog->log(QString("Publish to: " + dir.canonicalPath()), Qt::blue);
     for (int i=0; i<ui->scalingVariantsGroupBox->layout()->count(); ++i) {
         ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(ui->scalingVariantsGroupBox->layout()->itemAt(i)->widget());
@@ -538,7 +536,11 @@ void MainWindow::on_actionPublish_triggered() {
                 refreshAtlas(&atlas);
             }
 
-            if (!PublishSpriteSheet::instance()->publish(destFileInfo.filePath(), ui->dataFormatComboBox->currentText(), ui->optLevelSlider->value(), atlas)) {
+            PublishSpriteSheet* publisher = new PublishSpriteSheet();
+
+            QObject::connect(publisher, SIGNAL(onCompleted()), publishStatusDialog, SLOT(complete()));
+
+            if (!publisher->publish(destFileInfo.filePath(), ui->dataFormatComboBox->currentText(), ui->optLevelSlider->value(), atlas)) {
                 publishStatusDialog->log("Publish scale variant error! See all logs for details.", Qt::red);
                 continue;
             } else {

@@ -94,7 +94,15 @@ SpriteAtlas::SpriteAtlas(const QStringList& sourceList, int textureBorder, int s
     , _maxTextureSize(maxSize)
     , _scale(scale)
 {
+    _polygonMode.enable = false;
+}
 
+bool SpriteAtlas::enablePolygonMode(bool enable, float epsilon, float threshold) {
+    _polygonMode.enable = enable;
+    _polygonMode.epsilon = epsilon;
+    _polygonMode.threshold = threshold;
+
+    return true;
 }
 
 // TODO: QThread: gui is freeze on very large atlases (no profit) wtf?
@@ -149,7 +157,13 @@ bool SpriteAtlas::generate() {
         // Trim / Crop
         if (_trim) {
             packContent.trim(_trim);
-            //packContent.triangles = PolygonImage::generateTriangles(packContent.mImage, packContent.mRect);
+            if (_polygonMode.enable) {
+                packContent.triangles = PolygonImage::generateTriangles(
+                            packContent.mImage,
+                            packContent.mRect,
+                            _polygonMode.epsilon,
+                            _polygonMode.threshold);
+            }
         }
 
         bool findIdentical = false;
