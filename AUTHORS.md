@@ -10,6 +10,7 @@
     * Generate spritesheet from commandline using existing project file.
     * Added automatically refreshed preview.
     * UI and command line implementation of image optimization
+    * Win32: Polished publish dialog (Window title, position)
 		
 Thanks to all developers who report & trace bugs, discuss the sprite tools usage in forum!
 
