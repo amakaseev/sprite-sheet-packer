@@ -1,7 +1,7 @@
 /*
  * opngreduc.c - libpng extension: lossless image reductions.
  *
- * Copyright (C) 2003-2014 Cosmin Truta.
+ * Copyright (C) 2003-2012 Cosmin Truta.
  * This software is distributed under the same licensing and warranty terms
  * as libpng.
  */
@@ -19,7 +19,6 @@
  */
 
 #include "opngreduc.h"
-
 #include <string.h>
 
 #ifndef OPNG_ASSERT
@@ -179,9 +178,9 @@ opng_insert_palette_entry(png_colorp palette, int *num_palette,
    OPNG_ASSERT(low >= 0 && low <= *num_palette);
    for (i = *num_palette; i > low; --i)
       palette[i] = palette[i - 1];
-   palette[low].red = (png_byte)red;
+   palette[low].red   = (png_byte)red;
    palette[low].green = (png_byte)green;
-   palette[low].blue = (png_byte)blue;
+   palette[low].blue  = (png_byte)blue;
    ++(*num_palette);
    if (alpha < 255)
    {
@@ -278,9 +277,9 @@ opng_get_alpha_row(png_row_infop row_info_ptr, png_color_16p trans_color,
       if (color_type == PNG_COLOR_TYPE_RGB)
       {
          OPNG_ASSERT(channels == 3);
-         trans_red = (png_byte)trans_color->red;
+         trans_red   = (png_byte)trans_color->red;
          trans_green = (png_byte)trans_color->green;
-         trans_blue = (png_byte)trans_color->blue;
+         trans_blue  = (png_byte)trans_color->blue;
          sample_ptr = row;
          for (i = 0; i < width; ++i, sample_ptr += 3)
             alpha_row[i] = (png_byte)
@@ -354,10 +353,10 @@ opng_analyze_bits(png_structp png_ptr, png_infop info_ptr,
    {
       if (reductions & OPNG_REDUCE_16_TO_8)
       {
-         if (background->red % 257 != 0 ||
+         if (background->red   % 257 != 0 ||
              background->green % 257 != 0 ||
-             background->blue % 257 != 0 ||
-             background->gray % 257 != 0)
+             background->blue  % 257 != 0 ||
+             background->gray  % 257 != 0)
             reductions &= ~OPNG_REDUCE_16_TO_8;
       }
       if (reductions & OPNG_REDUCE_RGB_TO_GRAY)
@@ -567,15 +566,15 @@ opng_reduce_bits(png_structp png_ptr, png_infop info_ptr,
    {
       if (reductions & OPNG_REDUCE_16_TO_8)
       {
-         if (trans_color->red % 257 == 0 &&
+         if (trans_color->red   % 257 == 0 &&
              trans_color->green % 257 == 0 &&
-             trans_color->blue % 257 == 0 &&
-             trans_color->gray % 257 == 0)
+             trans_color->blue  % 257 == 0 &&
+             trans_color->gray  % 257 == 0)
          {
-            trans_color->red &= 255;
+            trans_color->red   &= 255;
             trans_color->green &= 255;
-            trans_color->blue &= 255;
-            trans_color->gray &= 255;
+            trans_color->blue  &= 255;
+            trans_color->gray  &= 255;
          }
          else
          {
@@ -602,10 +601,10 @@ opng_reduce_bits(png_structp png_ptr, png_infop info_ptr,
    {
       if (reductions & OPNG_REDUCE_16_TO_8)
       {
-         background->red &= 255;
+         background->red   &= 255;
          background->green &= 255;
-         background->blue &= 255;
-         background->gray &= 255;
+         background->blue  &= 255;
+         background->gray  &= 255;
       }
       if (reductions & OPNG_REDUCE_RGB_TO_GRAY)
          background->gray = background->red;
@@ -825,17 +824,17 @@ opng_reduce_to_palette(png_structp png_ptr, png_infop info_ptr,
       {
          for (j = 0; j < width; ++j, sample_ptr += channels)
          {
-            red = sample_ptr[0];
+            red   = sample_ptr[0];
             green = sample_ptr[1];
-            blue = sample_ptr[2];
+            blue  = sample_ptr[2];
             alpha = alpha_row[j];
             /* Check the cache first. */
             if (red != prev_red || green != prev_green || blue != prev_blue ||
                 alpha != prev_alpha)
             {
-               prev_red = red;
+               prev_red   = red;
                prev_green = green;
-               prev_blue = blue;
+               prev_blue  = blue;
                prev_alpha = alpha;
                if (opng_insert_palette_entry(palette, &num_palette,
                    trans_alpha, &num_trans, 256,
@@ -852,12 +851,12 @@ opng_reduce_to_palette(png_structp png_ptr, png_infop info_ptr,
       {
          for (j = 0; j < width; ++j, sample_ptr += channels)
          {
-            gray = sample_ptr[0];
+            gray  = sample_ptr[0];
             alpha = alpha_row[j];
             /* Check the cache first. */
             if (gray != prev_gray || alpha != prev_alpha)
             {
-               prev_gray = gray;
+               prev_gray  = gray;
                prev_alpha = alpha;
                if (opng_insert_palette_entry(palette, &num_palette,
                    trans_alpha, &num_trans, 256,
@@ -877,9 +876,9 @@ opng_reduce_to_palette(png_structp png_ptr, png_infop info_ptr,
       /* bKGD has an alpha-agnostic palette entry. */
       if (color_type & PNG_COLOR_MASK_COLOR)
       {
-         red = background->red;
+         red   = background->red;
          green = background->green;
-         blue = background->blue;
+         blue  = background->blue;
       }
       else
          red = green = blue = background->gray;
@@ -937,17 +936,17 @@ opng_reduce_to_palette(png_structp png_ptr, png_infop info_ptr,
       {
          for (j = 0; j < width; ++j, sample_ptr += channels)
          {
-            red = sample_ptr[0];
+            red   = sample_ptr[0];
             green = sample_ptr[1];
-            blue = sample_ptr[2];
+            blue  = sample_ptr[2];
             alpha = alpha_row[j];
             /* Check the cache first. */
             if (red != prev_red || green != prev_green || blue != prev_blue ||
                 alpha != prev_alpha)
             {
-               prev_red = red;
+               prev_red   = red;
                prev_green = green;
-               prev_blue = blue;
+               prev_blue  = blue;
                prev_alpha = alpha;
                if (opng_insert_palette_entry(palette, &num_palette,
                    trans_alpha, &num_trans, 256,
@@ -962,12 +961,12 @@ opng_reduce_to_palette(png_structp png_ptr, png_infop info_ptr,
       {
          for (j = 0; j < width; ++j, sample_ptr += channels)
          {
-            gray = sample_ptr[0];
+            gray  = sample_ptr[0];
             alpha = alpha_row[j];
             /* Check the cache first. */
             if (gray != prev_gray || alpha != prev_alpha)
             {
-               prev_gray = gray;
+               prev_gray  = gray;
                prev_alpha = alpha;
                if (opng_insert_palette_entry(palette, &num_palette,
                    trans_alpha, &num_trans, 256,

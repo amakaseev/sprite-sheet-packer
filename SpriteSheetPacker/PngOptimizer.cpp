@@ -1,43 +1,70 @@
 #include "PngOptimizer.h"
-#include "optipng.h"
+#include "opnglib/include/opnglib/opnglib.h"
 #include <QtDebug>
 #include <QtCore>
+
+static struct opng_options options;
+static opng_optimizer_t *the_optimizer;
+static opng_transformer_t *the_transformer;
 
 OptiPngOptimizer::OptiPngOptimizer(const QString& fileName, int optLevel) {
     _fileName = fileName;
     _optLevel = optLevel;
 
+/*
     opng_options options;
     memset(&options, 0, sizeof(options));
     options.optim_level = optLevel;
-    options.interlace = -1;
-    options.strip_all = 1;
+    options.force = 1;
+    //options.use_stdout = 1;
+    //options.interlace = -1;
 
-    options.strategy_set |= (1U << 3);
-    options.compr_level_set |= (1U << 9);
-    options.mem_level_set |= (1U << 8);
+    optimizer = opng_create_optimizer();
+    transformer = opng_create_transformer();
 
-    opng_ui ui;
-    ui.printf_fn      = &OptiPngOptimizer::app_printf;
-    ui.print_cntrl_fn = &OptiPngOptimizer::app_print_cntrl;
-    ui.progress_fn    = &OptiPngOptimizer::app_progress;
-    ui.panic_fn       = &OptiPngOptimizer::panic;
-    if (opng_initialize(&options, &ui) != 0) {
-        qCritical() << "Can't initialize optimization engine";
-    }
+    opng_set_options(optimizer, &options);
+    opng_set_transformer(optimizer, transformer);
+    */
 }
 
 OptiPngOptimizer::~OptiPngOptimizer() {
-    if (opng_finalize() != 0) {
-        qCritical() << "Can't finalize optimization engine";
-    }
+    opng_destroy_optimizer(optimizer);
 }
 
 bool OptiPngOptimizer::optimize() {
-    if (opng_optimize(_fileName.toStdString().c_str()) != 0) {
-        qCritical() << "Error optimizing png";
+
+    opng_options options;
+    memset(&options, 0, sizeof(options));
+
+    options.optim_level = _optLevel;
+    options.interlace = 1;
+
+    options.zstrategy_set |= (1U << 3);
+    options.zcompr_level_set |= (1U << 9);
+    options.zmem_level_set |= (1U << 8);
+
+    the_optimizer = opng_create_optimizer();
+    the_transformer = opng_create_transformer();
+
+    size_t err_objname_offset, err_objname_length = 0;
+    const char * err_message = "";
+
+    if (opng_transform_strip_objects(the_transformer, "all",
+                     &err_objname_offset, &err_objname_length,
+                     &err_message) >= 0) {
         return false;
     }
+
+    opng_set_options(the_optimizer, &options);
+    opng_set_transformer(the_optimizer, the_transformer);
+
+    if (opng_optimize_file(the_optimizer,
+                           _fileName.toStdString().c_str(),
+                           "",//_fileName.toStdString().c_str(),
+                           NULL) == -1) {
+        return false;
+    }
+
     return true;
 }
 

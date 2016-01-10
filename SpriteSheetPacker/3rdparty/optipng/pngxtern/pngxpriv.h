@@ -60,10 +60,10 @@ int pngx_read_tiff(png_structp png_ptr, png_infop info_ptr, FILE *stream);
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  /* extern "C" */
 #endif
 
 
-#endif /* PNGX_INTERNAL */
+#endif  /* PNGX_INTERNAL */
 
-#endif /* PNGXPRIV_H */
+#endif  /* PNGXPRIV_H */

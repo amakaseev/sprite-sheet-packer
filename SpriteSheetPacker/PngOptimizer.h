@@ -2,6 +2,7 @@
 #define PNGOPTIMIZER_H
 
 #include <QtCore>
+#include "opnglib/include/opnglib/opnglib.h"
 
 class PngOptimizer {
 public:
@@ -27,6 +28,8 @@ private:
 
     QString _fileName;
     int _optLevel;
+    opng_optimizer_t* optimizer;
+    opng_transformer_t* transformer;
 };
 
 #endif // PNGOPTIMIZER_H

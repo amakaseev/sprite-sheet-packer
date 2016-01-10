@@ -1,24 +1,16 @@
 /*
  * pngxrpnm.c - libpng external I/O: PNM reader.
- * Copyright (C) 2003-2012 Cosmin Truta.
+ * Copyright (C) 2003-2011 Cosmin Truta.
  */
 
 #include "pngxtern.h"
 #include "pngxutil.h"
 #include "pnmio.h"
-#include <limits.h>
 #include <stdio.h>
 #include <string.h>
 
 #define PNGX_INTERNAL
 #include "pngxpriv.h"
-
-
-#if UINT_MAX >= 0x7fffffffUL
-#define PNGX_PNM_LENGTH_MAX 0x7fffffffU
-#else
-#define PNGX_PNM_LENGTH_MAX UINT_MAX
-#endif
 
 
 static const char pbm_fmt_name[] = "PBM";
@@ -102,7 +94,7 @@ pngx_read_pnm(png_structp png_ptr, png_infop info_ptr, FILE *stream)
 {
    pnm_struct pnminfo;
    unsigned int format, depth, width, height, maxval;
-   unsigned int max_width, num_samples, sample_size;
+   unsigned int num_samples, sample_size;
    unsigned int *pnmrow;
    size_t row_size;
    png_bytepp row_pointers;
@@ -114,20 +106,14 @@ pngx_read_pnm(png_structp png_ptr, png_infop info_ptr, FILE *stream)
    if (pnm_fget_header(&pnminfo, stream) != 1)
       return 0;  /* not PNM */
    format = pnminfo.format;
-   depth = pnminfo.depth;
-   width = pnminfo.width;
+   depth  = pnminfo.depth;
+   width  = pnminfo.width;
    height = pnminfo.height;
    maxval = pnminfo.maxval;
    if (format > PNM_P6)
       png_error(png_ptr, "Can't handle PNM formats newer than PPM (\"P6\")");
-   max_width =
-      (sizeof(size_t) <= sizeof(unsigned int)) ?
-         UINT_MAX / sizeof(unsigned int) / depth : UINT_MAX;
-#if UINT_MAX > PNGX_PNM_LENGTH_MAX
-   if (max_width > PNGX_PNM_LENGTH_MAX)
-      max_width = PNGX_PNM_LENGTH_MAX;
-#endif
-   if (width > max_width)
+   if (width > (unsigned int)(-1) / depth ||
+       width > (size_t)(-1) / sizeof(unsigned int) / depth)
       png_error(png_ptr, "Can't handle exceedingly large PNM dimensions");
    sample_size = 1;
    row_size = num_samples = depth * width;

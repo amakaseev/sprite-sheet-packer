@@ -1,7 +1,7 @@
 /*
- * zlib version 1.2.8-optipng, 2013-Dec-28
+ * zlib version 1.2.8-optipng, 2013-12-28
  *
- * This is a modified version of zlib.
+ * This is an altered version of zlib.
  * See README.optipng.txt for more information.
  */
 
