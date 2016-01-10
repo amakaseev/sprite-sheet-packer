@@ -4,6 +4,7 @@
 #include <QtCore>
 #include <QJSEngine>
 #include <QtConcurrent>
+#include "PngOptimizer.h"
 
 class SpriteAtlas;
 struct ScalingVariant;
@@ -35,6 +36,7 @@ signals:
 private:
     static QMap<QString, QString> _formats;
     QFutureWatcher<bool> watcher;
+    OptiPngOptimizer* optimizer;
 };
 
 #endif // PUBLISHSPRITESHEET_H

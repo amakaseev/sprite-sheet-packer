@@ -21,13 +21,9 @@ public:
 
     bool optimize() override;
 private:
-    static void app_printf(const char *fmt, ...);
-    static void app_print_cntrl(int cntrl_code);
-    static void app_progress(unsigned long current_step, unsigned long total_steps);
-    static void panic(const char *msg);
-
     QString _fileName;
     int _optLevel;
+    opng_options options;
     opng_optimizer_t* optimizer;
     opng_transformer_t* transformer;
 };

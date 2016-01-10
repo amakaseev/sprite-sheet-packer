@@ -140,9 +140,12 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
 }
 
 bool PublishSpriteSheet::optimizePNG(const QString& fileName, int optLevel) {
-    OptiPngOptimizer* optimizer = new OptiPngOptimizer(fileName, optLevel);
+    optimizer = new OptiPngOptimizer(fileName, optLevel);
+    bool result = optimizer->optimize();
 
-    return optimizer->optimize();
+    delete optimizer;
+
+    return result;
 }
 
 void PublishSpriteSheet::optimizePNGInThread(const QString& fileName, int optLevel) {
