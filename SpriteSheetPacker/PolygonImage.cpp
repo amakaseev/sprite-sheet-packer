@@ -380,6 +380,26 @@ std::vector<QPointF> PolygonImage::expand(const std::vector<QPointF>& points, co
     return outPoints;
 }
 
+bool PolygonImage::polyInPoly(std::vector<QPointF>& a, const std::vector<QPointF>& b) {
+    ClipperLib::Path subj;
+    for(std::vector<QPointF>::const_iterator it = b.begin(); it<b.end(); it++) {
+        subj << ClipperLib::IntPoint(it->x()* PRECISION, it->y() * PRECISION);
+    }
+
+    bool erase = false;
+    std::vector<QPointF>::iterator it = a.begin();
+    while (it != a.end()) {
+        ClipperLib::IntPoint pt(it->x()* PRECISION, it->y() * PRECISION);
+        if (ClipperLib::PointInPolygon(pt, subj) == 1) {
+            it = a.erase(it);
+            erase = true;
+        } else {
+            ++it;
+        }
+    }
+    return erase;
+}
+
 Triangles PolygonImage::triangulate(const std::vector<QPointF>& points) {
     // if there are less than 3 points, then we can't triangulate
     if(points.size()<3)
@@ -473,29 +493,59 @@ void PolygonImage::calculateUV(const QRectF& rect, V2F_T2F* verts, const size_t&
 }
 
 Triangles PolygonImage::generateTriangles(const QImage& image, const QRectF& rect, const float epsilon, const float threshold) {
-    PolygonImage polygonImage(image, epsilon, threshold);
+
     QRectF realRect = rect;
 
-    Triangles triangles;
-    while (1) {
-        auto p = polygonImage.trace(realRect, threshold);
-        if (p.size() >= 3) {
-            // erase contour for find next
-            QPolygonF fillPolygon(QVector<QPointF>::fromStdVector(p));
-            fillPolygon.translate(rect.x(), rect.y());
-            QColor fillColor(0, 0, 0, 0);
-            QPen pen(fillColor);
-            pen.setWidthF(qMax(epsilon, 2.f));
-            QPainter painer(&polygonImage._image);
-            painer.setPen(pen);
-            painer.setBrush(QBrush(fillColor));
-            painer.setCompositionMode(QPainter::CompositionMode_Source);
-            painer.drawPolygon(fillPolygon);
-            painer.end();
-            //polygonImage._image.save("/Users/alekseymakaseev/Documents/Work/sprite-sheet-packer/test.png");
-        } else {
-            break;
+    // find first bigger
+    std::vector<QPointF> p_big;
+    {
+        PolygonImage polygonImage(image, epsilon, threshold);
+        while (1) {
+            auto p = polygonImage.trace(realRect, 2);
+            if (p.size() >= 3) {
+                if (p.size() > p_big.size()) {
+                    p_big = p;
+                }
+                // erase contour for find next
+                QPolygonF fillPolygon(QVector<QPointF>::fromStdVector(p));
+                fillPolygon.translate(rect.x(), rect.y());
+                QColor fillColor(0, 0, 0, 0);
+                QPen pen(fillColor);
+                pen.setWidthF(qMax(epsilon, 2.f));
+                QPainter painer(&polygonImage._image);
+                painer.setPen(pen);
+                painer.setBrush(QBrush(fillColor));
+                painer.setCompositionMode(QPainter::CompositionMode_Source);
+                painer.drawPolygon(fillPolygon);
+                painer.end();
+                //polygonImage._image.save("/Users/alekseymakaseev/Documents/Work/sprite-sheet-packer/test.png");
+            } else {
+                break;
+            }
         }
+    }
+
+    if (p_big.size() < 3) return Triangles();
+
+    PolygonImage polygonImage(image, epsilon, threshold);
+
+    Triangles triangles;
+    std::list< std::vector<QPointF> > polygons;
+    auto p = p_big;
+    while (1) {
+        // erase contour for find next
+        QPolygonF fillPolygon(QVector<QPointF>::fromStdVector(p));
+        fillPolygon.translate(rect.x(), rect.y());
+        QColor fillColor(0, 0, 0, 0);
+        QPen pen(fillColor);
+        pen.setWidthF(qMax(epsilon * 2, 10.f));
+        QPainter painer(&polygonImage._image);
+        painer.setPen(pen);
+        painer.setBrush(QBrush(fillColor));
+        painer.setCompositionMode(QPainter::CompositionMode_Source);
+        painer.drawPolygon(fillPolygon);
+        painer.end();
+        //polygonImage._image.save("/Users/alekseymakaseev/Documents/Work/sprite-sheet-packer/test.png");
 
         if (p.size() >= 9) {
             p = polygonImage.reduce(p, realRect, epsilon);
@@ -503,15 +553,91 @@ Triangles PolygonImage::generateTriangles(const QImage& image, const QRectF& rec
         if (p.size() >= 3) {
             p = polygonImage.expand(p, realRect, epsilon);
         }
-
         if (p.size() >= 3) {
-            auto tri = polygonImage.triangulate(p);
-            if (tri.indices.size()) {
-                triangles.add(tri);
-            }
-            triangles.debugPoints.insert(triangles.debugPoints.end(), p.begin(), p.end());
+            polygons.push_back(p);
         }
+
+        p = polygonImage.trace(realRect, 2);
+        if (p.size() < 3) {
+            break;
+        }
+        //break;
+
+//        finalPoints.insert(finalPoints.end(), p.begin(), p.end());
+//        if (p.size() >= 3) {
+//            auto tri = polygonImage.triangulate(p);
+//            if (tri.indices.size()) {
+//                triangles.add(tri);
+//            }
+//            triangles.debugPoints.insert(triangles.debugPoints.end(), p.begin(), p.end());
+//        }
     }
+
+/*
+    if (polygons.size() > 1) {
+//        std::sort(polygons.begin(), polygons.end(), [](std::vector<QPointF>& a, std::vector<QPointF>& b) {
+//            return b.size() < a.size();
+//        });
+
+        std::list<std::vector<QPointF>>::iterator it_p1 = polygons.begin();
+        for (; it_p1 != polygons.end(); ++it_p1) {
+            qDebug() << "size:" << (*it_p1).size();
+        }
+
+        qDebug() << "1: " << polygons.size();
+        it_p1 = polygons.begin();
+        while (it_p1 != polygons.end()) {
+            std::list<std::vector<QPointF>>::iterator it_p2 = it_p1;
+            ++it_p2;
+            int count = (*it_p1).size();
+            while (it_p2 != polygons.end()) {
+                if (polygonImage.polyInPoly((*it_p2), (*it_p1))) {
+                    (*it_p1).insert((*it_p1).end(), (*it_p2).begin(), (*it_p2).end());
+                    qDebug() << "insert: " << count << (*it_p1).size() << (*it_p2).size();
+//                    if ((*it_p1).size() >= 9) {
+//                        (*it_p1) = polygonImage.reduce((*it_p1), realRect, 0);
+//                    }
+                    if ((*it_p1).size() >= 3) {
+                        (*it_p1) = polygonImage.expand((*it_p1), realRect, epsilon);
+                    }
+                    it_p2 = polygons.erase(it_p2);
+                    qDebug() << "find: " << count << (*it_p1).size();
+                } else {
+                    ++it_p2;
+                }
+            }
+
+            ++it_p1;
+        }
+        qDebug() << "2: " << polygons.size();
+        for (it_p1 = polygons.begin(); it_p1 != polygons.end(); ++it_p1) {
+            qDebug() << "size:" << (*it_p1).size();
+        }
+    }*/
+    qDebug() << "Triangulate";
+    std::list<std::vector<QPointF>>::iterator it_p1 = polygons.begin();
+    while (it_p1 != polygons.end()) {
+        auto tri = polygonImage.triangulate((*it_p1));
+        if (tri.indices.size()) {
+            triangles.add(tri);
+        }
+        triangles.debugPoints.insert(triangles.debugPoints.end(), (*it_p1).begin(), (*it_p1).end());
+        ++it_p1;
+    }
+
+//    if (finalPoints.size() >= 9) {
+//        finalPoints = polygonImage.reduce(finalPoints, realRect, epsilon);
+//    }
+//    if (finalPoints.size() >= 3) {
+//        finalPoints = polygonImage.expand(finalPoints, realRect, epsilon);
+//    }
+//    if (finalPoints.size() >= 3) {
+//        auto tri = polygonImage.triangulate(finalPoints);
+//        if (tri.indices.size()) {
+//            triangles.add(tri);
+//        }
+//        triangles.debugPoints.insert(triangles.debugPoints.end(), finalPoints.begin(), finalPoints.end());
+//    }
 
     return triangles;
 }
