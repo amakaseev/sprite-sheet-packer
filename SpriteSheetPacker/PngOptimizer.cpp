@@ -12,10 +12,6 @@ OptiPngOptimizer::OptiPngOptimizer(const QString& fileName, int optLevel) {
     options.optim_level = _optLevel;
     options.interlace = -1;
 
-    options.zstrategy_set |= (1U << 3);
-    options.zcompr_level_set |= (1U << 9);
-    options.zmem_level_set |= (1U << 8);
-
     optimizer = opng_create_optimizer();
     transformer = opng_create_transformer();
 }
@@ -27,12 +23,13 @@ OptiPngOptimizer::~OptiPngOptimizer() {
 
 bool OptiPngOptimizer::optimize() {
 
-    size_t err_objname_offset, err_objname_length = 0;
-    const char * err_message = "";
+    //size_t err_objname_offset, err_objname_length = 0;
+    //const char * err_message = "";
 
     opng_set_options(optimizer, &options);
     opng_set_transformer(optimizer, transformer);
 
+    // @todo get that working
     //if (opng_transform_strip_objects(transformer, "all",
     //                 &err_objname_offset, &err_objname_length,
     //                 &err_message) >= 0) {
