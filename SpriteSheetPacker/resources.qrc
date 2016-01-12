@@ -19,5 +19,6 @@
         <file>res/Delete.png</file>
         <file>res/iPhone.png</file>
         <file>res/icon.png</file>
+        <file>res/identical.png</file>
     </qresource>
 </RCC>

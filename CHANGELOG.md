@@ -1,5 +1,6 @@
 v1.0.3
 ======
+* Show identical list of sprite frame
 * Win32: Polished publish dialog (Window title, position)
 * Add display outlines on preview
 * UI and command line implementation of image optimization

@@ -209,10 +209,25 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
     QList<QGraphicsItem*> outlineItems;
     QColor brushColor(Qt::blue);
     brushColor.setAlpha(100);
-    for(auto spriteFrame: atlas->spriteFrames()) {
+    qDebug() <<  atlas->identicalFrames();
+    for(auto it = atlas->spriteFrames().begin(); it != atlas->spriteFrames().end(); ++it) {
+        bool skip = false;
+        for (auto identicalFrame: atlas->identicalFrames()) {
+            if (skip) break;
+            for (auto frame: identicalFrame) {
+                if (frame == it.key()) {
+                    skip = true;
+                    break;
+                }
+            }
+        }
+        if (skip) continue;
+
+        auto spriteFrame = it.value();
         QPoint delta = spriteFrame.mFrame.topLeft();
 
-        outlineItems.push_back(_scene->addRect(spriteFrame.mFrame, QPen(Qt::white), QBrush(brushColor)));
+        if (ui->trimModeComboBox->currentText() == "Rect")
+            outlineItems.push_back(_scene->addRect(spriteFrame.mFrame, QPen(Qt::white), QBrush(brushColor)));
 
         for (int i=0; i<spriteFrame.triangles.indices.size(); i+=3) {
             QPointF v1 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+0]].v + delta;
@@ -229,6 +244,26 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
             rectItem->setPen(QPen(Qt::red));
             rectItem->setBrush(QBrush(Qt::red));
             outlineItems.push_back(rectItem);
+        }
+        if (spriteFrame.triangles.indices.size()) {
+            auto textItem = _scene->addSimpleText(QString("Triangles: %1").arg(spriteFrame.triangles.indices.size() / 3), QFont("", 24, QFont::Bold));
+            textItem->setPen(QPen(Qt::black, 0.5f));
+            textItem->setBrush(QBrush(Qt::white));
+            textItem->setPos(spriteFrame.mFrame.center() - textItem->boundingRect().center());
+            outlineItems.push_back(textItem);
+        }
+
+        // show identical statistics
+        auto identicalFrames = atlas->identicalFrames().find(it.key());
+        if (identicalFrames != atlas->identicalFrames().end()) {
+            auto identicalItem = _scene->addPixmap(QPixmap(":/res/identical.png"));
+            QString identicalString;
+            identicalString += it.key() + "\n";
+            for (auto frame: identicalFrames.value()) {
+                identicalString += frame + "\n";
+            }
+            identicalItem->setToolTip(identicalString);
+            identicalItem->setPos(spriteFrame.mFrame.topLeft());
         }
     }
     outlineItems.push_back(_scene->addRect(atlasPixmapItem->boundingRect(), QPen(Qt::darkRed)));

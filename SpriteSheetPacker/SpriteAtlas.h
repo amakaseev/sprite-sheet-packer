@@ -27,6 +27,7 @@ public:
 
     const QImage& image() const { return _atlasImage; }
     const QMap<QString, SpriteFrameInfo>& spriteFrames() const { return _spriteFrames; }
+    const QMap<QString, QVector<QString>>& identicalFrames() const { return _identicalFrames; }
 
 private:
     QStringList _sourceList;
@@ -44,6 +45,7 @@ private:
 
     QImage _atlasImage;
     QMap<QString, SpriteFrameInfo> _spriteFrames;
+    QMap<QString, QVector<QString>> _identicalFrames;
 };
 
 #endif // SPRITEATLAS_H

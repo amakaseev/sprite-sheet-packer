@@ -139,7 +139,7 @@ bool SpriteAtlas::generate() {
 
     int volume = 0;
     int skipSprites = 0;
-    QMap<QString, QVector<QPair<QString, QSize>>> identicalContent;
+    _identicalFrames.clear();
     // init images and rects
     QList< QPair<QString,QString> >::iterator it_f = fileList.begin();
     for(; it_f != fileList.end(); ++it_f) {
@@ -168,7 +168,7 @@ bool SpriteAtlas::generate() {
         for (auto& content: contentVector) {
             if (content.content.isIdentical(packContent)) {
                 findIdentical = true;
-                identicalContent[content.content.mName].push_back(qMakePair(packContent.mName, packContent.mImage.size()));
+                _identicalFrames[content.content.mName].push_back(packContent.mName);
                 qDebug() << "isIdentical:" << packContent.mName << "==" << content.content.mName;
                 skipSprites++;
                 break;
@@ -371,19 +371,19 @@ bool SpriteAtlas::generate() {
         _spriteFrames[packContent.mName] = spriteFrame;
 
         // add ident to sprite frames
-        auto identicalIt = identicalContent.find(packContent.mName);
-        if (identicalIt != identicalContent.end()) {
+        auto identicalIt = _identicalFrames.find(packContent.mName);
+        if (identicalIt != _identicalFrames.end()) {
             QStringList identicalList;
             for (auto ident: (*identicalIt)) {
                 SpriteFrameInfo identSpriteFrameInfo = spriteFrame;
                 identSpriteFrameInfo.mOffset = QPoint(
-                            (packContent.mRect.left() + (-ident.second.width() + content.size.w - _spriteBorder) * 0.5f),
-                            (-packContent.mRect.top() + ( ident.second.height() - content.size.h + _spriteBorder) * 0.5f)
+                            (packContent.mRect.left() + (-packContent.mImage.width() + content.size.w - _spriteBorder) * 0.5f),
+                            (-packContent.mRect.top() + ( packContent.mImage.height() - content.size.h + _spriteBorder) * 0.5f)
                             );
-                identSpriteFrameInfo.mSourceSize = ident.second;
-                _spriteFrames[ident.first] = identSpriteFrameInfo;
+                identSpriteFrameInfo.mSourceSize = packContent.mImage.size();
+                _spriteFrames[ident] = identSpriteFrameInfo;
 
-                identicalList.push_back(ident.first);
+                identicalList.push_back(ident);
             }
         }
     }
