@@ -87,17 +87,18 @@ public:
 
 SpriteAtlas::SpriteAtlas(const QStringList& sourceList, int textureBorder, int spriteBorder, int trim, bool pow2, int maxSize, float scale)
     : _sourceList(sourceList)
+    , _trim(trim)
     , _textureBorder(textureBorder)
     , _spriteBorder(spriteBorder)
-    , _trim(trim)
     , _pow2(pow2)
     , _maxTextureSize(maxSize)
     , _scale(scale)
 {
+    _algorithm = "Rect";
     _polygonMode.enable = false;
 }
 
-bool SpriteAtlas::enablePolygonMode(bool enable, float epsilon) {
+void SpriteAtlas::enablePolygonMode(bool enable, float epsilon) {
     _polygonMode.enable = enable;
     _polygonMode.epsilon = epsilon;
 }
@@ -115,8 +116,6 @@ bool SpriteAtlas::enablePolygonMode(bool enable, float epsilon) {
 bool SpriteAtlas::generate() {
     QTime timePerform;
     timePerform.start();
-
-    BinPack2D::ContentAccumulator<PackContent> inputContent;
 
     QStringList nameFilter;
     nameFilter << "*.png" << "*.jpg" << "*.jpeg" << "*.gif" << "*.bmp";
@@ -139,8 +138,10 @@ bool SpriteAtlas::generate() {
 
     int volume = 0;
     int skipSprites = 0;
-    _identicalFrames.clear();
+
     // init images and rects
+    _identicalFrames.clear();
+    BinPack2D::ContentAccumulator<PackContent> inputContent;
     QList< QPair<QString,QString> >::iterator it_f = fileList.begin();
     for(; it_f != fileList.end(); ++it_f) {
         QImage image((*it_f).first);
@@ -329,13 +330,10 @@ bool SpriteAtlas::generate() {
     QCoreApplication::processEvents();
 
     // parse output.
-    typedef BinPack2D::Content<PackContent>::Vector::iterator binpack2d_iterator;
-
     _atlasImage = QImage(w, h, QImage::Format_RGBA8888);
     _atlasImage.fill(QColor(0, 0, 0, 0));
-
     _spriteFrames.clear();
-    for( binpack2d_iterator itor = outputContent.Get().begin(); itor != outputContent.Get().end(); itor++ ) {
+    for(auto itor = outputContent.Get().begin(); itor != outputContent.Get().end(); itor++ ) {
         const BinPack2D::Content<PackContent> &content = *itor;
 
         // retreive your data.

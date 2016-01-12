@@ -22,7 +22,8 @@ class SpriteAtlas
 public:
     SpriteAtlas(const QStringList& sourceList, int textureBorder = 0, int spriteBorder = 1, int trim = 1, bool pow2 = false, int maxSize = 8192, float scale = 1);
 
-    bool enablePolygonMode(bool enable, float epsilon = 2.f);
+    void setAlgorithm(const QString& algorithm) { _algorithm = algorithm; }
+    void enablePolygonMode(bool enable, float epsilon = 2.f);
     bool generate();
 
     const QImage& image() const { return _atlasImage; }
@@ -31,9 +32,10 @@ public:
 
 private:
     QStringList _sourceList;
+    QString _algorithm;
+    int _trim;
     int _textureBorder;
     int _spriteBorder;
-    int _trim;
     bool _pow2;
     int _maxTextureSize;
     float _scale;

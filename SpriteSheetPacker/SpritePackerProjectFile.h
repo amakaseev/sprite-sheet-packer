@@ -14,6 +14,8 @@ class SpritePackerProjectFile
 public:
     SpritePackerProjectFile();
 
+    void setAlgorithm(const QString& algorithm) { _algorithm = algorithm; }
+    QString algorithm() const { return _algorithm; }
 
     void setTrimMode(const QString& trimMode) { _trimMode = trimMode; }
     QString trimMode() const { return _trimMode; }
@@ -62,6 +64,7 @@ public:
     }
 
 protected:
+    QString _algorithm;
     QString _trimMode;
     int     _trimThreshold;
     float   _epsilon;

@@ -186,9 +186,13 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
                                 ui->pow2ComboBox->currentIndex()? true:false,
                                 ui->maxTextureSizeComboBox->currentText().toInt(),
                                 scale);
+
+        atlas->setAlgorithm(ui->algorithmComboBox->currentText());
+
         if (ui->trimModeComboBox->currentText() == "Polygon") {
             atlas->enablePolygonMode(true, ui->epsilonHorizontalSlider->value() / 10.f);
         }
+
         if (!atlas->generate()) {
             QMessageBox::critical(this, "Generate error", "Max texture size limit is small!");
             delete atlas;
@@ -569,9 +573,13 @@ void MainWindow::on_actionPublish_triggered() {
                               ui->pow2ComboBox->currentIndex()? true:false,
                               ui->maxTextureSizeComboBox->currentText().toInt(),
                               scale);
+
+            atlas.setAlgorithm(ui->algorithmComboBox->currentText());
+
             if (ui->trimModeComboBox->currentText() == "Polygon") {
                 atlas.enablePolygonMode(true, ui->epsilonHorizontalSlider->value() / 10.f);
             }
+
             if (!atlas.generate()) {
                 QMessageBox::critical(this, "Generate error", "Max texture size limit is small!");
                 publishStatusDialog->log("Generate error: Max texture size limit is small!", Qt::red);
