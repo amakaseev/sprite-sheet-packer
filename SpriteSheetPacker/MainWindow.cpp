@@ -36,6 +36,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->graphicsView->setAcceptDrops(false);
     _outlinesGroup = NULL;
 
+    _blockUISignals = false;
+
     _spritesTreeWidget = new SpritesTreeWidget(ui->spritesDockWidgetContents);
     connect(_spritesTreeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(spritesTreeWidgetItemSelectionChanged()));
     ui->spritesDockWidgetLayout->addWidget(_spritesTreeWidget);
@@ -300,6 +302,7 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
         return;
     }
 
+    _blockUISignals = true;
     ui->trimModeComboBox->setCurrentText(projectFile->trimMode());
     ui->trimSpinBox->setValue(projectFile->trimThreshold());
     ui->epsilonHorizontalSlider->setValue(projectFile->epsilon() * 10);
@@ -329,7 +332,10 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
 
     _spritesTreeWidget->clear();
     _spritesTreeWidget->addContent(projectFile->srcList());
+
+    _blockUISignals = false;
     refreshAtlas();
+
     // fit scene before open project
     on_toolButtonZoomFit_clicked();
 
@@ -741,6 +747,7 @@ void MainWindow::removeScalingVariant() {
 }
 
 void MainWindow::propertiesValueChanged(int val) {
+    if (_blockUISignals) return;
     QSettings settings;
 
     if (settings.value("Preferences/automaticPreview", true).toBool()) {
