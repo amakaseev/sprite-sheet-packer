@@ -15,8 +15,14 @@ public:
     SpritePackerProjectFile();
 
 
+    void setTrimMode(const QString& trimMode) { _trimMode = trimMode; }
+    QString trimMode() const { return _trimMode; }
+
     void setTrimThreshold(int trimThreshold) { _trimThreshold = trimThreshold; }
     int trimThreshold() const { return _trimThreshold; }
+
+    void setEpsilon(float epsilon) { _epsilon = epsilon; }
+    float epsilon() const { return _epsilon; }
 
     void setTextureBorder(int textureBorder) { _textureBorder = textureBorder; }
     int textureBorder() const { return _textureBorder; }
@@ -56,7 +62,9 @@ public:
     }
 
 protected:
+    QString _trimMode;
     int     _trimThreshold;
+    float   _epsilon;
     int     _textureBorder;
     int     _spriteBorder;
     int     _maxTextureSize;

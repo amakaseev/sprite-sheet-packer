@@ -501,7 +501,7 @@ Triangles PolygonImage::generateTriangles(const QImage& image, const QRectF& rec
     {
         PolygonImage polygonImage(image, epsilon, threshold);
         while (1) {
-            auto p = polygonImage.trace(realRect, 2);
+            auto p = polygonImage.trace(realRect, threshold);
             if (p.size() >= 3) {
                 if (p.size() > p_big.size()) {
                     p_big = p;
@@ -557,7 +557,7 @@ Triangles PolygonImage::generateTriangles(const QImage& image, const QRectF& rec
             polygons.push_back(p);
         }
 
-        p = polygonImage.trace(realRect, 2);
+        p = polygonImage.trace(realRect, threshold);
         if (p.size() < 3) {
             break;
         }

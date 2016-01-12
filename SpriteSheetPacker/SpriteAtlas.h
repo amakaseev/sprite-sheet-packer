@@ -22,7 +22,7 @@ class SpriteAtlas
 public:
     SpriteAtlas(const QStringList& sourceList, int textureBorder = 0, int spriteBorder = 1, int trim = 1, bool pow2 = false, int maxSize = 8192, float scale = 1);
 
-    bool enablePolygonMode(bool enable, float epsilon = 2.f, float threshold = 0.05f);
+    bool enablePolygonMode(bool enable, float epsilon = 2.f);
     bool generate();
 
     const QImage& image() const { return _atlasImage; }
@@ -40,7 +40,6 @@ private:
     struct TPolygonMode{
         bool enable;
         float epsilon;
-        float threshold;
     } _polygonMode;
 
     QImage _atlasImage;

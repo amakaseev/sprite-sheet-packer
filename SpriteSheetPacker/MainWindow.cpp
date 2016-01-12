@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->trimSpinBox, SIGNAL(valueChanged(int)), this, SLOT(propertiesValueChanged(int)));
     connect(ui->textureBorderSpinBox, SIGNAL(valueChanged(int)), this, SLOT(propertiesValueChanged(int)));
     connect(ui->spriteBorderSpinBox, SIGNAL(valueChanged(int)), this, SLOT(propertiesValueChanged(int)));
-    connect(ui->epsilonHorizontalSlider, SIGNAL(sliderMoved(int)), this, SLOT(propertiesValueChanged(int)));
+    connect(ui->epsilonHorizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(propertiesValueChanged(int)));
     connect(ui->pow2ComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(propertiesValueChanged(int)));
     connect(ui->maxTextureSizeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(propertiesValueChanged(int)));
     connect(ui->algorithmComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(propertiesValueChanged(int)));
@@ -261,7 +261,9 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
         return;
     }
 
+    ui->trimModeComboBox->setCurrentText(projectFile->trimMode());
     ui->trimSpinBox->setValue(projectFile->trimThreshold());
+    ui->epsilonHorizontalSlider->setValue(projectFile->epsilon() * 10);
     ui->textureBorderSpinBox->setValue(projectFile->textureBorder());
     ui->spriteBorderSpinBox->setValue(projectFile->spriteBorder());
     ui->maxTextureSizeComboBox->setCurrentText(QString::number(projectFile->maxTextureSize()));
@@ -316,7 +318,10 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
         QMessageBox::critical(this, "ERROR", "Unknown project file format!");
         return;
     }
+
+    projectFile->setTrimMode(ui->trimModeComboBox->currentText());
     projectFile->setTrimThreshold(ui->trimSpinBox->value());
+    projectFile->setEpsilon(ui->epsilonHorizontalSlider->value() / 10.f);
     projectFile->setTextureBorder(ui->textureBorderSpinBox->value());
     projectFile->setSpriteBorder(ui->spriteBorderSpinBox->value());
     projectFile->setMaxTextureSize(ui->maxTextureSizeComboBox->currentText().toInt());
@@ -529,6 +534,9 @@ void MainWindow::on_actionPublish_triggered() {
                               ui->pow2ComboBox->currentIndex()? true:false,
                               ui->maxTextureSizeComboBox->currentText().toInt(),
                               scale);
+            if (ui->trimModeComboBox->currentText() == "Polygon") {
+                atlas.enablePolygonMode(true, ui->epsilonHorizontalSlider->value() / 10.f);
+            }
             if (!atlas.generate()) {
                 QMessageBox::critical(this, "Generate error", "Max texture size limit is small!");
                 publishStatusDialog->log("Generate error: Max texture size limit is small!", Qt::red);

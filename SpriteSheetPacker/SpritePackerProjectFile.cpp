@@ -7,12 +7,14 @@
 GenericObjectFactory<std::string, SpritePackerProjectFile> SpritePackerProjectFile::_factory;
 
 SpritePackerProjectFile::SpritePackerProjectFile() {
+    _trimMode = "Rect";
     _trimThreshold = 1;
     _textureBorder = 0;
     _spriteBorder = 2;
     _maxTextureSize = 8192;
     _pow2 = false;
     _optLevel = 0;
+    _epsilon = 5;
 }
 
 
@@ -27,7 +29,11 @@ bool SpritePackerProjectFile::read(const QString &fileName) {
         return false;
     }
 
+    if (json.contains("trimMode"))
+        _trimMode = json["trimMode"].toString();
     _trimThreshold = json["trimThreshold"].toInt();
+    if (json.contains("epsilon"))
+        _epsilon = json["epsilon"].toDouble();
     _textureBorder = json["textureBorder"].toInt();
     _spriteBorder = json["spriteBorder"].toInt();
     _maxTextureSize = json["maxTextureSize"].toInt();
@@ -61,7 +67,9 @@ bool SpritePackerProjectFile::write(const QString &fileName) {
     QDir dir(QFileInfo(fileName).absolutePath());
     QJsonObject json;
 
+    json["trimMode"] = _trimMode;
     json["trimThreshold"] = _trimThreshold;
+    json["epsilon"] = _epsilon;
     json["textureBorder"] = _textureBorder;
     json["spriteBorder"] = _spriteBorder;
     json["maxTextureSize"] = _maxTextureSize;

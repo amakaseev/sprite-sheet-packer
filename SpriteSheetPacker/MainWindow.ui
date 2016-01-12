@@ -406,7 +406,7 @@
                     <bool>true</bool>
                    </property>
                    <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Algorithm&lt;/span&gt;&lt;/p&gt;&lt;p&gt;There are currently one algorithm&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;MaxRects&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Currently the best packing algorithm. Tries to use the last texture space by applying different heuristics when placing the sprites.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Trim / Crop&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Removes transparent pixels from a sprite's border.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Rect&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Removes the transparency around a sprite. The sprites appear to have their original size when using them.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Polygon&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-family:'Helvetica Neue'; color:#323333;&quot;&gt;The amount of rendered transparency can be reduced by creating a tight fitting polygon around the solid pixels of a sprite. But: The vertices must be transformed by the CPU — introducing new costs.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
                    <item>
                     <property name="text">
