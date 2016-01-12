@@ -339,6 +339,7 @@ std::vector<QPointF> PolygonImage::expand(const std::vector<QPointF>& points, co
     for(std::vector<QPointF>::const_iterator it = points.begin(); it<points.end(); it++) {
         subj << ClipperLib::IntPoint(it->x()* PRECISION, it->y() * PRECISION);
     }
+    ClipperLib::CleanPolygon(subj, PRECISION);
     ClipperLib::ClipperOffset co;
     co.AddPath(subj, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
     co.Execute(solution, epsilon * PRECISION);
@@ -419,9 +420,6 @@ Triangles PolygonImage::triangulate(const std::vector<QPointF>& points) {
     std::vector<p2t::Triangle*> tris = cdt.GetTriangles();
 
     Triangles triangles;
-
-    triangles.verts.resize(points.size());
-    triangles.indices.resize(tris.size()*3);
     unsigned short idx = 0;
     unsigned short vdx = 0;
 
@@ -440,14 +438,14 @@ Triangles PolygonImage::triangulate(const std::vector<QPointF>& points) {
             }
             if(found) {
                 //if we found the same vertex, don't add to verts, but use the same vertex with indices
-                triangles.indices[idx] = j;
+                triangles.indices.push_back(j);
                 idx++;
             } else {
                 //vert does not exist yet, so we need to create a new one,
                 auto t2f = QPointF(0,0); // don't worry about tex coords now, we calculate that later
                 V2F_T2F vert = {v2, t2f};
-                triangles.verts[vdx] = vert;
-                triangles.indices[idx] = vdx;
+                triangles.verts.push_back(vert);
+                triangles.indices.push_back(vdx);
                 idx++;
                 vdx++;
             }
