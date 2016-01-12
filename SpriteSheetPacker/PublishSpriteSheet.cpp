@@ -81,11 +81,11 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
         auto it_f = spriteAtlas.spriteFrames().cbegin();
         for (; it_f != spriteAtlas.spriteFrames().cend(); ++it_f) {
             QJSValue spriteFrameValue = engine.newObject();
-            spriteFrameValue.setProperty("frame", jsValue(engine, it_f.value().mFrame));
-            spriteFrameValue.setProperty("offset", jsValue(engine, it_f.value().mOffset));
-            spriteFrameValue.setProperty("rotated", it_f.value().mRotated);
-            spriteFrameValue.setProperty("sourceColorRect", jsValue(engine, it_f.value().mSourceColorRect));
-            spriteFrameValue.setProperty("sourceSize", jsValue(engine, it_f.value().mSourceSize));
+            spriteFrameValue.setProperty("frame", jsValue(engine, it_f.value().frame));
+            spriteFrameValue.setProperty("offset", jsValue(engine, it_f.value().offset));
+            spriteFrameValue.setProperty("rotated", it_f.value().rotated);
+            spriteFrameValue.setProperty("sourceColorRect", jsValue(engine, it_f.value().sourceColorRect));
+            spriteFrameValue.setProperty("sourceSize", jsValue(engine, it_f.value().sourceSize));
 
             spriteFramesValue.setProperty(it_f.key(), spriteFrameValue);
         }

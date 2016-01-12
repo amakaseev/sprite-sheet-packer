@@ -194,7 +194,7 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
         }
 
         if (!atlas->generate()) {
-            QMessageBox::critical(this, "Generate error", "Max texture size limit is small!");
+            QMessageBox::critical(this, "Generate error", "Generate atlas error!");
             delete atlas;
             return;
         }
@@ -228,10 +228,10 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
         if (skip) continue;
 
         auto spriteFrame = it.value();
-        QPoint delta = spriteFrame.mFrame.topLeft();
+        QPoint delta = spriteFrame.frame.topLeft();
 
         if (ui->trimModeComboBox->currentText() == "Rect")
-            outlineItems.push_back(_scene->addRect(spriteFrame.mFrame, QPen(Qt::white), QBrush(brushColor)));
+            outlineItems.push_back(_scene->addRect(spriteFrame.frame, QPen(Qt::white), QBrush(brushColor)));
 
         for (int i=0; i<spriteFrame.triangles.indices.size(); i+=3) {
             QPointF v1 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+0]].v + delta;
@@ -253,7 +253,7 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
             auto textItem = _scene->addSimpleText(QString("Triangles: %1").arg(spriteFrame.triangles.indices.size() / 3), QFont("", 24, QFont::Bold));
             textItem->setPen(QPen(Qt::black, 0.5f));
             textItem->setBrush(QBrush(Qt::white));
-            textItem->setPos(spriteFrame.mFrame.center() - textItem->boundingRect().center());
+            textItem->setPos(spriteFrame.frame.center() - textItem->boundingRect().center());
             outlineItems.push_back(textItem);
         }
 
@@ -267,7 +267,7 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
                 identicalString += frame + "\n";
             }
             identicalItem->setToolTip(identicalString);
-            identicalItem->setPos(spriteFrame.mFrame.topLeft());
+            identicalItem->setPos(spriteFrame.frame.topLeft());
         }
     }
     outlineItems.push_back(_scene->addRect(atlasPixmapItem->boundingRect(), QPen(Qt::darkRed)));

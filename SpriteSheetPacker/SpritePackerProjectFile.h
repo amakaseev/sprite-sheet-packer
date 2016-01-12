@@ -13,6 +13,7 @@ class SpritePackerProjectFile
 {
 public:
     SpritePackerProjectFile();
+    virtual ~SpritePackerProjectFile();
 
     void setAlgorithm(const QString& algorithm) { _algorithm = algorithm; }
     QString algorithm() const { return _algorithm; }

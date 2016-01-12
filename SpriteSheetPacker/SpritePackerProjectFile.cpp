@@ -18,6 +18,10 @@ SpritePackerProjectFile::SpritePackerProjectFile() {
     _epsilon = 5;
 }
 
+SpritePackerProjectFile::~SpritePackerProjectFile() {
+
+}
+
 
 bool SpritePackerProjectFile::read(const QString &fileName) {
     QDir dir(QFileInfo(fileName).absolutePath());
