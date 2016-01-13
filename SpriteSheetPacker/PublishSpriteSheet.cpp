@@ -107,7 +107,7 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
 
             if (optLevel > 0) {
                 // TODO: optimize in QThread and enable/disable on preferences
-                optimizePNGInThread(filePath + ".png", optLevel);
+                //optimizePNGInThread(filePath + ".png", optLevel);
             }
 
             // write data
@@ -140,17 +140,21 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
 }
 
 bool PublishSpriteSheet::optimizePNG(const QString& fileName, int optLevel) {
-    optimizer = new OptiPngOptimizer(fileName, optLevel);
-    bool result = optimizer->optimize();
+    PngOptimizer* optimizer = new OptiPngOptimizer(optLevel);
 
-    delete optimizer;
+    QMutexLocker loker(&_mutex);
+    bool result = optimizer->optimizeFile(fileName);
 
     return result;
 }
 
-void PublishSpriteSheet::optimizePNGInThread(const QString& fileName, int optLevel) {
+void PublishSpriteSheet::optimizePNGInThread(QList<QString> fileNames, int optLevel) {
     QObject::connect(&watcher, SIGNAL(finished()), this, SIGNAL(onCompleted()));
+    QFuture<bool> resultFuture;
 
-    QFuture<bool> future = QtConcurrent::run(this, &PublishSpriteSheet::optimizePNG, fileName, optLevel);
-    watcher.setFuture(future);
+    for (const QString& fileName : fileNames) {
+        resultFuture = QtConcurrent::run(this, &PublishSpriteSheet::optimizePNG, fileName, optLevel);
+    }
+
+    watcher.setFuture(resultFuture);
 }

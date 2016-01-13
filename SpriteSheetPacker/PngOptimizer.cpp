@@ -3,8 +3,7 @@
 #include <QtDebug>
 #include <QtCore>
 
-OptiPngOptimizer::OptiPngOptimizer(const QString& fileName, int optLevel) {
-    _fileName = fileName;
+OptiPngOptimizer::OptiPngOptimizer(int optLevel) {
     _optLevel = optLevel;
 
     memset(&options, 0, sizeof(options));
@@ -12,34 +11,48 @@ OptiPngOptimizer::OptiPngOptimizer(const QString& fileName, int optLevel) {
     options.optim_level = _optLevel;
     options.interlace = -1;
 
-    optimizer = opng_create_optimizer();
-    transformer = opng_create_transformer();
+    optimizer.store(opng_create_optimizer());
+    transformer.store(opng_create_transformer());
+
+    opng_set_options(optimizer.load(), &options);
+
+    opng_set_transformer(optimizer.load(), transformer.load());
 }
 
 OptiPngOptimizer::~OptiPngOptimizer() {
-    opng_destroy_optimizer(optimizer);
-    opng_destroy_transformer(transformer);
+    opng_destroy_optimizer(optimizer.load());
+    opng_destroy_transformer(transformer.load());
 }
 
-bool OptiPngOptimizer::optimize() {
+bool OptiPngOptimizer::optimizeFiles(QList<QString> fileNames) {
 
-    //size_t err_objname_offset, err_objname_length = 0;
-    //const char * err_message = "";
+    for(const QString& fileName : fileNames) {
+        if (!optimizeFile(fileName)) {
+            continue;
+        }
+    }
 
-    opng_set_options(optimizer, &options);
-    opng_set_transformer(optimizer, transformer);
+    return true;
+}
 
-    // @todo get that working
-    //if (opng_transform_strip_objects(transformer, "all",
-    //                 &err_objname_offset, &err_objname_length,
-    //                 &err_message) >= 0) {
-    //    return false;
-    //}
+bool OptiPngOptimizer::optimizeFile(const QString& fileName) {
 
-    if (opng_optimize_file(optimizer,
-                           _fileName.toStdString().c_str(),
-                           _fileName.toStdString().c_str(),
+    if (opng_optimize_file(optimizer.load(),
+                           fileName.toStdString().c_str(),
+                           fileName.toStdString().c_str(),
                            NULL) == -1) {
+        return false;
+    }
+
+    return true;
+}
+
+bool OptiPngOptimizer::setOptions(int optLevel) {
+    _optLevel = optLevel;
+
+    options.optim_level = _optLevel;
+
+    if (opng_set_options(optimizer, &options) < 0) {
         return false;
     }
 

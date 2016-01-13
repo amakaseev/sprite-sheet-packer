@@ -203,7 +203,7 @@
      <x>0</x>
      <y>0</y>
      <width>1222</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="defaultUp">
@@ -313,8 +313,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>314</width>
-          <height>839</height>
+          <width>320</width>
+          <height>848</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -784,7 +784,7 @@
               <item>
                <widget class="QSlider" name="optLevelSlider">
                 <property name="maximum">
-                 <number>7</number>
+                 <number>6</number>
                 </property>
                 <property name="pageStep">
                  <number>1</number>

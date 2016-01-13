@@ -9,23 +9,31 @@ public:
     PngOptimizer() {}
     ~PngOptimizer() {}
 	
-protected:
-    virtual bool optimize() { return true; }
+public:
+    virtual bool optimizeFiles(QList<QString> fileNames) { return true; }
+    virtual bool optimizeFile(const QString& fileName) { return true; }
+
+    virtual bool setOptions(int optLevel) { return true; }
 };
 
 class OptiPngOptimizer : public PngOptimizer {
 
 public:
-    OptiPngOptimizer(const QString& fileName, int optLevel);
+    OptiPngOptimizer(int optLevel = 0);
     ~OptiPngOptimizer();
 
-    bool optimize() override;
+    bool optimizeFiles(QList<QString> fileNames) override;
+    bool optimizeFile(const QString& fileName) override;
+
+    bool setOptions(int optLevel);
+
 private:
-    QString _fileName;
     int _optLevel;
+
     opng_options options;
-    opng_optimizer_t* optimizer;
-    opng_transformer_t* transformer;
+
+    QAtomicPointer<opng_optimizer_t> optimizer;
+    QAtomicPointer<opng_transformer_t> transformer;
 };
 
 #endif // PNGOPTIMIZER_H

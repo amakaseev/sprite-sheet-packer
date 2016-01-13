@@ -489,6 +489,9 @@ void MainWindow::on_actionPublish_triggered() {
         return;
     }
 
+    PublishSpriteSheet* publisher = new PublishSpriteSheet();
+    QList<QString> fileNames;
+
     PublishStatusDialog* publishStatusDialog = new PublishStatusDialog(this);
     publishStatusDialog->setAttribute(Qt::WA_DeleteOnClose);
     publishStatusDialog->open();
@@ -536,18 +539,27 @@ void MainWindow::on_actionPublish_triggered() {
                 refreshAtlas(&atlas);
             }
 
-            PublishSpriteSheet* publisher = new PublishSpriteSheet();
+            //PublishSpriteSheet* publisher = new PublishSpriteSheet();
 
-            QObject::connect(publisher, SIGNAL(onCompleted()), publishStatusDialog, SLOT(complete()));
+            //QObject::connect(publisher, SIGNAL(onCompleted()), publishStatusDialog, SLOT(complete()));
 
+            atlas.image().save(destFileInfo.filePath() + ".png");
+
+            fileNames.append(destFileInfo.filePath() + ".png");
+
+            /*
             if (!publisher->publish(destFileInfo.filePath(), ui->dataFormatComboBox->currentText(), ui->optLevelSlider->value(), atlas)) {
                 publishStatusDialog->log("Publish scale variant error! See all logs for details.", Qt::red);
                 continue;
             } else {
                 publishStatusDialog->log("Publish scale variant complete.");
             }
+            */
         }
     }
+    QObject::connect(publisher, SIGNAL(onCompleted()), publishStatusDialog, SLOT(complete()));
+    publisher->optimizePNGInThread(fileNames, ui->optLevelSlider->value());
+
     //publishStatusDialog->log(QString("Publishing is finished."), Qt::blue);
     //publishStatusDialog->complete();
 }
