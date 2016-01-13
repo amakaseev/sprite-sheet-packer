@@ -21,7 +21,6 @@ PolygonImage::PolygonImage(const QImage& image, const float epsilon, const float
     : _width(image.width())
     , _height(image.height())
     , _threshold(threshold)
-    , _filename("unknow")
 {
     _image = image.convertToFormat(QImage::Format_RGBA8888);
 }
@@ -302,12 +301,12 @@ std::vector<QPointF> PolygonImage::reduce(const std::vector<QPointF>& points, co
     auto size = points.size();
     // if there are less than 3 points, then we have nothing
     if (size<3) {
-        qDebug("AUTOPOLYGON: cannot reduce points for %s that has less than 3 points in input, e: %f", _filename.c_str(), epsilon);
+        qDebug("AUTOPOLYGON: cannot reduce points that has less than 3 points in input, e: %f", epsilon);
         return std::vector<QPointF>();
     }
     // if there are less than 9 points (but more than 3), then we don't need to reduce it
     else if (size < 9) {
-        qDebug("AUTOPOLYGON: cannot reduce points for %s e: %f", _filename.c_str(), epsilon);
+        qDebug("AUTOPOLYGON: cannot reduce points epsilon: %f", epsilon);
         return points;
     }
 
@@ -330,7 +329,7 @@ std::vector<QPointF> PolygonImage::expand(const std::vector<QPointF>& points, co
     auto size = points.size();
     // if there are less than 3 points, then we have nothing
     if(size < 3) {
-        qDebug("AUTOPOLYGON: cannot expand points for %s with less than 3 points, e: %f", _filename.c_str(), epsilon);
+        qDebug("AUTOPOLYGON: cannot expand points with less than 3 points, e: %f", epsilon);
         return std::vector<QPointF>();
     }
     ClipperLib::Path subj;
@@ -405,7 +404,7 @@ Triangles PolygonImage::triangulate(const std::vector<QPointF>& points) {
     // if there are less than 3 points, then we can't triangulate
     if(points.size()<3)
     {
-        qDebug("AUTOPOLYGON: cannot triangulate %s with less than 3 points", _filename.c_str());
+        qDebug("AUTOPOLYGON: cannot triangulate with less than 3 points");
         return Triangles();
     }
     std::vector<p2t::Point*> p2points;
@@ -612,7 +611,7 @@ Triangles PolygonImage::generateTriangles(const QImage& image, const QRectF& rec
             qDebug() << "size:" << (*it_p1).size();
         }
     }*/
-    qDebug() << "Triangulate";
+
     std::list<std::vector<QPointF>>::iterator it_p1 = polygons.begin();
     while (it_p1 != polygons.end()) {
         auto tri = polygonImage.triangulate((*it_p1));

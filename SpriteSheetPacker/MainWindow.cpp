@@ -215,7 +215,6 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
     QList<QGraphicsItem*> outlineItems;
     QColor brushColor(Qt::blue);
     brushColor.setAlpha(100);
-    qDebug() <<  atlas->identicalFrames();
     for(auto it = atlas->spriteFrames().begin(); it != atlas->spriteFrames().end(); ++it) {
         bool skip = false;
         for (auto identicalFrame: atlas->identicalFrames()) {

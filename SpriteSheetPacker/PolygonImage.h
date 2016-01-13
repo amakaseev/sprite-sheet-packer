@@ -59,7 +59,6 @@ protected:
 
 private:
     QImage        _image;
-    std::string   _filename;
     unsigned int  _width;
     unsigned int  _height;
     unsigned int  _threshold;
