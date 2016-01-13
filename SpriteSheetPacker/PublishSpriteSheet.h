@@ -4,14 +4,12 @@
 #include <QtCore>
 #include <QJSEngine>
 #include <QtConcurrent>
-//#include <QtAtom
 #include "PngOptimizer.h"
 
 class SpriteAtlas;
 struct ScalingVariant;
 
-class JSConsole : public QObject
-{
+class JSConsole : public QObject {
     Q_OBJECT
 public:
     explicit JSConsole() { }
@@ -36,7 +34,7 @@ signals:
 
 private:
     static QMap<QString, QString> _formats;
-    QFutureWatcher<void> watcher;
+    QFutureWatcher<bool> _watcher;
     QMutex _mutex;
 };
 

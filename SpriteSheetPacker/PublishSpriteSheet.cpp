@@ -3,7 +3,6 @@
 #include "SpriteAtlas.h"
 #include "PListSerializer.h"
 #include <QMessageBox>
-#include <functional>
 #include "PngOptimizer.h"
 
 QMap<QString, QString> PublishSpriteSheet::_formats;
@@ -105,10 +104,9 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
             // write image
             spriteAtlas.image().save(filePath + ".png");
 
-            if (optLevel > 0) {
-                // TODO: optimize in QThread and enable/disable on preferences
+            //if (optLevel > 0) {
                 //optimizePNGInThread(filePath + ".png", optLevel);
-            }
+            //}
 
             // write data
             if (!result.hasProperty("data") || !result.hasProperty("format")) {
@@ -149,12 +147,12 @@ bool PublishSpriteSheet::optimizePNG(const QString& fileName, int optLevel) {
 }
 
 void PublishSpriteSheet::optimizePNGInThread(QList<QString> fileNames, int optLevel) {
-    QObject::connect(&watcher, SIGNAL(finished()), this, SIGNAL(onCompleted()));
+    QObject::connect(&_watcher, SIGNAL(finished()), this, SIGNAL(onCompleted()));
     QFuture<bool> resultFuture;
 
     for (const QString& fileName : fileNames) {
         resultFuture = QtConcurrent::run(this, &PublishSpriteSheet::optimizePNG, fileName, optLevel);
     }
 
-    watcher.setFuture(resultFuture);
+    _watcher.setFuture(resultFuture);
 }
