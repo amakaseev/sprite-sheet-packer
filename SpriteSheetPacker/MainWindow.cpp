@@ -232,31 +232,28 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
         auto spriteFrame = it.value();
         QPoint delta = spriteFrame.frame.topLeft();
 
-        if (ui->trimModeComboBox->currentText() == "Rect")
-            outlineItems.push_back(_scene->addRect(spriteFrame.frame, QPen(Qt::white), QBrush(brushColor)));
-
-        for (int i=0; i<spriteFrame.triangles.indices.size(); i+=3) {
-            QPointF v1 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+0]].v + delta;
-            QPointF v2 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+1]].v + delta;
-            QPointF v3 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+2]].v + delta;
-
-            auto polygonItem = _scene->addPolygon(QPolygonF() << v1 << v2 << v3);
-            polygonItem->setPen(QPen(Qt::white));
-            polygonItem->setBrush(QBrush(brushColor));
-            outlineItems.push_back(polygonItem);
-        }
-        for (auto point: spriteFrame.triangles.debugPoints) {
-            auto rectItem = _scene->addRect(QRectF(point.x() + delta.x(), point.y() + delta.y(), 1, 1));
-            rectItem->setPen(QPen(Qt::red));
-            rectItem->setBrush(QBrush(Qt::red));
+        if (ui->trimModeComboBox->currentText() == "Rect") {
+            auto rectItem = _scene->addRect(spriteFrame.frame, QPen(Qt::white), QBrush(brushColor));
+            rectItem->setToolTip(it.key());
             outlineItems.push_back(rectItem);
         }
+
         if (spriteFrame.triangles.indices.size()) {
-            auto textItem = _scene->addSimpleText(QString("Triangles: %1").arg(spriteFrame.triangles.indices.size() / 3), QFont("", 24, QFont::Bold));
-            textItem->setPen(QPen(Qt::black, 0.5f));
-            textItem->setBrush(QBrush(Qt::white));
-            textItem->setPos(spriteFrame.frame.center() - textItem->boundingRect().center());
-            outlineItems.push_back(textItem);
+            QPainterPath trianglesPath;
+            for (int i=0; i<spriteFrame.triangles.indices.size(); i+=3) {
+                QPointF v1 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+0]].v + delta;
+                QPointF v2 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+1]].v + delta;
+                QPointF v3 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+2]].v + delta;
+                trianglesPath.addPolygon(QPolygonF() << v1 << v2 << v3);
+            }
+            auto pathItem = _scene->addPath(trianglesPath, QPen(Qt::white), QBrush(brushColor));
+            pathItem->setToolTip(QString("%1\nTriangles: %2").arg(it.key()).arg(spriteFrame.triangles.indices.size() / 3));
+            outlineItems.push_back(pathItem);
+        }
+
+        for (auto point: spriteFrame.triangles.debugPoints) {
+            auto rectItem = _scene->addRect(QRectF(point.x() + delta.x(), point.y() + delta.y(), 1, 1), QPen(Qt::red), QBrush(Qt::red));
+            outlineItems.push_back(rectItem);
         }
 
         // show identical statistics
@@ -272,7 +269,6 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
             identicalItem->setPos(spriteFrame.frame.topLeft());
         }
     }
-    outlineItems.push_back(_scene->addRect(atlasPixmapItem->boundingRect(), QPen(Qt::darkRed)));
 
     _outlinesGroup = _scene->createItemGroup(outlineItems);
     _outlinesGroup->setVisible(ui->displayOutlinesCheckBox->isChecked());
