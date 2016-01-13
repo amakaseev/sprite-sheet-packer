@@ -92,6 +92,8 @@ INCLUDEPATH += \
 	$$PWD/opnglib \
 	$$PWD/opnglib/include/opnglib \
 	$$PWD/opnglib/include/optk \
+	$$PWD/opnglib/src/opngcore \
+	$$PWD/opnglib/src/opngtrans
 	
 HEADERS += \
     $$PWD/opnglib/include/opnglib/opngcore.h \

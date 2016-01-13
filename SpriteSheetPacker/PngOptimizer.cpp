@@ -1,6 +1,4 @@
 #include "PngOptimizer.h"
-#include "opnglib/include/opnglib/opnglib.h"
-#include <QtDebug>
 #include <QtCore>
 
 OptiPngOptimizer::OptiPngOptimizer(int optLevel) {
@@ -11,20 +9,19 @@ OptiPngOptimizer::OptiPngOptimizer(int optLevel) {
     options.optim_level = _optLevel;
     options.interlace = -1;
 
-    optimizer.store(opng_create_optimizer());
-    transformer.store(opng_create_transformer());
+    optimizer = opng_create_optimizer();
+    transformer = opng_create_transformer();
 
-    opng_set_options(optimizer.load(), &options);
-
-    opng_set_transformer(optimizer.load(), transformer.load());
+    opng_set_options(optimizer, &options);
+    opng_set_transformer(optimizer, transformer);
 }
 
 OptiPngOptimizer::~OptiPngOptimizer() {
-    opng_destroy_optimizer(optimizer.load());
-    opng_destroy_transformer(transformer.load());
+    opng_destroy_optimizer(optimizer);
+    opng_destroy_transformer(transformer);
 }
 
-bool OptiPngOptimizer::optimizeFiles(QList<QString> fileNames) {
+bool OptiPngOptimizer::optimizeFiles(QStringList fileNames) {
 
     for(const QString& fileName : fileNames) {
         if (!optimizeFile(fileName)) {
@@ -37,7 +34,7 @@ bool OptiPngOptimizer::optimizeFiles(QList<QString> fileNames) {
 
 bool OptiPngOptimizer::optimizeFile(const QString& fileName) {
 
-    if (opng_optimize_file(optimizer.load(),
+    if (opng_optimize_file(optimizer,
                            fileName.toStdString().c_str(),
                            fileName.toStdString().c_str(),
                            NULL) == -1) {

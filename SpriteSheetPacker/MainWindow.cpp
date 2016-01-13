@@ -536,7 +536,6 @@ void MainWindow::on_actionPublish_triggered() {
     }
 
     PublishSpriteSheet* publisher = new PublishSpriteSheet();
-    QList<QString> fileNames;
 
     PublishStatusDialog* publishStatusDialog = new PublishStatusDialog(this);
     publishStatusDialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -568,7 +567,7 @@ void MainWindow::on_actionPublish_triggered() {
                 }
             }
 
-            publishStatusDialog->log(QString("Begin publish scale variant (%1) scale: %2.").arg(spriteSheetName).arg(scale));
+            publishStatusDialog->log(QString("Generating scale variant (%1) scale: %2.").arg(spriteSheetName).arg(scale));
 
             SpriteAtlas atlas(_spritesTreeWidget->contentList(),
                               ui->textureBorderSpinBox->value(),
@@ -592,29 +591,24 @@ void MainWindow::on_actionPublish_triggered() {
                 refreshAtlas(&atlas);
             }
 
-            //PublishSpriteSheet* publisher = new PublishSpriteSheet();
-
-            //QObject::connect(publisher, SIGNAL(onCompleted()), publishStatusDialog, SLOT(complete()));
-
-            atlas.image().save(destFileInfo.filePath() + ".png");
-
-            fileNames.append(destFileInfo.filePath() + ".png");
-
-            /*
-            if (!publisher->publish(destFileInfo.filePath(), ui->dataFormatComboBox->currentText(), ui->optLevelSlider->value(), atlas)) {
-                publishStatusDialog->log("Publish scale variant error! See all logs for details.", Qt::red);
-                continue;
-            } else {
-                publishStatusDialog->log("Publish scale variant complete.");
-            }
-            */
+            publisher->addSpriteSheet(atlas, destFileInfo.filePath());
         }
     }
-    QObject::connect(publisher, SIGNAL(onCompleted()), publishStatusDialog, SLOT(complete()));
-    publisher->optimizePNGInThread(fileNames, ui->optLevelSlider->value());
 
-    //publishStatusDialog->log(QString("Publishing is finished."), Qt::blue);
-    //publishStatusDialog->complete();
+    publisher->publish(ui->dataFormatComboBox->currentText(), ui->optLevelSlider->value());
+
+    if (ui->optLevelSlider->value() == 0) {
+        publishStatusDialog->log(QString("Publishing is finished."), Qt::blue);
+        publishStatusDialog->complete();
+        delete publisher;
+
+    } else {
+        QObject::connect(publisher, &PublishSpriteSheet::onCompleted, [publishStatusDialog, publisher] () {
+            publishStatusDialog->log(QString("Publishing is finished."), Qt::blue);
+            publishStatusDialog->complete();
+            delete publisher;
+        });
+    }
 }
 
 void MainWindow::on_actionAbout_triggered() {

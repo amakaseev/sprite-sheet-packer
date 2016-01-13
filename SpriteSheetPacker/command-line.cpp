@@ -22,7 +22,7 @@ Default is Rect", "mode", "Rect"},
         {"sprite-border", "Sprite border is the space between sprites. Value adds transparent pixels between sprites to avoid artifacts from neighbor sprites. The transparent pixels are not added to the sprites, default is 2.", "int", "2"},
         {"powerOf2", "Forces the texture to have power of 2 size (32, 64, 128...). Default is disable."},
         {"max-size", "Sets the maximum size for the texture, default is 8192.", "size", "8192"},
-        {"opt-level", "Optimizes the image's file size. Allowed values: 1 to 7 (Higher values take noticeably longer.", "int", "0"},
+        {"opt-level", "Optimizes the image's file size. Allowed values: 0 to 6 (Using a high value might take some time to optimize.", "int", "0"},
         {"scale", "Scales all images before creating the sheet. E.g. use 0.5 for half size, default is 1 (Scale has no effect when source is a project file).", "float", "1"},
     });
 
@@ -142,6 +142,7 @@ Default is Rect", "mode", "Rect"},
 
     if (parser.isSet("opt-level")) {
         optLevel = parser.value("opt-level").toInt();
+        optLevel = qBound(0, optLevel, 6);
     }
 
     qDebug() << "trimMode:" << trimMode;
@@ -159,6 +160,8 @@ Default is Rect", "mode", "Rect"},
     QStringList formatsFolder;
     formatsFolder.push_back(QCoreApplication::applicationDirPath() + "/defaultFormats");
     formatsFolder.push_back(settings.value("Preferences/customFormatFolder").toString());
+
+    PublishSpriteSheet publisher;
 
     // load formats
     PublishSpriteSheet::formats().clear();
@@ -209,12 +212,7 @@ Default is Rect", "mode", "Rect"},
                 return -1;
             }
 
-            PublishSpriteSheet publisher;
-            // Publish data
-            if (!publisher.publish(destFileInfo.filePath(), format, optLevel, atlas, false)) {
-                qCritical() << "ERROR: publish atlas!";
-                return -1;
-            }
+            publisher.addSpriteSheet(atlas, destFileInfo.filePath());
         }
 
         delete projectFile;
@@ -230,13 +228,14 @@ Default is Rect", "mode", "Rect"},
             return -1;
         }
 
-        PublishSpriteSheet publisher;
-        // Publish data
-        if (!publisher.publish(destination.filePath() + source.fileName(), format, optLevel, atlas, false)) {
-            qCritical() << "ERROR: publish atlas!";
-            return -1;
-        }
+        publisher.addSpriteSheet(atlas, destination.filePath() + source.fileName());
     }
+
+    if (!publisher.publish(format, optLevel, false)) {
+        qCritical() << "ERROR: publish atlas!";
+        return -1;
+    }
+
     qDebug() << "Publishing is finished.";
 
 

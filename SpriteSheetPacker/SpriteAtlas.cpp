@@ -13,12 +13,6 @@ int pow2(int len) {
     return pow(2,order);
 }
 
-void copyImage(QImage& dst, const QPoint& pos, const QImage& src, const QRect& srcRect) {
-    for (int x=0; x<srcRect.width(); ++x) {
-        for (int y=0; y<srcRect.height(); ++y) {
-            dst.setPixel(pos.x() + x, pos.y() + y, src.pixel(srcRect.x() + x, srcRect.y() + y));
-        }
-    }
 PackContent::PackContent() {
     // only for QVector
     qDebug() << "PackContent::PackContent()";
@@ -29,47 +23,15 @@ PackContent::PackContent(const QString& name, const QImage& image) {
     _rect = QRect(0, 0, _image.width(), _image.height());
 }
 
-class PackContent {
-public:
-    PackContent(const QString& fname, const QString& name, const QImage& image) {
-        mFileName = fname;
-        mName = name;
-        mImage = image;
-        mRect = QRect(0, 0, mImage.width(), mImage.height());
-    }
 bool PackContent::isIdentical(const PackContent& other) {
     if (_rect != other._rect) return false;
 
-    bool isIdentical(const PackContent& other) {
-        if (mRect != other.mRect) return false;
-
-        for (int x=mRect.left(); x<=mRect.right(); ++x) {
-            for (int y=mRect.top(); y<=mRect.bottom(); ++y) {
-                if (mImage.pixel(x, y) != other.mImage.pixel(x, y)) return false;
-            }
     for (int x = _rect.left(); x < _rect.right(); ++x) {
         for (int y = _rect.top(); y < _rect.bottom(); ++y) {
             if (_image.pixel(x, y) != other._image.pixel(x, y)) return false;
         }
-
-        return true;
     }
 
-    void trim(int alpha) {
-        int l = mImage.width();
-        int t = mImage.height();
-        int r = 0;
-        int b = 0;
-        for (int y=0; y<mImage.height(); y++) {
-            bool rowFilled = false;
-            for (int x=0; x<mImage.width(); x++) {
-                int a = qAlpha(mImage.pixel(x, y));
-                if (a >= alpha) {
-                    rowFilled = true;
-                    r = qMax(r, x);
-                    if (l > x) {
-                        l = x;
-                    }
     return true;
 }
 
@@ -89,25 +51,10 @@ void PackContent::trim(int alpha) {
                     l = x;
                 }
             }
-            if (rowFilled) {
-                t = qMin(t, y);
-                b = y;
-            }
         }
-        mRect = QRect(QPoint(l, t), QPoint(r,b));
-        if ((mRect.width() % 2) != (mImage.width() % 2)) {
-            if (l>0) l--; else r++;
-            mRect = QRect(QPoint(l, t), QPoint(r,b));
         if (rowFilled) {
             t = qMin(t, y);
             b = y;
-        }
-        if ((mRect.height() % 2) != (mImage.height() % 2)) {
-            if (t>0) t--; else b++;
-            mRect = QRect(QPoint(l, t), QPoint(r,b));
-        }
-        if ((mRect.width()<0)||(mRect.height()<0)) {
-            mRect = QRect(0, 0, 2, 2);
         }
     }
     _rect = QRect(QPoint(l, t), QPoint(r,b));
@@ -124,19 +71,11 @@ void PackContent::trim(int alpha) {
     }
 }
 
-    QString mFileName;
-    QString mName;
-    QImage  mImage;
-    QRect   mRect;
-    Triangles triangles;
-};
-
 SpriteAtlas::SpriteAtlas(const QStringList& sourceList, int textureBorder, int spriteBorder, int trim, bool pow2, int maxSize, float scale)
     : _sourceList(sourceList)
     , _trim(trim)
     , _textureBorder(textureBorder)
     , _spriteBorder(spriteBorder)
-    , _trim(trim)
     , _pow2(pow2)
     , _maxTextureSize(maxSize)
     , _scale(scale)
@@ -145,11 +84,9 @@ SpriteAtlas::SpriteAtlas(const QStringList& sourceList, int textureBorder, int s
     _polygonMode.enable = false;
 }
 
-bool SpriteAtlas::enablePolygonMode(bool enable, float epsilon, float threshold) {
 void SpriteAtlas::enablePolygonMode(bool enable, float epsilon) {
     _polygonMode.enable = enable;
     _polygonMode.epsilon = epsilon;
-    _polygonMode.threshold = threshold;
 }
 
 // TODO: QThread: gui is freeze on very large atlases (no profit) wtf?
@@ -165,8 +102,6 @@ void SpriteAtlas::enablePolygonMode(bool enable, float epsilon) {
 bool SpriteAtlas::generate() {
     QTime timePerform;
     timePerform.start();
-
-    BinPack2D::ContentAccumulator<PackContent> inputContent;
 
     QStringList nameFilter;
     nameFilter << "*.png" << "*.jpg" << "*.jpeg" << "*.gif" << "*.bmp";
@@ -187,12 +122,9 @@ bool SpriteAtlas::generate() {
         }
     }
 
-    int volume = 0;
     int skipSprites = 0;
-    QMap<QString, QVector<QPair<QString, QSize>>> identicalContent;
 
     // init images and rects
-    QList< QPair<QString,QString> >::iterator it_f = fileList.begin();
     _identicalFrames.clear();
 
     QVector<PackContent> inputContent;
@@ -204,18 +136,12 @@ bool SpriteAtlas::generate() {
             image = image.scaled(ceil(image.width() * _scale), ceil(image.height() * _scale), Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
-        PackContent packContent((*it_f).first, (*it_f).second, image);
         PackContent packContent((*it_f).second, image);
 
         // Trim / Crop
         if (_trim) {
             packContent.trim(_trim);
             if (_polygonMode.enable) {
-                packContent.triangles = PolygonImage::generateTriangles(
-                            packContent.mImage,
-                            packContent.mRect,
-                            _polygonMode.epsilon,
-                            _polygonMode.threshold);
                 //qDebug() << (*it_f).first;
                 PolygonImage polygonImage(packContent.image(), packContent.rect(), _polygonMode.epsilon, _trim);
                 packContent.setPolygons(polygonImage.polygons());
@@ -225,27 +151,19 @@ bool SpriteAtlas::generate() {
 
         // Find Identical
         bool findIdentical = false;
-        auto& contentVector = inputContent.Get();
-        for (auto& content: contentVector) {
-            if (content.content.isIdentical(packContent)) {
         for (auto& content: inputContent) {
             if (content.isIdentical(packContent)) {
                 findIdentical = true;
-                identicalContent[content.content.mName].push_back(qMakePair(packContent.mName, packContent.mImage.size()));
-                qDebug() << "isIdentical:" << packContent.mName << "==" << content.content.mName;
                 _identicalFrames[content.name()].push_back(packContent.name());
                 qDebug() << "isIdentical:" << packContent.name() << "==" << content.name();
                 skipSprites++;
                 break;
             }
         }
-
         if (findIdentical) {
             continue;
         }
 
-        int width = packContent.mRect.width();
-        int height = packContent.mRect.height();
         inputContent.push_back(packContent);
     }
     if (skipSprites)
@@ -276,14 +194,9 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
 
         inputContent += BinPack2D::Content<PackContent>(packContent,
                                                         BinPack2D::Coord(),
-                                                        BinPack2D::Size(width+_spriteBorder, height+_spriteBorder),
                                                         BinPack2D::Size(width + _spriteBorder, height + _spriteBorder),
                                                         false);
     }
-    if (skipSprites)
-        qDebug() << "Total skip sprites: " << skipSprites;
-
-    QCoreApplication::processEvents();
 
     // Sort the input content by size... usually packs better.
     inputContent.Sort();
@@ -421,14 +334,10 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
     QCoreApplication::processEvents();
 
     // parse output.
-    typedef BinPack2D::Content<PackContent>::Vector::iterator binpack2d_iterator;
-
     _atlasImage = QImage(w, h, QImage::Format_RGBA8888);
     _atlasImage.fill(QColor(0, 0, 0, 0));
-
     QPainter painter(&_atlasImage);
     _spriteFrames.clear();
-    for( binpack2d_iterator itor = outputContent.Get().begin(); itor != outputContent.Get().end(); itor++ ) {
     for(auto itor = outputContent.Get().begin(); itor != outputContent.Get().end(); itor++ ) {
         const BinPack2D::Content<PackContent> &content = *itor;
 
@@ -439,74 +348,51 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
         // image
         QImage image;
         if (content.rotated) {
-            image = packContent.mImage.copy(packContent.mRect);
             image = packContent.image().copy(packContent.rect());
             image = rotate90(image);
         }
 
         SpriteFrameInfo spriteFrame;
-        spriteFrame.triangles = packContent.triangles;
-        spriteFrame.mFrame = QRect(content.coord.x + _textureBorder, content.coord.y + _textureBorder, content.size.w-_spriteBorder, content.size.h-_spriteBorder);
-        spriteFrame.mOffset = QPoint(
-                    (packContent.mRect.left() + (-packContent.mImage.width() + content.size.w - _spriteBorder) * 0.5f),
-                    (-packContent.mRect.top() + ( packContent.mImage.height() - content.size.h + _spriteBorder) * 0.5f)
         spriteFrame.triangles = packContent.triangles();
         spriteFrame.frame = QRect(content.coord.x + _textureBorder, content.coord.y + _textureBorder, content.size.w - _spriteBorder, content.size.h - _spriteBorder);
         spriteFrame.offset = QPoint(
                     (packContent.rect().left() + (-packContent.image().width() + content.size.w - _spriteBorder) * 0.5f),
                     (-packContent.rect().top() + ( packContent.image().height() - content.size.h + _spriteBorder) * 0.5f)
                     );
-        spriteFrame.mRotated = content.rotated;
-        spriteFrame.mSourceColorRect = packContent.mRect;
-        spriteFrame.mSourceSize = packContent.mImage.size();
         spriteFrame.rotated = content.rotated;
         spriteFrame.sourceColorRect = packContent.rect();
         spriteFrame.sourceSize = packContent.image().size();
         if (content.rotated) {
-            spriteFrame.mFrame = QRect(content.coord.x, content.coord.y, content.size.h-_spriteBorder, content.size.w-_spriteBorder);
             spriteFrame.frame = QRect(content.coord.x, content.coord.y, content.size.h-_spriteBorder, content.size.w-_spriteBorder);
 
         }
         if (content.rotated) {
-            copyImage(_atlasImage, QPoint(content.coord.x+_textureBorder, content.coord.y+_textureBorder), image, image.rect());
             painter.drawImage(QPoint(content.coord.x + _textureBorder, content.coord.y + _textureBorder), image);
         } else {
-            copyImage(_atlasImage, QPoint(content.coord.x+_textureBorder, content.coord.y+_textureBorder), packContent.mImage, packContent.mRect);
             painter.drawImage(QPoint(content.coord.x + _textureBorder, content.coord.y + _textureBorder), packContent.image(), packContent.rect());
         }
-        _spriteFrames[packContent.mName] = spriteFrame;
 
         _spriteFrames[packContent.name()] = spriteFrame;
 
         // add ident to sprite frames
-        auto identicalIt = identicalContent.find(packContent.mName);
-        if (identicalIt != identicalContent.end()) {
         auto identicalIt = _identicalFrames.find(packContent.name());
         if (identicalIt != _identicalFrames.end()) {
             QStringList identicalList;
             for (auto ident: (*identicalIt)) {
                 SpriteFrameInfo identSpriteFrameInfo = spriteFrame;
-                identSpriteFrameInfo.mOffset = QPoint(
-                            (packContent.mRect.left() + (-ident.second.width() + content.size.w - _spriteBorder) * 0.5f),
-                            (-packContent.mRect.top() + ( ident.second.height() - content.size.h + _spriteBorder) * 0.5f)
                 identSpriteFrameInfo.offset = QPoint(
                             (packContent.rect().left() + (-packContent.image().width() + content.size.w - _spriteBorder) * 0.5f),
                             (-packContent.rect().top() + ( packContent.image().height() - content.size.h + _spriteBorder) * 0.5f)
                             );
-                identSpriteFrameInfo.mSourceSize = ident.second;
-                _spriteFrames[ident.first] = identSpriteFrameInfo;
                 identSpriteFrameInfo.sourceSize = packContent.image().size();
                 _spriteFrames[ident] = identSpriteFrameInfo;
 
-                identicalList.push_back(ident.first);
                 identicalList.push_back(ident);
             }
         }
     }
     painter.end();
 
-    int elapsed = timePerform.elapsed();
-    qDebug() << "Generate time mc:" <<  elapsed/1000.f << "sec";
     return true;
 }
 

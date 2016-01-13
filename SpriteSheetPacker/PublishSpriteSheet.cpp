@@ -34,7 +34,39 @@ void JSConsole::log(QString msg) {
     qDebug() << "js:"<< msg;
 }
 
-bool PublishSpriteSheet::publish(const QString& filePath, const QString& format, int optLevel, const SpriteAtlas& spriteAtlas, bool errorMessage) {
+void PublishSpriteSheet::addSpriteSheet(const SpriteAtlas &atlas, const QString &fileName) {
+    _spriteAtlases.append(atlas);
+    _fileNames.append(fileName);
+}
+
+bool PublishSpriteSheet::publish(const QString& format, int optLevel, bool errorMessage) {
+
+    if (_spriteAtlases.size() != _fileNames.size()) {
+        return false;
+    }
+
+    for (int i = 0; i < _spriteAtlases.size(); i++) {
+        const SpriteAtlas& atlas = _spriteAtlases.at(i);
+        const QString& filePath = _fileNames.at(i);
+
+        // generate the data file and the image
+        if (!generateDataFile(filePath, format, atlas, errorMessage)) {
+            return false;
+        }
+        atlas.image().save(filePath + ".png");
+    }
+
+    if (optLevel > 0) {
+        optimizePNGInThread(_fileNames, optLevel);
+    }
+
+    _spriteAtlases.clear();
+    _fileNames.clear();
+
+    return true;
+}
+
+bool PublishSpriteSheet::generateDataFile(const QString& filePath, const QString& format, const SpriteAtlas &spriteAtlas, bool errorMessage) {
     QJSEngine engine;
 
     auto it_format = _formats.find(format);
@@ -101,13 +133,6 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
             if (errorMessage) QMessageBox::critical(NULL, "Export script error", errorString);
             return false;
         } else {
-            // write image
-            spriteAtlas.image().save(filePath + ".png");
-
-            //if (optLevel > 0) {
-                //optimizePNGInThread(filePath + ".png", optLevel);
-            //}
-
             // write data
             if (!result.hasProperty("data") || !result.hasProperty("format")) {
                 QString errorString = "Script function must be return object: {data:data, format:'plist|json|other'}";
@@ -138,15 +163,15 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
 }
 
 bool PublishSpriteSheet::optimizePNG(const QString& fileName, int optLevel) {
-    PngOptimizer* optimizer = new OptiPngOptimizer(optLevel);
+    OptiPngOptimizer optimizer(optLevel);
 
     QMutexLocker loker(&_mutex);
-    bool result = optimizer->optimizeFile(fileName);
+    bool result = optimizer.optimizeFile(fileName + ".png");
 
     return result;
 }
 
-void PublishSpriteSheet::optimizePNGInThread(QList<QString> fileNames, int optLevel) {
+void PublishSpriteSheet::optimizePNGInThread(QStringList fileNames, int optLevel) {
     QObject::connect(&_watcher, SIGNAL(finished()), this, SIGNAL(onCompleted()));
     QFuture<bool> resultFuture;
 
