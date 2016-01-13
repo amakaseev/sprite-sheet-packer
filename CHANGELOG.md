@@ -1,5 +1,6 @@
 v1.0.3
 ======
+* Add ToolTip for sprite frames
 * Fix bug with copy image (break alpha chanel if image scale)
 * Show identical list of sprite frame
 * Win32: Polished publish dialog (Window title, position)
