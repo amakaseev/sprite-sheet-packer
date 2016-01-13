@@ -36,6 +36,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->graphicsView->setAcceptDrops(false);
     _outlinesGroup = NULL;
 
+    _blockUISignals = false;
+
     _spritesTreeWidget = new SpritesTreeWidget(ui->spritesDockWidgetContents);
     connect(_spritesTreeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(spritesTreeWidgetItemSelectionChanged()));
     ui->spritesDockWidgetLayout->addWidget(_spritesTreeWidget);
@@ -48,8 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->trimSpinBox, SIGNAL(valueChanged(int)), this, SLOT(propertiesValueChanged(int)));
     connect(ui->textureBorderSpinBox, SIGNAL(valueChanged(int)), this, SLOT(propertiesValueChanged(int)));
     connect(ui->spriteBorderSpinBox, SIGNAL(valueChanged(int)), this, SLOT(propertiesValueChanged(int)));
-    connect(ui->trimSpinBox, SIGNAL(valueChanged(int)), this, SLOT(propertiesValueChanged(int)));
-    connect(ui->epsilonHorizontalSlider, SIGNAL(sliderMoved(int)), this, SLOT(propertiesValueChanged(int)));
+    connect(ui->epsilonHorizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(propertiesValueChanged(int)));
     connect(ui->pow2ComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(propertiesValueChanged(int)));
     connect(ui->maxTextureSizeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(propertiesValueChanged(int)));
     connect(ui->algorithmComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(propertiesValueChanged(int)));
@@ -187,9 +188,15 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
                                 ui->pow2ComboBox->currentIndex()? true:false,
                                 ui->maxTextureSizeComboBox->currentText().toInt(),
                                 scale);
-        //trimModeComboBox
+
+        atlas->setAlgorithm(ui->algorithmComboBox->currentText());
+
+        if (ui->trimModeComboBox->currentText() == "Polygon") {
+            atlas->enablePolygonMode(true, ui->epsilonHorizontalSlider->value() / 10.f);
+        }
+
         if (!atlas->generate()) {
-            QMessageBox::critical(this, "Generate error", "Max texture size limit is small!");
+            QMessageBox::critical(this, "Generate error", "Generate atlas error!");
             delete atlas;
             return;
         }
@@ -208,29 +215,59 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
     QList<QGraphicsItem*> outlineItems;
     QColor brushColor(Qt::blue);
     brushColor.setAlpha(100);
-    for(auto spriteFrame: atlas->spriteFrames()) {
-        QPoint delta = spriteFrame.mFrame.topLeft();
-
-        outlineItems.push_back(_scene->addRect(spriteFrame.mFrame, QPen(Qt::white), QBrush(brushColor)));
-
-        for (int i=0; i<spriteFrame.triangles.indices.size(); i+=3) {
-            QPointF v1 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+0]].v + delta;
-            QPointF v2 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+1]].v + delta;
-            QPointF v3 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+2]].v + delta;
-
-            auto polygonItem = _scene->addPolygon(QPolygonF() << v1 << v2 << v3);
-            polygonItem->setPen(QPen(Qt::white));
-            polygonItem->setBrush(QBrush(brushColor));
-            outlineItems.push_back(polygonItem);
+    for(auto it = atlas->spriteFrames().begin(); it != atlas->spriteFrames().end(); ++it) {
+        bool skip = false;
+        for (auto identicalFrame: atlas->identicalFrames()) {
+            if (skip) break;
+            for (auto frame: identicalFrame) {
+                if (frame == it.key()) {
+                    skip = true;
+                    break;
+                }
+            }
         }
-        for (auto point: spriteFrame.triangles.debugPoints) {
-            auto rectItem = _scene->addRect(QRectF(point.x() + delta.x(), point.y() + delta.y(), 1, 1));
-            rectItem->setPen(QPen(Qt::red));
-            rectItem->setBrush(QBrush(Qt::red));
+        if (skip) continue;
+
+        auto spriteFrame = it.value();
+        QPoint delta = spriteFrame.frame.topLeft();
+
+        if (ui->trimModeComboBox->currentText() == "Rect") {
+            auto rectItem = _scene->addRect(spriteFrame.frame, QPen(Qt::white), QBrush(brushColor));
+            rectItem->setToolTip(it.key());
             outlineItems.push_back(rectItem);
         }
+
+        if (spriteFrame.triangles.indices.size()) {
+            QPainterPath trianglesPath;
+            for (int i=0; i<spriteFrame.triangles.indices.size(); i+=3) {
+                QPointF v1 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+0]].v + delta;
+                QPointF v2 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+1]].v + delta;
+                QPointF v3 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+2]].v + delta;
+                trianglesPath.addPolygon(QPolygonF() << v1 << v2 << v3);
+            }
+            auto pathItem = _scene->addPath(trianglesPath, QPen(Qt::white), QBrush(brushColor));
+            pathItem->setToolTip(QString("%1\nTriangles: %2").arg(it.key()).arg(spriteFrame.triangles.indices.size() / 3));
+            outlineItems.push_back(pathItem);
+        }
+
+        for (auto point: spriteFrame.triangles.debugPoints) {
+            auto rectItem = _scene->addRect(QRectF(point.x() + delta.x(), point.y() + delta.y(), 1, 1), QPen(Qt::red), QBrush(Qt::red));
+            outlineItems.push_back(rectItem);
+        }
+
+        // show identical statistics
+        auto identicalFrames = atlas->identicalFrames().find(it.key());
+        if (identicalFrames != atlas->identicalFrames().end()) {
+            auto identicalItem = _scene->addPixmap(QPixmap(":/res/identical.png"));
+            QString identicalString;
+            identicalString += it.key() + "\n";
+            for (auto frame: identicalFrames.value()) {
+                identicalString += frame + "\n";
+            }
+            identicalItem->setToolTip(identicalString);
+            identicalItem->setPos(spriteFrame.frame.topLeft());
+        }
     }
-    outlineItems.push_back(_scene->addRect(atlasPixmapItem->boundingRect(), QPen(Qt::darkRed)));
 
     _outlinesGroup = _scene->createItemGroup(outlineItems);
     _outlinesGroup->setVisible(ui->displayOutlinesCheckBox->isChecked());
@@ -260,7 +297,10 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
         return;
     }
 
+    _blockUISignals = true;
+    ui->trimModeComboBox->setCurrentText(projectFile->trimMode());
     ui->trimSpinBox->setValue(projectFile->trimThreshold());
+    ui->epsilonHorizontalSlider->setValue(projectFile->epsilon() * 10);
     ui->textureBorderSpinBox->setValue(projectFile->textureBorder());
     ui->spriteBorderSpinBox->setValue(projectFile->spriteBorder());
     ui->maxTextureSizeComboBox->setCurrentText(QString::number(projectFile->maxTextureSize()));
@@ -287,7 +327,10 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
 
     _spritesTreeWidget->clear();
     _spritesTreeWidget->addContent(projectFile->srcList());
+
+    _blockUISignals = false;
     refreshAtlas();
+
     // fit scene before open project
     on_toolButtonZoomFit_clicked();
 
@@ -315,7 +358,10 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
         QMessageBox::critical(this, "ERROR", "Unknown project file format!");
         return;
     }
+
+    projectFile->setTrimMode(ui->trimModeComboBox->currentText());
     projectFile->setTrimThreshold(ui->trimSpinBox->value());
+    projectFile->setEpsilon(ui->epsilonHorizontalSlider->value() / 10.f);
     projectFile->setTextureBorder(ui->textureBorderSpinBox->value());
     projectFile->setSpriteBorder(ui->spriteBorderSpinBox->value());
     projectFile->setMaxTextureSize(ui->maxTextureSizeComboBox->currentText().toInt());
@@ -531,6 +577,13 @@ void MainWindow::on_actionPublish_triggered() {
                               ui->pow2ComboBox->currentIndex()? true:false,
                               ui->maxTextureSizeComboBox->currentText().toInt(),
                               scale);
+
+            atlas.setAlgorithm(ui->algorithmComboBox->currentText());
+
+            if (ui->trimModeComboBox->currentText() == "Polygon") {
+                atlas.enablePolygonMode(true, ui->epsilonHorizontalSlider->value() / 10.f);
+            }
+
             if (!atlas.generate()) {
                 QMessageBox::critical(this, "Generate error", "Max texture size limit is small!");
                 publishStatusDialog->log("Generate error: Max texture size limit is small!", Qt::red);
@@ -705,6 +758,7 @@ void MainWindow::removeScalingVariant() {
 }
 
 void MainWindow::propertiesValueChanged(int val) {
+    if (_blockUISignals) return;
     QSettings settings;
 
     if (settings.value("Preferences/automaticPreview", true).toBool()) {

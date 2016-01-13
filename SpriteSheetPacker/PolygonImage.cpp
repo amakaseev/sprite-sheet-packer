@@ -17,13 +17,106 @@ inline float clampf(float value, float min_inclusive, float max_inclusive)
     return value < min_inclusive ? min_inclusive : value < max_inclusive? value : max_inclusive;
 }
 
-PolygonImage::PolygonImage(const QImage& image, const float epsilon, const float threshold)
+PolygonImage::PolygonImage(const QImage& image, const QRectF& rect, const float epsilon, const float threshold)
     : _width(image.width())
     , _height(image.height())
     , _threshold(threshold)
-    , _filename("unknow")
 {
     _image = image.convertToFormat(QImage::Format_RGBA8888);
+
+    QRectF realRect = rect;
+
+    // find first bigger
+    double area_big = 0;
+    std::vector<QPointF> p_big;
+    {
+        auto p = trace(realRect, threshold);
+        while (p.size() >= 3) {
+            // erase contour for find next
+            QPolygonF fillPolygon(QVector<QPointF>::fromStdVector(p));
+            fillPolygon.translate(rect.x(), rect.y());
+            QColor fillColor(0, 0, 0, 0);
+            QPen pen(fillColor);
+            pen.setWidthF(qMax(epsilon, 2.f));
+            QPainter painer(&_image);
+            painer.setPen(pen);
+            painer.setBrush(QBrush(fillColor));
+            painer.setCompositionMode(QPainter::CompositionMode_Source);
+            painer.drawPolygon(fillPolygon);
+            painer.end();
+            //_image.save("/Users/alekseymakaseev/Documents/Work/sprite-sheet-packer/test.png");
+
+            // calculate area of polygon
+            std::vector<QPointF> polyPoint = p;
+            if (polyPoint.size() >= 9) {
+                polyPoint = reduce(polyPoint, realRect, epsilon);
+            }
+            if (polyPoint.size() >= 3) {
+                polyPoint = expand(polyPoint, realRect, epsilon);
+            }
+            if (polyPoint.size() >= 3) {
+                ClipperLib::Path poly;
+                for(auto it = polyPoint.begin(); it<polyPoint.end(); ++it) {
+                    poly << ClipperLib::IntPoint(it->x()* PRECISION, it->y() * PRECISION);
+                }
+                double area = fabs(ClipperLib::Area(poly));
+                if (area > area_big) {
+                    p_big = p;
+                    area_big = area;
+                }
+            }
+
+            // next
+            p = trace(realRect, threshold);
+        }
+    }
+
+    if (p_big.size() < 3) return;
+
+    // reinit image
+    _image = image.convertToFormat(QImage::Format_RGBA8888);
+
+    // finding all polygons (start with bigger)
+    auto p = p_big;
+    while (p.size() >= 3) {
+        // erase contour for find next
+        QPolygonF fillPolygon(QVector<QPointF>::fromStdVector(p));
+        fillPolygon.translate(rect.x(), rect.y());
+        QColor fillColor(0, 0, 0, 0);
+        QPen pen(fillColor);
+        pen.setWidthF(qMax(epsilon * 2, 10.f));
+        QPainter painer(&_image);
+        painer.setPen(pen);
+        painer.setBrush(QBrush(fillColor));
+        painer.setCompositionMode(QPainter::CompositionMode_Source);
+        painer.drawPolygon(fillPolygon);
+        painer.end();
+        //_image.save("/Users/alekseymakaseev/Documents/Work/sprite-sheet-packer/test.png");
+
+        if (p.size() >= 9) {
+            p = reduce(p, realRect, epsilon);
+        }
+        if (p.size() >= 3) {
+            p = expand(p, realRect, epsilon);
+        }
+        if (p.size() >= 3) {
+            _polygons.push_back(p);
+        }
+
+        // find next
+        p = trace(realRect, threshold);
+    }
+
+    // triangulate polygon(s)
+    auto it_p1 = _polygons.begin();
+    while (it_p1 != _polygons.end()) {
+        auto tri = triangulate((*it_p1));
+        if (tri.indices.size()) {
+            _triangles.add(tri);
+        }
+        _triangles.debugPoints.insert(_triangles.debugPoints.end(), (*it_p1).begin(), (*it_p1).end());
+        ++it_p1;
+    }
 }
 
 std::vector<QPointF> PolygonImage::trace(const QRectF& rect, const float& threshold) {
@@ -215,7 +308,7 @@ std::vector<QPointF> PolygonImage::marchSquare(const QRectF& rect, const QPointF
                 }
                 break;
             default:
-                qDebug() << "this shouldn't happen.";
+                qDebug() << "this shouldn't happen:" << _points.size();
                 return _points;
         }
         //little optimization
@@ -301,13 +394,13 @@ std::vector<QPointF> PolygonImage::rdp(std::vector<QPointF> v, const float& opti
 std::vector<QPointF> PolygonImage::reduce(const std::vector<QPointF>& points, const QRectF& rect , const float& epsilon) {
     auto size = points.size();
     // if there are less than 3 points, then we have nothing
-    if (size<3) {
-        qDebug("AUTOPOLYGON: cannot reduce points for %s that has less than 3 points in input, e: %f", _filename.c_str(), epsilon);
+    if (size < 3) {
+        qDebug("AUTOPOLYGON: cannot reduce points that has less than 3 points in input, e: %f", epsilon);
         return std::vector<QPointF>();
     }
     // if there are less than 9 points (but more than 3), then we don't need to reduce it
     else if (size < 9) {
-        qDebug("AUTOPOLYGON: cannot reduce points for %s e: %f", _filename.c_str(), epsilon);
+        qDebug("AUTOPOLYGON: cannot reduce points epsilon: %f", epsilon);
         return points;
     }
 
@@ -327,10 +420,9 @@ std::vector<QPointF> PolygonImage::reduce(const std::vector<QPointF>& points, co
 }
 
 std::vector<QPointF> PolygonImage::expand(const std::vector<QPointF>& points, const QRectF &rect, const float& epsilon) {
-    auto size = points.size();
     // if there are less than 3 points, then we have nothing
-    if(size < 3) {
-        qDebug("AUTOPOLYGON: cannot expand points for %s with less than 3 points, e: %f", _filename.c_str(), epsilon);
+    if(points.size() < 3) {
+        qDebug("AUTOPOLYGON: cannot expand points with less than 3 points, e: %f", epsilon);
         return std::vector<QPointF>();
     }
     ClipperLib::Path subj;
@@ -339,6 +431,13 @@ std::vector<QPointF> PolygonImage::expand(const std::vector<QPointF>& points, co
     for(std::vector<QPointF>::const_iterator it = points.begin(); it<points.end(); it++) {
         subj << ClipperLib::IntPoint(it->x()* PRECISION, it->y() * PRECISION);
     }
+
+    // clean
+    ClipperLib::CleanPolygon(subj, PRECISION * 2);
+    if (subj.size() < 3) {
+        return std::vector<QPointF>();
+    }
+
     ClipperLib::ClipperOffset co;
     co.AddPath(subj, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
     co.Execute(solution, epsilon * PRECISION);
@@ -380,11 +479,31 @@ std::vector<QPointF> PolygonImage::expand(const std::vector<QPointF>& points, co
     return outPoints;
 }
 
+bool PolygonImage::polyInPoly(std::vector<QPointF>& a, const std::vector<QPointF>& b) {
+    ClipperLib::Path subj;
+    for(std::vector<QPointF>::const_iterator it = b.begin(); it<b.end(); it++) {
+        subj << ClipperLib::IntPoint(it->x()* PRECISION, it->y() * PRECISION);
+    }
+
+    bool erase = false;
+    std::vector<QPointF>::iterator it = a.begin();
+    while (it != a.end()) {
+        ClipperLib::IntPoint pt(it->x()* PRECISION, it->y() * PRECISION);
+        if (ClipperLib::PointInPolygon(pt, subj) == 1) {
+            it = a.erase(it);
+            erase = true;
+        } else {
+            ++it;
+        }
+    }
+    return erase;
+}
+
 Triangles PolygonImage::triangulate(const std::vector<QPointF>& points) {
     // if there are less than 3 points, then we can't triangulate
     if(points.size()<3)
     {
-        qDebug("AUTOPOLYGON: cannot triangulate %s with less than 3 points", _filename.c_str());
+        qDebug("AUTOPOLYGON: cannot triangulate with less than 3 points");
         return Triangles();
     }
     std::vector<p2t::Point*> p2points;
@@ -399,9 +518,6 @@ Triangles PolygonImage::triangulate(const std::vector<QPointF>& points) {
     std::vector<p2t::Triangle*> tris = cdt.GetTriangles();
 
     Triangles triangles;
-
-    triangles.verts.resize(points.size());
-    triangles.indices.resize(tris.size()*3);
     unsigned short idx = 0;
     unsigned short vdx = 0;
 
@@ -420,14 +536,14 @@ Triangles PolygonImage::triangulate(const std::vector<QPointF>& points) {
             }
             if(found) {
                 //if we found the same vertex, don't add to verts, but use the same vertex with indices
-                triangles.indices[idx] = j;
+                triangles.indices.push_back(j);
                 idx++;
             } else {
                 //vert does not exist yet, so we need to create a new one,
                 auto t2f = QPointF(0,0); // don't worry about tex coords now, we calculate that later
                 V2F_T2F vert = {v2, t2f};
-                triangles.verts[vdx] = vert;
-                triangles.indices[idx] = vdx;
+                triangles.verts.push_back(vert);
+                triangles.indices.push_back(vdx);
                 idx++;
                 vdx++;
             }
@@ -470,48 +586,4 @@ void PolygonImage::calculateUV(const QRectF& rect, V2F_T2F* verts, const size_t&
         i->t.setX(u);
         i->t.setY(v);
     }
-}
-
-Triangles PolygonImage::generateTriangles(const QImage& image, const QRectF& rect, const float epsilon, const float threshold) {
-    PolygonImage polygonImage(image, epsilon, threshold);
-    QRectF realRect = rect;
-
-    Triangles triangles;
-    while (1) {
-        auto p = polygonImage.trace(realRect, threshold);
-        if (p.size() >= 3) {
-            // erase contour for find next
-            QPolygonF fillPolygon(QVector<QPointF>::fromStdVector(p));
-            fillPolygon.translate(rect.x(), rect.y());
-            QColor fillColor(0, 0, 0, 0);
-            QPen pen(fillColor);
-            pen.setWidthF(qMax(epsilon, 2.f));
-            QPainter painer(&polygonImage._image);
-            painer.setPen(pen);
-            painer.setBrush(QBrush(fillColor));
-            painer.setCompositionMode(QPainter::CompositionMode_Source);
-            painer.drawPolygon(fillPolygon);
-            painer.end();
-            //polygonImage._image.save("/Users/alekseymakaseev/Documents/Work/sprite-sheet-packer/test.png");
-        } else {
-            break;
-        }
-
-        if (p.size() >= 9) {
-            p = polygonImage.reduce(p, realRect, epsilon);
-        }
-        if (p.size() >= 3) {
-            p = polygonImage.expand(p, realRect, epsilon);
-        }
-
-        if (p.size() >= 3) {
-            auto tri = polygonImage.triangulate(p);
-            if (tri.indices.size()) {
-                triangles.add(tri);
-            }
-            triangles.debugPoints.insert(triangles.debugPoints.end(), p.begin(), p.end());
-        }
-    }
-
-    return triangles;
 }

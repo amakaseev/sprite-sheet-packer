@@ -72,6 +72,7 @@ private:
     QString             _currentProjectFileName;
     QToolButton*        _openButton;
     QGraphicsItemGroup* _outlinesGroup;
+    bool                _blockUISignals;
 };
 
 #endif // MAINWINDOW_H

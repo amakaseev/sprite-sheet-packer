@@ -33,11 +33,12 @@ struct Triangles {
 class PolygonImage
 {
 public:
-    static Triangles generateTriangles(const QImage& image, const QRectF& rect, const float epsilon = 2.f, const float threshold = 0.05f);
+    PolygonImage(const QImage& image, const QRectF& rect, const float epsilon = 2.f, const float threshold = 0.05f);
+
+    const Triangles& triangles() const { return _triangles; }
+    const std::list<std::vector<QPointF>>& polygons() const { return _polygons; }
 
 protected:
-    PolygonImage(const QImage& image, const float epsilon, const float threshold);
-
     std::vector<QPointF> trace(const QRectF& rect, const float& threshold);
     QPair<bool, QPointF> findFirstNoneTransparentPixel(const QRectF& rect, const float& threshold);
 
@@ -52,16 +53,20 @@ protected:
     std::vector<QPointF> rdp(std::vector<QPointF> v, const float& optimization);
     std::vector<QPointF> reduce(const std::vector<QPointF>& points, const QRectF& rect , const float& epsilon);
     std::vector<QPointF> expand(const std::vector<QPointF>& points, const QRectF &rect, const float& epsilon);
+    bool polyInPoly(std::vector<QPointF>& a, const std::vector<QPointF>& b);
 
     Triangles triangulate(const std::vector<QPointF>& points);
     void calculateUV(const QRectF& rect, V2F_T2F* verts, const size_t& count);
 
 private:
     QImage        _image;
-    std::string   _filename;
     unsigned int  _width;
     unsigned int  _height;
     unsigned int  _threshold;
+
+    // out
+    Triangles     _triangles;
+    std::list<std::vector<QPointF>> _polygons;
 };
 
 #endif // POLYGONIMAGE_H

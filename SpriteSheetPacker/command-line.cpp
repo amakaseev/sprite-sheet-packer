@@ -13,13 +13,17 @@ int commandLine(QCoreApplication& app) {
 
     parser.addOptions({
         {{"f", "format"}, "Format for export sprite sheet data. Default is cocos2d.", "format"},
+        {"trimMode", "Rect - Removes the transparency around a sprite. The sprites appear to have their original size when using them.\n\
+Polygon - The amount of rendered transparency can be reduced by creating a tight fitting polygon around the solid pixels of a sprite. But: The vertices must be transformed by the CPU — introducing new costs.\n\
+Default is Rect", "mode", "Rect"},
+        {"trim", "Allowed values: 1 to 255, default is 1. Pixels with an alpha value below this value will be considered transparent when trimming the sprite. Very useful for sprites with nearly invisible alpha pixels at the borders.", "int", "1"},
+        {"epsilon", "Lower values create a tighter fitting mesh with less transparency but with more vertices.\nHigher values on the other hand reduce the number of vertices at the cost of adding more transparency.", "float", "5"},
         {"texture-border", "Border of the sprite sheet, value adds transparent pixels around the borders of the sprite sheet. Default value is 0.", "int", "0"},
         {"sprite-border", "Sprite border is the space between sprites. Value adds transparent pixels between sprites to avoid artifacts from neighbor sprites. The transparent pixels are not added to the sprites, default is 2.", "int", "2"},
-        {"trim", "Allowed values: 1 to 255, default is 1. Pixels with an alpha value below this value will be considered transparent when trimming the sprite. Very useful for sprites with nearly invisible alpha pixels at the borders.", "int", "1"},
         {"powerOf2", "Forces the texture to have power of 2 size (32, 64, 128...). Default is disable."},
         {"max-size", "Sets the maximum size for the texture, default is 8192.", "size", "8192"},
         {"opt-level", "Optimizes the image's file size. Allowed values: 1 to 7 (Higher values take noticeably longer.", "int", "0"},
-        {"scale", "Scales all images before creating the sheet. E.g. use 0.5 for half size, default is 0.5 (Scale has no effect when source is a project file).", "float", "1"},
+        {"scale", "Scales all images before creating the sheet. E.g. use 0.5 for half size, default is 1 (Scale has no effect when source is a project file).", "float", "1"},
     });
 
     //--texture-border 10 /Users/alekseymakaseev/Documents/Work/run-and-jump/Assets/ART/Character /Users/alekseymakaseev/Documents/Work/run-and-jump/RunAndJump/testResources --trim 2
@@ -68,9 +72,11 @@ int commandLine(QCoreApplication& app) {
     }
 
     // initialize [options]
+    QString trimMode = "Rect";
+    int trim = 1;
+    float epsilon = 5.f;
     int textureBorder = 0;
     int spriteBorder = 2;
-    int trim = 1;
     bool pow2 = false;
     int maxSize = 8192;
     float imageScale = 1;
@@ -81,9 +87,11 @@ int commandLine(QCoreApplication& app) {
         if (!projectFile->read(source.filePath())) {
             qCritical() << "File format error.";
         } else {
+            trimMode = projectFile->trimMode();
+            trim = projectFile->trimThreshold();
+            epsilon = projectFile->epsilon();
             textureBorder = projectFile->textureBorder();
             spriteBorder = projectFile->spriteBorder();
-            trim = projectFile->trimThreshold();
             pow2 = projectFile->pow2();
             maxSize = projectFile->maxTextureSize();
             optLevel = projectFile->optLevel();
@@ -104,14 +112,20 @@ int commandLine(QCoreApplication& app) {
     }
 
     // you can override project file options
+    if (parser.isSet("trimMode")) {
+        trimMode = parser.value("trimMode");
+    }
+    if (parser.isSet("trim")) {
+        trim = parser.value("trim").toInt();
+    }
+    if (parser.isSet("epsilon")) {
+        epsilon = parser.value("epsilon").toFloat();
+    }
     if (parser.isSet("texture-border")) {
         textureBorder = parser.value("texture-border").toInt();
     }
     if (parser.isSet("sprite-border")) {
         spriteBorder = parser.value("sprite-border").toInt();
-    }
-    if (parser.isSet("trim")) {
-        trim = parser.value("trim").toInt();
     }
     if (parser.isSet("powerOf2")) {
         pow2 = true;
@@ -130,9 +144,11 @@ int commandLine(QCoreApplication& app) {
         optLevel = parser.value("opt-level").toInt();
     }
 
+    qDebug() << "trimMode:" << trimMode;
+    qDebug() << "trim:" << trim;
+    qDebug() << "epsilon:" << epsilon;
     qDebug() << "textureBorder:" << textureBorder;
     qDebug() << "spriteBorder:" << spriteBorder;
-    qDebug() << "trim:" << trim;
     qDebug() << "pow2:" << pow2;
     qDebug() << "maxSize:" << maxSize;
     qDebug() << "scale:" << imageScale;
@@ -185,6 +201,9 @@ int commandLine(QCoreApplication& app) {
 
             // Generate sprite atlas
             SpriteAtlas atlas(QStringList() << projectFile->srcList(), textureBorder, spriteBorder, trim, pow2, maxSize, scale);
+            if (trimMode == "Polygon") {
+                atlas.enablePolygonMode(true, epsilon);
+            }
             if (!atlas.generate()) {
                 qCritical() << "ERROR: Generate atlas!";
                 return -1;
@@ -201,9 +220,11 @@ int commandLine(QCoreApplication& app) {
         delete projectFile;
         projectFile = nullptr;
     } else {
-
         // Generate sprite atlas
         SpriteAtlas atlas(QStringList() << source.filePath(), textureBorder, spriteBorder, trim, pow2, maxSize, imageScale);
+        if (trimMode == "Polygon") {
+            atlas.enablePolygonMode(true, epsilon);
+        }
         if (!atlas.generate()) {
             qCritical() << "ERROR: Generate atlas!";
             return -1;
