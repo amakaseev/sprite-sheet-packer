@@ -1,5 +1,6 @@
 v1.0.3
 ======
+* Fix bug with copy image (break alpha chanel if image scale)
 * Show identical list of sprite frame
 * Win32: Polished publish dialog (Window title, position)
 * Add display outlines on preview

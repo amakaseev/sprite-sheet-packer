@@ -13,14 +13,6 @@ int pow2(int len) {
     return pow(2,order);
 }
 
-void copyImage(QImage& dst, const QPoint& pos, const QImage& src, const QRect& srcRect) {
-    for (int x=0; x<srcRect.width(); ++x) {
-        for (int y=0; y<srcRect.height(); ++y) {
-            dst.setPixel(pos.x() + x, pos.y() + y, src.pixel(srcRect.x() + x, srcRect.y() + y));
-        }
-    }
-}
-
 PackContent::PackContent() {
     // only for QVector
     qDebug() << "PackContent::PackContent()";
@@ -341,6 +333,7 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
     // parse output.
     _atlasImage = QImage(w, h, QImage::Format_RGBA8888);
     _atlasImage.fill(QColor(0, 0, 0, 0));
+    QPainter painter(&_atlasImage);
     _spriteFrames.clear();
     for(auto itor = outputContent.Get().begin(); itor != outputContent.Get().end(); itor++ ) {
         const BinPack2D::Content<PackContent> &content = *itor;
@@ -371,10 +364,11 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
 
         }
         if (content.rotated) {
-            copyImage(_atlasImage, QPoint(content.coord.x+_textureBorder, content.coord.y+_textureBorder), image, image.rect());
+            painter.drawImage(QPoint(content.coord.x + _textureBorder, content.coord.y + _textureBorder), image);
         } else {
-            copyImage(_atlasImage, QPoint(content.coord.x+_textureBorder, content.coord.y+_textureBorder), packContent.image(), packContent.rect());
+            painter.drawImage(QPoint(content.coord.x + _textureBorder, content.coord.y + _textureBorder), packContent.image(), packContent.rect());
         }
+
         _spriteFrames[packContent.name()] = spriteFrame;
 
         // add ident to sprite frames
@@ -394,6 +388,7 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
             }
         }
     }
+    painter.end();
 
     return true;
 }
