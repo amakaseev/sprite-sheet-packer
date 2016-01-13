@@ -142,7 +142,10 @@ bool SpriteAtlas::generate() {
         if (_trim) {
             packContent.trim(_trim);
             if (_polygonMode.enable) {
-                packContent.setTriangles(PolygonImage::generateTriangles(packContent.image(), packContent.rect(), _polygonMode.epsilon, _trim));
+                //qDebug() << (*it_f).first;
+                PolygonImage polygonImage(packContent.image(), packContent.rect(), _polygonMode.epsilon, _trim);
+                packContent.setPolygons(polygonImage.polygons());
+                packContent.setTriangles(polygonImage.triangles());
             }
         }
 
@@ -394,6 +397,11 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
 }
 
 bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
+    QList<PackContent> inputContent = QList<PackContent>::fromVector(content);
+    // Sort the input content by size... usually packs better.
+    qSort(inputContent.begin(), inputContent.end(), [](const PackContent& a, const PackContent& b) {
+        return true;
+    });
 
     return true;
 }

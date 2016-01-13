@@ -25,6 +25,7 @@ public:
     bool isIdentical(const PackContent& other);
     void trim(int alpha);
     void setTriangles(const Triangles& triangles) { _triangles = triangles; }
+    void setPolygons(const std::list<std::vector<QPointF>>& polygons) { _polygons = polygons; }
 
     const QString& name() const { return _name; }
     const QImage& image() const { return _image; }
@@ -36,6 +37,7 @@ private:
     QImage  _image;
     QRect   _rect;
     Triangles _triangles;
+    std::list<std::vector<QPointF>> _polygons;
 };
 
 class SpriteAtlas
