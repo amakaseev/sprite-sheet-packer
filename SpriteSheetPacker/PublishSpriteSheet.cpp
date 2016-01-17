@@ -162,21 +162,36 @@ bool PublishSpriteSheet::generateDataFile(const QString& filePath, const QString
     return true;
 }
 
-bool PublishSpriteSheet::optimizePNG(const QString& fileName, int optLevel) {
-    OptiPngOptimizer optimizer(optLevel);
+bool PublishSpriteSheet::optimizePNG(const QString& fileName, int optLevel, bool useOptiPng) {
+    bool result = false;
 
-    QMutexLocker loker(&_mutex);
-    bool result = optimizer.optimizeFile(fileName + ".png");
+    if (useOptiPng) {
+        OptiPngOptimizer optimizer(optLevel);
+
+        _mutex.lock();
+        result = optimizer.optimizeFile(fileName + ".png");
+        _mutex.unlock();
+    } else {
+        PngQuantOptimizer optimizer(optLevel);
+
+        _mutex.lock();
+        result = optimizer.optimizeFile(fileName + ".png");
+        _mutex.unlock();
+    }
 
     return result;
 }
 
 void PublishSpriteSheet::optimizePNGInThread(QStringList fileNames, int optLevel) {
     QObject::connect(&_watcher, SIGNAL(finished()), this, SIGNAL(onCompleted()));
+
     QFuture<bool> resultFuture;
+    QSettings settings;
+    QString imageOptimizer(settings.value("Preferences/imageOptimizer", "OptiPNG").toString());
+    bool useOptiPng = (QString::compare(imageOptimizer, "OptiPNG") == 0);
 
     for (const QString& fileName : fileNames) {
-        resultFuture = QtConcurrent::run(this, &PublishSpriteSheet::optimizePNG, fileName, optLevel);
+        resultFuture = QtConcurrent::run(this, &PublishSpriteSheet::optimizePNG, fileName, optLevel, useOptiPng);
     }
 
     _watcher.setFuture(resultFuture);
