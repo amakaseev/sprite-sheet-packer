@@ -76,6 +76,7 @@ pngx_sig_is_png(png_structp png_ptr,
 
 int PNGAPI
 pngx_read_image(png_structp png_ptr, png_infop info_ptr,
+                pngx_get_FILE_ptr get_FILE_fn,
                 png_const_charpp fmt_name_ptr,
                 png_const_charpp fmt_long_name_ptr)
 {
@@ -93,7 +94,10 @@ pngx_read_image(png_structp png_ptr, png_infop info_ptr,
 #endif
 
    /* Read the signature bytes. */
-   stream = (FILE *)png_get_io_ptr(png_ptr);
+   if (get_FILE_fn != NULL)
+      stream = get_FILE_fn(png_get_io_ptr(png_ptr));
+   else
+      stream = (FILE *)png_get_io_ptr(png_ptr);
    if (fgetpos(stream, &fpos) != 0)
       png_error(png_ptr, "Can't ftell in input file stream");
    num = fread(sig, 1, sizeof(sig), stream);

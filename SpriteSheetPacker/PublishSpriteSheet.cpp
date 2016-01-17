@@ -2,8 +2,8 @@
 #include "SpritePackerProjectFile.h"
 #include "SpriteAtlas.h"
 #include "PListSerializer.h"
-#include "optipng.h"
 #include <QMessageBox>
+#include "PngOptimizer.h"
 
 QMap<QString, QString> PublishSpriteSheet::_formats;
 
@@ -34,7 +34,39 @@ void JSConsole::log(QString msg) {
     qDebug() << "js:"<< msg;
 }
 
-bool PublishSpriteSheet::publish(const QString& filePath, const QString& format, int optLevel, const SpriteAtlas& spriteAtlas, bool errorMessage) {
+void PublishSpriteSheet::addSpriteSheet(const SpriteAtlas &atlas, const QString &fileName) {
+    _spriteAtlases.append(atlas);
+    _fileNames.append(fileName);
+}
+
+bool PublishSpriteSheet::publish(const QString& format, int optLevel, bool errorMessage) {
+
+    if (_spriteAtlases.size() != _fileNames.size()) {
+        return false;
+    }
+
+    for (int i = 0; i < _spriteAtlases.size(); i++) {
+        const SpriteAtlas& atlas = _spriteAtlases.at(i);
+        const QString& filePath = _fileNames.at(i);
+
+        // generate the data file and the image
+        if (!generateDataFile(filePath, format, atlas, errorMessage)) {
+            return false;
+        }
+        atlas.image().save(filePath + ".png");
+    }
+
+    if (optLevel > 0) {
+        optimizePNGInThread(_fileNames, optLevel);
+    }
+
+    _spriteAtlases.clear();
+    _fileNames.clear();
+
+    return true;
+}
+
+bool PublishSpriteSheet::generateDataFile(const QString& filePath, const QString& format, const SpriteAtlas &spriteAtlas, bool errorMessage) {
     QJSEngine engine;
 
     auto it_format = _formats.find(format);
@@ -101,14 +133,6 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
             if (errorMessage) QMessageBox::critical(NULL, "Export script error", errorString);
             return false;
         } else {
-            // write image
-            spriteAtlas.image().save(filePath + ".png");
-
-            if (optLevel > 0) {
-                // TODO: optimize in QThread and enable/disable on preferences
-                optimizePNG(filePath + ".png", optLevel);
-            }
-
             // write data
             if (!result.hasProperty("data") || !result.hasProperty("format")) {
                 QString errorString = "Script function must be return object: {data:data, format:'plist|json|other'}";
@@ -138,64 +162,22 @@ bool PublishSpriteSheet::publish(const QString& filePath, const QString& format,
     return true;
 }
 
-/** Application-defined printf callback **/
-static void app_printf(const char *fmt, ...) {
-//    va_list args;
-//    va_start(args, fmt);
-//    printf(fmt, args);
-//    va_end(args);
-}
-
-/** Application-defined control print callback **/
-static void app_print_cntrl(int cntrl_code) {
-    // TODO: implement
-}
-
-/** Application-defined progress update callback **/
-static void app_progress(unsigned long current_step, unsigned long total_steps) {
-    // TODO: implement
-    //qDebug("current_step: %d (total_steps: %d)\n", (int)current_step, (int)total_steps);
-}
-
-/** Panic handling **/
-static void panic(const char *msg) {
-    /* Print the panic message to stderr and terminate abnormally. */
-    qCritical("** INTERNAL ERROR: %s", msg);
-}
-
 bool PublishSpriteSheet::optimizePNG(const QString& fileName, int optLevel) {
-    /* Initialize the optimization engine. */
-    opng_options options;
-    memset(&options, 0, sizeof(options));
-    options.optim_level = optLevel;
-    options.interlace = -1;
-    options.strip_all = 1;
-    //options.compr_level_set |= 9;
-    //options.mem_level_set |= 9;
+    OptiPngOptimizer optimizer(optLevel);
 
-    opng_ui ui;
-    ui.printf_fn      = app_printf;
-    ui.print_cntrl_fn = app_print_cntrl;
-    ui.progress_fn    = app_progress;
-    ui.panic_fn       = panic;
-    if (opng_initialize(&options, &ui) != 0) {
-        qCritical() << "Can't initialize optimization engine";
-        return false;
-    }
+    QMutexLocker loker(&_mutex);
+    bool result = optimizer.optimizeFile(fileName + ".png");
 
-    if (opng_optimize(fileName.toStdString().c_str()) != 0) {
-        return false;
-    }
-
-    /* Finalize the optimization engine. */
-    if (opng_finalize() != 0) {
-        qCritical() << "Can't finalize optimization engine";
-    }
-    return true;
+    return result;
 }
 
-void PublishSpriteSheet::optimizePNGInThread(const QString& fileName, int optLevel) {
-    //QThread* generateThread = new QThread(this)
+void PublishSpriteSheet::optimizePNGInThread(QStringList fileNames, int optLevel) {
+    QObject::connect(&_watcher, SIGNAL(finished()), this, SIGNAL(onCompleted()));
+    QFuture<bool> resultFuture;
 
-    //generateThread->start();
+    for (const QString& fileName : fileNames) {
+        resultFuture = QtConcurrent::run(this, &PublishSpriteSheet::optimizePNG, fileName, optLevel);
+    }
+
+    _watcher.setFuture(resultFuture);
 }

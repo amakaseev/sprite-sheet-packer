@@ -203,7 +203,7 @@
      <x>0</x>
      <y>0</y>
      <width>1222</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="defaultUp">
@@ -313,8 +313,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>314</width>
-          <height>839</height>
+          <width>320</width>
+          <height>848</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -798,8 +798,11 @@
               </item>
               <item>
                <widget class="QSlider" name="optLevelSlider">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;PNG Optimization level&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Applies lossless image optimization and decreases your PNG file size. A value of 2 is most of the time sufficent.&lt;p&gt;0 = no optimization&lt;/p&gt;&lt;p&gt;1-6 apply optimization(higher values take longer)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="maximum">
-                 <number>7</number>
+                 <number>6</number>
                 </property>
                 <property name="pageStep">
                  <number>1</number>

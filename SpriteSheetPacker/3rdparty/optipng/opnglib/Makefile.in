@@ -1,0 +1,246 @@
+.PHONY: all test check clean distclean
+.PRECIOUS: Makefile
+.SUFFIXES: .c .o .a
+
+CC = @CC@
+CFLAGS = @CFLAGS@
+CPP = @CPP@
+CPPFLAGS = @CPPFLAGS@
+LD = @LD@
+LDFLAGS = @LDFLAGS@
+AR = @AR@
+ARFLAGS = @ARFLAGS@
+RANLIB = @RANLIB@
+DIFF = @DIFF@
+RM_F = @RM_F@
+
+OPNGREDUC_DIR = ../opngreduc
+PNGXTERN_DIR = ../pngxtern
+@USE_SYSTEM_LIBPNG_FALSE@LIBPNG_DIR = ../libpng
+@USE_SYSTEM_ZLIB_FALSE@ZLIB_DIR = ../zlib
+GIF_DIR = ../gifread
+PNM_DIR = ../pnmio
+TIFF_DIR = ../minitiff
+CEXCEPT_DIR = ../cexcept
+SYSEXITS_DIR = ../sysexits
+
+OPNGLIB_LIB = libopng.a
+
+OPNGCORE_OBJS = \
+  src/opngcore/codec.o \
+  src/opngcore/image.o \
+  src/opngcore/ioenv.o \
+  src/opngcore/logger.o \
+  src/opngcore/optim.o \
+  src/opngcore/util.o \
+  src/opngcore/version.o
+OPNGTRANS_OBJS = \
+  src/opngtrans/apply.o \
+  src/opngtrans/chunksig.o \
+  src/opngtrans/parser.o \
+  src/opngtrans/trans.o
+OPTK_OBJS = \
+  src/optk/bits.o \
+  src/optk/io.o \
+  src/optk/wildargs.o
+OPNGLIB_OBJS = $(OPNGCORE_OBJS) $(OPNGTRANS_OBJS) $(OPTK_OBJS)
+
+OPNGCORE_IMPL_HEADERS = \
+  src/opngcore/codec.h \
+  src/opngcore/image.h \
+  src/opngcore/ioenv.h \
+  src/opngcore/util.h
+OPNGTRANS_IMPL_HEADERS = \
+  src/opngtrans/chunksig.h \
+  src/opngtrans/parser.h \
+  src/opngtrans/trans.h
+OPTK_HEADERS = \
+  include/optk/bits.h \
+  include/optk/io.h
+OPNGLIB_HEADERS = \
+  include/opnglib/opnglib.h \
+  include/opnglib/opngcore.h \
+  include/opnglib/opngtrans.h \
+  include/opnglib/optk.h \
+  $(OPTK_HEADERS)
+
+OPNGLIB_TESTS = \
+  bits_test$(EXEEXT) \
+  integer_test$(EXEEXT) \
+  io_test$(EXEEXT) \
+  print_ratio_test$(EXEEXT) \
+  parser_test$(EXEEXT)
+OPNGLIB_TESTOBJS = \
+  test/bits_test.o \
+  test/integer_test.o \
+  test/io_test.o \
+  test/parser_test.o \
+  test/print_ratio_test.o \
+  test/sprint_ratio.generated.o
+OPNGLIB_TESTOUT = \
+  bits_test.out bits_test.diff.out \
+  integer_test.out \
+  io_test.out \
+  print_ratio_test.out \
+  parser_test.out
+
+@USE_SYSTEM_LIBPNG_FALSE@OPNGLIB_DEPINCLUDE_LIBPNG = -I$(LIBPNG_DIR)
+@USE_SYSTEM_LIBPNG_TRUE@OPNGLIB_DEPINCLUDE_LIBPNG =
+@USE_SYSTEM_ZLIB_FALSE@OPNGLIB_DEPINCLUDE_ZLIB = -I$(ZLIB_DIR)
+@USE_SYSTEM_ZLIB_TRUE@OPNGLIB_DEPINCLUDE_ZLIB =
+OPNGLIB_DEPINCLUDES = \
+  -I$(OPNGREDUC_DIR) \
+  -I$(PNGXTERN_DIR) \
+  $(OPNGLIB_DEPINCLUDE_LIBPNG) \
+  $(OPNGLIB_DEPINCLUDE_ZLIB) \
+  -I$(GIF_DIR) \
+  -I$(PNM_DIR) \
+  -I$(TIFF_DIR) \
+  -I$(CEXCEPT_DIR) \
+  -I$(SYSEXITS_DIR)
+OPNGLIB_INCLUDES = $(OPNGLIB_DEPINCLUDES) -Iinclude
+
+all: $(OPNGLIB_LIB)
+
+test: $(OPNGLIB_TESTS)
+	./bits_test$(EXEEXT) < test/bits_test.dat > bits_test.out
+	$(DIFF) test/bits_test.expect bits_test.out > bits_test.diff.out
+	-@echo bits_test ... ok
+	./integer_test$(EXEEXT) > integer_test.out
+	-@echo integer_test ... ok
+	./io_test$(EXEEXT) > io_test.out
+	-@echo io_test ... ok
+	./print_ratio_test$(EXEEXT) > print_ratio_test.out
+	-@echo print_ratio_test ... ok
+	./parser_test$(EXEEXT) > parser_test.out
+	-@echo parser_test ... ok
+
+bits_test$(EXEEXT): test/bits_test.o libopng.a
+	$(LD) $(LDFLAGS) -o $@ test/bits_test.o libopng.a
+
+integer_test$(EXEEXT): test/integer_test.o libopng.a
+	$(LD) $(LDFLAGS) -o $@ test/integer_test.o libopng.a
+
+io_test$(EXEEXT): test/io_test.o libopng.a
+	$(LD) $(LDFLAGS) -o $@ test/io_test.o libopng.a
+
+print_ratio_test$(EXEEXT): test/print_ratio_test.o test/sprint_ratio.generated.o
+	$(LD) $(LDFLAGS) -o $@ test/print_ratio_test.o test/sprint_ratio.generated.o
+
+parser_test$(EXEEXT): test/parser_test.o libopng.a
+	$(LD) $(LDFLAGS) -o $@ test/parser_test.o libopng.a
+
+check: test
+
+.c.o:
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OPNGLIB_DEPINCLUDES) -c -o $@ $<
+
+$(OPNGLIB_LIB): $(OPNGLIB_OBJS)
+	$(AR) $(ARFLAGS) $@ $(OPNGLIB_OBJS)
+	$(RANLIB) $@
+
+src/opngcore/codec.o: \
+  src/opngcore/codec.c \
+  $(OPNGCORE_IMPL_HEADERS) \
+  $(OPNGLIB_HEADERS)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OPNGLIB_INCLUDES) -o $@ $*.c
+
+src/opngcore/image.o: \
+  src/opngcore/image.c \
+  $(OPNGCORE_IMPL_HEADERS) \
+  $(OPNGLIB_HEADERS)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OPNGLIB_INCLUDES) -o $@ $*.c
+
+src/opngcore/ioenv.o: \
+  src/opngcore/ioenv.c \
+  $(OPNGCORE_IMPL_HEADERS) \
+  $(OPNGLIB_HEADERS)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OPNGLIB_INCLUDES) -o $@ $*.c
+
+src/opngcore/logger.o: \
+  src/opngcore/logger.c \
+  $(OPNGCORE_IMPL_HEADERS) \
+  $(OPNGLIB_HEADERS)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OPNGLIB_INCLUDES) -o $@ $*.c
+
+src/opngcore/optim.o: \
+  src/opngcore/optim.c \
+  $(OPNGCORE_IMPL_HEADERS) \
+  $(OPNGLIB_HEADERS)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OPNGLIB_INCLUDES) -o $@ $*.c
+
+src/opngcore/util.o: \
+  src/opngcore/util.c \
+  $(OPNGCORE_IMPL_HEADERS) \
+  $(OPNGLIB_HEADERS)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OPNGLIB_INCLUDES) -o $@ $*.c
+
+src/opngcore/version.o: \
+  src/opngcore/version.c \
+  src/opngcore/version.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OPNGLIB_INCLUDES) -o $@ $*.c
+
+src/opngtrans/apply.o: \
+  src/opngtrans/apply.c \
+  $(OPNGTRANS_IMPL_HEADERS) \
+  $(OPNGCORE_IMPL_HEADERS) \
+  $(OPNGLIB_HEADERS)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OPNGLIB_INCLUDES) -o $@ $*.c
+
+src/opngtrans/chunksig.o: \
+  src/opngtrans/chunksig.c \
+  $(OPNGTRANS_IMPL_HEADERS) \
+  $(OPNGCORE_IMPL_HEADERS) \
+  $(OPNGLIB_HEADERS)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OPNGLIB_INCLUDES) -o $@ $*.c
+
+src/opngtrans/parser.o: \
+  src/opngtrans/parser.c \
+  $(OPNGTRANS_IMPL_HEADERS) \
+  $(OPNGCORE_IMPL_HEADERS) \
+  $(OPNGLIB_HEADERS)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OPNGLIB_INCLUDES) -o $@ $*.c
+
+src/opngtrans/trans.o: \
+  src/opngtrans/trans.c \
+  $(OPNGTRANS_IMPL_HEADERS) \
+  $(OPNGCORE_IMPL_HEADERS) \
+  $(OPNGLIB_HEADERS)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OPNGLIB_INCLUDES) -o $@ $*.c
+
+src/optk/bits.o: src/optk/bits.c include/optk/bits.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) -Iinclude -o $@ $*.c
+
+src/optk/io.o: src/optk/io.c include/optk/io.h include/optk/integer.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) -Iinclude -o $@ $*.c
+
+src/optk/wildargs.o: src/optk/wildargs.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) -o $@ $*.c
+
+test/bits_test.o: test/bits_test.c include/optk/bits.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) -Iinclude -o $@ $*.c
+
+test/integer_test.o: test/integer_test.c include/optk/integer.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) -Iinclude -o $@ $*.c
+
+test/io_test.o: test/io_test.c include/optk/io.h include/optk/integer.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) -Iinclude -o $@ $*.c
+
+test/parser_test.o: test/parser_test.c $(OPNGTRANS_IMPL_HEADERS)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OPNGLIB_INCLUDES) -Isrc/opngtrans -o $@ $*.c
+
+test/print_ratio_test.o: test/print_ratio_test.c test/print_ratio.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) -Iinclude -o $@ $*.c
+
+test/sprint_ratio.generated.o: test/sprint_ratio.generated.c test/print_ratio.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) -Iinclude -o $@ $*.c
+
+#test/sprint_ratio.generated.c: test/extract_print_ratio.sh src/opngcore/optim.c
+#	$(SHELL) test/extract_print_ratio.sh
+
+clean:
+	-$(RM_F) $(OPNGLIB_LIB) $(OPNGLIB_OBJS)
+	-$(RM_F) $(OPNGLIB_TESTS) $(OPNGLIB_TESTOBJS) $(OPNGLIB_TESTOUT)
+
+distclean: clean
+	-$(RM_F) Makefile
