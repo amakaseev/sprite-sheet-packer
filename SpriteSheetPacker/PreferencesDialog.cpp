@@ -11,6 +11,8 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) :
     QSettings settings;
     QString customFormatFolder = settings.value("Preferences/customFormatFolder").toString();
     ui->customFormatFolderEdit->setText(customFormatFolder);
+    QString imageOptimizer = settings.value("Preferences/imageOptimizer", "OptiPNG").toString();
+    ui->optimizerComboBox->setCurrentText(imageOptimizer);
 }
 
 PreferencesDialog::~PreferencesDialog() {
@@ -33,6 +35,7 @@ void PreferencesDialog::on_toolButton_clicked() {
 void PreferencesDialog::on_buttonBox_accepted() {
     QSettings settings;
     settings.setValue("Preferences/customFormatFolder", ui->customFormatFolderEdit->text());
+    settings.setValue("Preferences/imageOptimizer", ui->optimizerComboBox->currentText());
 }
 
 void PreferencesDialog::on_resetAllPushButton_clicked() {

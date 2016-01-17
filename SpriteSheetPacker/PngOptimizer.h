@@ -3,6 +3,7 @@
 
 #include <QtCore>
 #include "opnglib.h"
+#include "libimagequant.h"
 
 class PngOptimizer {
 public:
@@ -33,6 +34,25 @@ private:
     opng_options options;
     opng_optimizer_t* optimizer;
     opng_transformer_t* transformer;
+};
+
+class PngQuantOptimizer : public PngOptimizer {
+
+public:
+    PngQuantOptimizer(int optLevel = 0);
+    ~PngQuantOptimizer();
+
+    bool optimizeFiles(QStringList fileNames) override;
+    bool optimizeFile(const QString& fileName) override;
+
+    bool setOptions(int optLevel);
+
+private:
+    int _optLevel;
+
+    liq_attr* attr;
+    liq_image* image;
+    liq_result* res;
 };
 
 #endif // PNGOPTIMIZER_H

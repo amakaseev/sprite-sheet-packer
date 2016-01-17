@@ -27,7 +27,7 @@ public:
     bool publish(const QString& format, int optLevel, bool errorMessage = true);
     bool generateDataFile(const QString& filePath, const QString& format, const SpriteAtlas &atlas, bool errorMessage = true);
 
-    bool optimizePNG(const QString& fileName, int optLevel);
+    bool optimizePNG(const QString& fileName, int optLevel, bool useOptiPng);
     void optimizePNGInThread(QStringList fileNames, int optLevel);
 
     static void addFormat(const QString& format, const QString& scriptFileName) { _formats[format] = scriptFileName; }
