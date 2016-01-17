@@ -799,7 +799,7 @@
               <item>
                <widget class="QSlider" name="optLevelSlider">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;PNG Optimization level&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Applies lossless image optimization and decreases your PNG file size. A value of 2 is most of the time sufficent. The optimizer can be changed in preferences(slider values higher than 1 have no effect currently, when using the pngquant optimizer)&lt;p&gt;0 = no optimization&lt;/p&gt;&lt;p&gt;1-6 apply optimization(higher values take longer)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;PNG Optimization level&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Applies image optimization and decreases your PNG file size. A value of 2 is most of the time sufficent. The optimizer can be changed in preferences(slider values higher than 1 have no effect currently, when using the pngquant optimizer)&lt;p&gt;0 = no optimization&lt;/p&gt;&lt;p&gt;1-6 apply optimization(higher values take longer)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="maximum">
                  <number>6</number>
