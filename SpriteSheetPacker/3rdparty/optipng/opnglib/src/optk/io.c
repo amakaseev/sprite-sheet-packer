@@ -761,7 +761,7 @@ optk_copy_attr(const char *src_path, const char *dest_path)
     if (chmod(dest_path, mode) != 0)
         return -1;
 
-#ifdef AT_FDCWD
+#if defined(AT_FDCWD) && !defined(__APPLE__) && !defined(__SVR4) && !defined(__sun)
     {
         struct timespec times[2];
 
