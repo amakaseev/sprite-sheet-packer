@@ -544,6 +544,7 @@ void MainWindow::on_actionPublish_triggered() {
     PublishSpriteSheet* publisher = new PublishSpriteSheet();
 
     PublishStatusDialog* publishStatusDialog = new PublishStatusDialog(this);
+    //publishStatusDialog->setAttribute(Qt::WA_DeleteOnClose);
     publishStatusDialog->open();
 
     publishStatusDialog->log(QString("Publish to: " + dir.canonicalPath()), Qt::blue);
@@ -608,12 +609,9 @@ void MainWindow::on_actionPublish_triggered() {
         delete publisher;
 
     } else {
-
         QObject::connect(publisher, &PublishSpriteSheet::onCompleted, [publishStatusDialog, publisher] () {
-            if (publishStatusDialog) {
-                publishStatusDialog->log(QString("Publishing is finished."), Qt::blue);
-                publishStatusDialog->complete();
-            }
+            publishStatusDialog->log(QString("Publishing is finished."), Qt::blue);
+            publishStatusDialog->complete();
             delete publisher;
         });
     }
@@ -621,11 +619,13 @@ void MainWindow::on_actionPublish_triggered() {
 
 void MainWindow::on_actionAbout_triggered() {
     AboutDialog* aboutDialog = new AboutDialog(this);
+    aboutDialog->setAttribute(Qt::WA_DeleteOnClose);
     aboutDialog->exec();
 }
 
 void MainWindow::on_actionPreferences_triggered() {
     PreferencesDialog* preferencesDialog = new PreferencesDialog(this);
+    preferencesDialog->setAttribute(Qt::WA_DeleteOnClose);
     if (preferencesDialog->exec()) {
         refreshFormats();
     }

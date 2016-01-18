@@ -19,9 +19,6 @@ public:
     void log(const QString& msg, const QColor& color = Qt::black);
     void complete();
 
-signals:
-    void onClose();
-
 private:
     Ui::PublishStatusDialog *ui;
 };
