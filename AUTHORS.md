@@ -7,6 +7,7 @@
 
 ## Developers:
 * [TheCodez](https://github.com/TheCodez)
+	* Add optipng and pngquant optimizer
     * Generate spritesheet from commandline using existing project file.
     * Added automatically refreshed preview.
     * UI and command line implementation of image optimization

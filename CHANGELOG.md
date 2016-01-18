@@ -1,5 +1,6 @@
 v1.0.3
 ======
+* Add optipng and pngquant optimizer
 * Add ToolTip for sprite frames
 * Fix bug with copy image (break alpha chanel if image scale)
 * Show identical list of sprite frame
