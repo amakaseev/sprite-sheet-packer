@@ -32,6 +32,7 @@ void messageOutput(QtMsgType type, const QMessageLogContext &context, const QStr
         case QtFatalMsg:
             abort();
         }
+        QCoreApplication::processEvents();
     }
 }
 
@@ -78,6 +79,7 @@ void PublishStatusDialog::log(const QString& msg, const QColor& color) {
     if (color == Qt::red) {
         ui->hideCheckBox->setChecked(false);
     }
+    QCoreApplication::processEvents();
 }
 
 

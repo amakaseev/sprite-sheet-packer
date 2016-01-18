@@ -170,8 +170,6 @@ bool SpriteAtlas::generate() {
     if (skipSprites)
         qDebug() << "Total skip sprites: " << skipSprites;
 
-    QCoreApplication::processEvents();
-
     bool result = false;
     if ((_algorithm == "Polygon") && (_polygonMode.enable)) {
         result = packWithPolygon(inputContent);
@@ -237,7 +235,6 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
                 h = qMin(h*2, _maxTextureSize);
             }
             qDebug() << "Resize for bigger:" << w << "x" << h;
-            QCoreApplication::processEvents();
         }
         while (w > 2) {
             w = w/2;
@@ -252,7 +249,6 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
                 canvasArray.CollectContent(outputContent);
             }
             qDebug() << "Optimize width:" << w << "x" << h;
-            QCoreApplication::processEvents();
         }
         while (h > 2) {
             h = h/2;
@@ -267,7 +263,6 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
                 canvasArray.CollectContent(outputContent);
             }
             qDebug() << "Optimize height:" << w << "x" << h;
-            QCoreApplication::processEvents();
         }
     } else {
         qDebug() << "Volume size:" << w << "x" << h;
@@ -295,7 +290,6 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
                 h = qMin(h + step, _maxTextureSize);;
             }
             qDebug() << "Resize for bigger:" << w << "x" << h << "step:" << step;
-            QCoreApplication::processEvents();
         }
         step = (w + h) / 20;
         while (w) {
@@ -311,7 +305,6 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
                 canvasArray.CollectContent(outputContent);
             }
             qDebug() << "Optimize width:" << w << "x" << h << "step:" << step;
-            QCoreApplication::processEvents();
         }
         step = (w + h) / 20;
         while (h) {
@@ -327,12 +320,10 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
                 canvasArray.CollectContent(outputContent);
             }
             qDebug() << "Optimize height:" << w << "x" << h << "step:" << step;
-            QCoreApplication::processEvents();
         }
     }
 
     qDebug() << "Found optimize size:" << w << "x" << h;
-    QCoreApplication::processEvents();
 
     // parse output.
     _atlasImage = QImage(w, h, QImage::Format_RGBA8888);
