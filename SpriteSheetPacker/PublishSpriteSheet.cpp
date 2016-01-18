@@ -53,10 +53,14 @@ bool PublishSpriteSheet::publish(const QString& format, int optLevel, bool error
         if (!generateDataFile(filePath, format, atlas, errorMessage)) {
             return false;
         }
+
+        // save png image
+        qDebug() << "Save image:" << filePath + ".png";
         atlas.image().save(filePath + ".png");
     }
 
     if (optLevel > 0) {
+        qDebug() << "Begin optimize image...";
         optimizePNGInThread(_fileNames, optLevel);
     }
 
