@@ -103,13 +103,6 @@ bool PngQuantOptimizer::optimizeFile(const QString& fileName) {
     LodePNGState state;
     lodepng_state_init(&state);
 
-    if (width * height > 1024 * 1024) {
-        liq_set_speed(attr, 5);
-    } else if (width * height < 128 * 128) {
-        liq_set_speed(attr, 2);
-        liq_set_quality(attr, 0, 95);
-    }
-
     image = liq_image_create_rgba(attr, img.bits(), width, height, 0);
     liq_set_speed(attr, 1);
 
