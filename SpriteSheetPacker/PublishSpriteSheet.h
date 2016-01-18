@@ -24,11 +24,11 @@ class PublishSpriteSheet : public QObject {
 public:
     void addSpriteSheet(const SpriteAtlas& atlas, const QString& fileName);
 
-    bool publish(const QString& format, int optLevel, bool errorMessage = true);
+    bool publish(const QString& format, const QString& optMode, int optLevel, bool errorMessage = true);
     bool generateDataFile(const QString& filePath, const QString& format, const SpriteAtlas &atlas, bool errorMessage = true);
 
-    bool optimizePNG(const QString& fileName, int optLevel, bool useOptiPng);
-    void optimizePNGInThread(QStringList fileNames, int optLevel);
+    bool optimizePNG(const QString& fileName, const QString& optMode, int optLevel);
+    void optimizePNGInThread(QStringList fileNames, const QString& optMode, int optLevel);
 
     static void addFormat(const QString& format, const QString& scriptFileName) { _formats[format] = scriptFileName; }
     static QMap<QString, QString>& formats() { return _formats; }

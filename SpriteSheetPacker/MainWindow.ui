@@ -406,7 +406,7 @@
                     <bool>true</bool>
                    </property>
                    <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Trim / Crop&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Removes transparent pixels from a sprite's border.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Rect&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Removes the transparency around a sprite. The sprites appear to have their original size when using them.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Polygon&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-family:'Helvetica Neue'; color:#323333;&quot;&gt;The amount of rendered transparency can be reduced by creating a tight fitting polygon around the solid pixels of a sprite. But: The vertices must be transformed by the CPU — introducing new costs.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Trim / Crop&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Removes transparent pixels from a sprite's border.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Rect&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Removes the transparency around a sprite. The sprites appear to have their original size when using them.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Polygon&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=color:#323333;&quot;&gt;The amount of rendered transparency can be reduced by creating a tight fitting polygon around the solid pixels of a sprite. But: The vertices must be transformed by the CPU — introducing new costs.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
                    <item>
                     <property name="text">
@@ -788,9 +788,45 @@
              </layout>
             </item>
             <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_15">
+              <item>
+               <widget class="QLabel" name="label_12">
+                <property name="text">
+                 <string>PNG Optimization:</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="optModeComboBox">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;PNG Optimization&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Optimizes the png's file size.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;None&lt;/span&gt;&lt;/p&gt;&lt;p&gt;No optimization at all(fastest).&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Lossless&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=color:#323333;&quot;&gt;Uses optipng to optimize the filesize. The reduction is mostly small but doesn't harm image quality.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Lossy&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=color:#323333;&quot;&gt;Uses pngquant to optimize the filesize. The reduction is mostly about 70%, but the image quality gets a bit worse.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>None</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Lossless</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Lossy</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
              <layout class="QHBoxLayout" name="horizontalLayout_12">
               <item>
-               <widget class="QLabel" name="label_11">
+               <widget class="QLabel" name="optLevelLabel">
                 <property name="text">
                  <string>PNG Opt Level:</string>
                 </property>
@@ -799,10 +835,13 @@
               <item>
                <widget class="QSlider" name="optLevelSlider">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;PNG Optimization level&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Applies image optimization and decreases your PNG file size. A value of 2 is most of the time sufficent. The optimizer can be changed in preferences(slider values higher than 1 have no effect currently, when using the pngquant optimizer)&lt;p&gt;0 = no optimization&lt;/p&gt;&lt;p&gt;1-6 apply optimization(higher values take longer)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;PNG Optimization level&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Sets the optimization value for the losless png optimizer. A value of 2 is most of the time sufficent.&lt;p&gt;1 = least possible optimization&lt;/p&gt;&lt;p&gt;2-7 apply better optimization(higher values take longer)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
                 </property>
                 <property name="maximum">
-                 <number>6</number>
+                 <number>7</number>
                 </property>
                 <property name="pageStep">
                  <number>1</number>
@@ -815,7 +854,7 @@
               <item>
                <widget class="QLabel" name="optLevelText">
                 <property name="text">
-                 <string>0</string>
+                 <string>1</string>
                 </property>
                </widget>
               </item>

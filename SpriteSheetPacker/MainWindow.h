@@ -4,6 +4,7 @@
 #include <QtWidgets>
 #include "SpriteAtlas.h"
 #include "SpritesTreeWidget.h"
+#include "PublishStatusDialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -64,6 +65,7 @@ private slots:
     void propertiesValueChanged(int val);
 
     void on_displayOutlinesCheckBox_clicked(bool checked);
+    void on_optModeComboBox_currentTextChanged(const QString &text);
 
 private:
     Ui::MainWindow*      ui;

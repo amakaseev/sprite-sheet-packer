@@ -41,6 +41,7 @@ PublishStatusDialog::PublishStatusDialog(QWidget *parent) :
     ui(new Ui::PublishStatusDialog)
 {
     ui->setupUi(this);
+    //setAttribute(Qt::WA_DeleteOnClose);
 
     if (parent) {
         int width = parent->width() / 2;
