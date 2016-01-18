@@ -25,7 +25,8 @@ SOURCES += main.cpp\
     AboutDialog.cpp \
     SpritesTreeWidget.cpp \
     command-line.cpp \
-    PolygonImage.cpp
+    PolygonImage.cpp \
+    polypack2d.cpp
 
 HEADERS += MainWindow.h \
     ImageRotate.h \
@@ -38,7 +39,8 @@ HEADERS += MainWindow.h \
     PublishStatusDialog.h \
     AboutDialog.h \
     SpritesTreeWidget.h \
-    PolygonImage.h
+    PolygonImage.h \
+    polypack2d.h
 
 FORMS += MainWindow.ui \
     ScalingVariantWidget.ui \

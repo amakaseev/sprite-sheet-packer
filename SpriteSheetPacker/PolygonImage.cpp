@@ -3,8 +3,7 @@
 #include "clipper.hpp"
 #include "poly2tri.h"
 
-static unsigned short quadIndices[]={0,1,2, 3,2,1};
-const static float PRECISION = 10.0f;
+const static float PRECISION = 10.f;
 
 /** Clamp a value between from and to.
  */

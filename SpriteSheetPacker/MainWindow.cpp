@@ -196,7 +196,7 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
         }
 
         if (!atlas->generate()) {
-            QMessageBox::critical(this, "Generate error", "Generate atlas error!");
+            QMessageBox::critical(this, "Generate error", "Max texture size limit is small!");
             delete atlas;
             return;
         }

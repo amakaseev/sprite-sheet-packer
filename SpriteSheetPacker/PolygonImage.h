@@ -30,13 +30,15 @@ struct Triangles {
     }
 };
 
+typedef std::vector<std::vector<QPointF>> Polygons;
+
 class PolygonImage
 {
 public:
     PolygonImage(const QImage& image, const QRectF& rect, const float epsilon = 2.f, const float threshold = 0.05f);
 
     const Triangles& triangles() const { return _triangles; }
-    const std::list<std::vector<QPointF>>& polygons() const { return _polygons; }
+    const Polygons& polygons() const { return _polygons; }
 
 protected:
     std::vector<QPointF> trace(const QRectF& rect, const float& threshold);
@@ -66,7 +68,7 @@ private:
 
     // out
     Triangles     _triangles;
-    std::list<std::vector<QPointF>> _polygons;
+    Polygons      _polygons;
 };
 
 #endif // POLYGONIMAGE_H

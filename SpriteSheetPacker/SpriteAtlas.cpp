@@ -1,6 +1,7 @@
 #include "SpriteAtlas.h"
 
 #include "binpack2d.hpp"
+#include "polypack2d.h"
 #include "ImageRotate.h"
 #include "PolygonImage.h"
 
@@ -397,11 +398,32 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
 }
 
 bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
-    QList<PackContent> inputContent = QList<PackContent>::fromVector(content);
+    // initialize content
+    PolyPack2D::ContentList<PackContent> inputContent;
+    for (auto packContent: content) {
+        inputContent += PolyPack2D::Content<PackContent>(packContent, packContent.polygons());
+    }
+
+    // Sort the input content by area... usually packs better.
+    inputContent.sort();
+
+    for (auto it = inputContent.begin(); it != inputContent.end(); ++it) {
+        qDebug() << (*it).content().name() << (*it).area();
+    }
+
+
     // Sort the input content by size... usually packs better.
-    qSort(inputContent.begin(), inputContent.end(), [](const PackContent& a, const PackContent& b) {
-        return true;
-    });
+    //qSort(inputContent.begin(), inputContent.end(), [](const PackContent& a, const PackContent& b) {
+    //    return true;
+    //});
+//    // calculate area of polygon
+//    ClipperLib::Path poly;
+//    for(auto it = p.begin(); it<p.end(); ++it) {
+//        poly << ClipperLib::IntPoint(it->x()* PRECISION, it->y() * PRECISION);
+//    }
+//    double area = fabs(ClipperLib::Area(poly));
+
+//    _polygons.area += area;
 
     return true;
 }
