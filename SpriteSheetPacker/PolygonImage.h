@@ -4,8 +4,6 @@
 #include <QtCore>
 #include <QtGui>
 
-#include <Box2D.h>
-
 struct V2F_T2F {
     QPointF v;
     QPointF t;

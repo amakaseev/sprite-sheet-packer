@@ -57,7 +57,6 @@ include(3rdparty/optipng/optipng.pri)
 include(3rdparty/qtplist-master/qtplist-master.pri)
 include(3rdparty/clipper/clipper.pri)
 include(3rdparty/poly2tri/poly2tri.pri)
-include(3rdparty/Box2D/Box2D.pri)
 include(3rdparty/pngquant/pngquant.pri)
 include(3rdparty/lodepng/lodepng.pri)
 

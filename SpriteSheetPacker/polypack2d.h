@@ -44,6 +44,7 @@ namespace PolyPack2D {
                 for (auto it_p = (*it).begin(); it_p != (*it).end(); ++it_p) {
                     poly << ClipperLib::IntPoint(it_p->x() * PRECISION, it_p->y() * PRECISION);
                 }
+
                 _area += fabs(ClipperLib::Area(poly));
                 _polygons.push_back(poly);
             }
@@ -74,18 +75,12 @@ namespace PolyPack2D {
         }
 
         void sort() {
-            std::sort(this->begin(), this->end(), GreatestWidthThenGreatestAreaSort());
-        }
-
-    private:
-        struct GreatestWidthThenGreatestAreaSort {
-            bool operator()(const Content<T> &a, const Content<T> &b) const {
+            std::sort(this->begin(), this->end(), [](const Content<T> &a, const Content<T> &b){
                 auto areaA = a.area();
                 auto areaB = b.area();
-
                 return areaA > areaB;
-            }
-        };
+            });
+        }
     };
 
 }
