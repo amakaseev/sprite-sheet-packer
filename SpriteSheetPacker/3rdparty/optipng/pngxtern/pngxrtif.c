@@ -1,6 +1,6 @@
 /*
  * pngxrtif.c - libpng external I/O: TIFF reader.
- * Copyright (C) 2006-2012 Cosmin Truta.
+ * Copyright (C) 2006-2011 Cosmin Truta.
  */
 
 #include "pngxtern.h"
@@ -80,14 +80,14 @@ pngx_read_tiff(png_structp png_ptr, png_infop info_ptr, FILE *stream)
    err_png_ptr = png_ptr;
    num_extra_images = 0;
    minitiff_init_info(&tiff_info);
-   tiff_info.error_handler = pngx_tiff_error;
+   tiff_info.error_handler   = pngx_tiff_error;
    tiff_info.warning_handler = pngx_tiff_warning;
    minitiff_read_info(&tiff_info, stream);
    minitiff_validate_info(&tiff_info);
 
-   width = (unsigned int)tiff_info.width;
+   width  = (unsigned int)tiff_info.width;
    height = (unsigned int)tiff_info.height;
-   pixel_size = tiff_info.samples_per_pixel;
+   pixel_size   = tiff_info.samples_per_pixel;
    sample_depth = tiff_info.bits_per_sample;
    switch (pixel_size)
    {

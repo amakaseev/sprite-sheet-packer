@@ -22,7 +22,7 @@ TIFFDIR = ../minitiff
 PNGXTERN_LIB = libpngxtern.a
 
 PNGXREAD_OBJS = pngxread.o pngxrbmp.o pngxrgif.o pngxrjpg.o pngxrpnm.o pngxrtif.o
-PNGXUTIL_OBJS = pngxio.o pngxmem.o pngxset.o
+PNGXUTIL_OBJS = pngxmem.o pngxset.o
 PNGXTERN_OBJS = $(PNGXREAD_OBJS) $(PNGXUTIL_OBJS)
 
 @USE_SYSTEM_ZLIB_FALSE@PNGXTERN_DEPINCLUDE_ZLIB = -I$(ZDIR)
@@ -49,7 +49,6 @@ $(PNGXTERN_LIB): $(PNGXTERN_OBJS)
 	$(AR) $(ARFLAGS) $@ $(PNGXTERN_OBJS)
 	$(RANLIB) $@
 
-pngxio.o: pngxio.c pngxutil.h
 pngxmem.o: pngxmem.c pngxutil.h
 pngxset.o: pngxset.c pngxutil.h
 pngxread.o: pngxread.c pngxtern.h pngxutil.h

@@ -1,6 +1,6 @@
 /*
  * pngxrgif.c - libpng external I/O: GIF reader.
- * Copyright (C) 2003-2012 Cosmin Truta.
+ * Copyright (C) 2003-2011 Cosmin Truta.
  */
 
 #include "pngxtern.h"
@@ -118,15 +118,15 @@ pngx_read_gif(png_structp png_ptr, png_infop info_ptr, FILE *stream)
    png_bytepp row_pointers;
 
    /* Set up the custom error handling. */
-   GIFError = pngx_gif_error;
+   GIFError   = pngx_gif_error;
    GIFWarning = pngx_gif_warning;
-   err_png_ptr = png_ptr;
+   err_png_ptr       = png_ptr;
    err_gif_image_ptr = NULL;
-   err_gif_ext_ptr = NULL;
+   err_gif_ext_ptr   = NULL;
 
    /* Read the GIF screen. */
    GIFReadScreen(&screen, stream);
-   width = screen.Width;
+   width  = screen.Width;
    height = screen.Height;
 
    /* Set the PNG image type. */
