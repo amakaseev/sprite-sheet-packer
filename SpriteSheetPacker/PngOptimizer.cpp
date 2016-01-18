@@ -25,7 +25,7 @@ OptiPngOptimizer::~OptiPngOptimizer() {
     opng_destroy_transformer(transformer);
 }
 
-bool OptiPngOptimizer::optimizeFiles(QStringList fileNames) {
+bool OptiPngOptimizer::optimizeFiles(const QStringList& fileNames) {
 
     for(const QString& fileName : fileNames) {
         if (!optimizeFile(fileName)) {
@@ -78,7 +78,7 @@ PngQuantOptimizer::~PngQuantOptimizer() {
     }
 }
 
-bool PngQuantOptimizer::optimizeFiles(QStringList fileNames) {
+bool PngQuantOptimizer::optimizeFiles(const QStringList& fileNames) {
 
     for(const QString& fileName : fileNames) {
         if (!optimizeFile(fileName)) {

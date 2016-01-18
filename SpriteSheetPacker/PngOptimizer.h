@@ -11,7 +11,7 @@ public:
     ~PngOptimizer() {}
 	
 public:
-    virtual bool optimizeFiles(QStringList fileNames) { return true; }
+    virtual bool optimizeFiles(const QStringList& fileNames) { return true; }
     virtual bool optimizeFile(const QString& fileName) { return true; }
 
     virtual bool setOptions(int optLevel) { return true; }
@@ -23,10 +23,10 @@ public:
     OptiPngOptimizer(int optLevel = 0);
     ~OptiPngOptimizer();
 
-    bool optimizeFiles(QStringList fileNames) override;
+    bool optimizeFiles(const QStringList& fileNames) override;
     bool optimizeFile(const QString& fileName) override;
 
-    bool setOptions(int optLevel);
+    bool setOptions(int optLevel) override;
 
 private:
     int _optLevel;
@@ -42,10 +42,10 @@ public:
     PngQuantOptimizer(int optLevel = 0);
     ~PngQuantOptimizer();
 
-    bool optimizeFiles(QStringList fileNames) override;
+    bool optimizeFiles(const QStringList& fileNames) override;
     bool optimizeFile(const QString& fileName) override;
 
-    bool setOptions(int optLevel);
+    bool setOptions(int optLevel) override;
 
 private:
     int _optLevel;

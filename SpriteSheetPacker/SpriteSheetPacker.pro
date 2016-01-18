@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT += core widgets xml qml
+QT += core widgets xml qml concurrent
 
 TARGET = SpriteSheetPacker
 TEMPLATE = app
@@ -19,6 +19,7 @@ SOURCES += main.cpp\
     SpriteAtlas.cpp \
     ScalingVariantWidget.cpp \
     SpritePackerProjectFile.cpp \
+    PngOptimizer.cpp \
     PublishSpriteSheet.cpp \
     PreferencesDialog.cpp \
     PublishStatusDialog.cpp \
@@ -34,6 +35,7 @@ HEADERS += MainWindow.h \
     binpack2d.hpp \
     ScalingVariantWidget.h \
     SpritePackerProjectFile.h \
+    PngOptimizer.h \
     PublishSpriteSheet.h \
     PreferencesDialog.h \
     PublishStatusDialog.h \
