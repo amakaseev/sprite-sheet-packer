@@ -402,19 +402,26 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
         qDebug() << (*it).content().name() << (*it).area();
     }
 
+    PolyPack2D::Container<PackContent> container;
+    container.place(inputContent);
 
-    // Sort the input content by size... usually packs better.
-    //qSort(inputContent.begin(), inputContent.end(), [](const PackContent& a, const PackContent& b) {
-    //    return true;
-    //});
-//    // calculate area of polygon
-//    ClipperLib::Path poly;
-//    for(auto it = p.begin(); it<p.end(); ++it) {
-//        poly << ClipperLib::IntPoint(it->x()* PRECISION, it->y() * PRECISION);
-//    }
-//    double area = fabs(ClipperLib::Area(poly));
+    auto outputContent = container.contentList();
 
-//    _polygons.area += area;
+    _atlasImage = QImage(2000, 2000, QImage::Format_RGBA8888);
+    _atlasImage.fill(QColor(0, 0, 0, 0));
+
+    _spriteFrames.clear();
+    for(auto itor = outputContent.begin(); itor != outputContent.end(); itor++ ) {
+        const PolyPack2D::Content<PackContent> &content = *itor;
+
+        // retreive your data.
+        const PackContent &packContent = content.content();
+        SpriteFrameInfo spriteFrame;
+        spriteFrame.triangles = packContent.triangles();
+        spriteFrame.frame = QRect(content.bounds().left, content.bounds().top, content.bounds().right, content.bounds().bottom);
+
+        _spriteFrames[packContent.name()] = spriteFrame;
+    }
 
     return true;
 }
