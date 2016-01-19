@@ -68,6 +68,12 @@ PublishStatusDialog::~PublishStatusDialog() {
     delete ui;
 }
 
+void PublishStatusDialog::reject() {
+//    Escape Key
+//    If the user presses the Esc key in a dialog, QDialog::reject() will be called.
+//    This will cause the window to close: The close event cannot be ignored.
+}
+
 void PublishStatusDialog::log(const QString& msg, const QColor& color) {
     ui->smartTextEdit->setTextColor(color);
     ui->smartTextEdit->append(msg);
@@ -83,9 +89,15 @@ void PublishStatusDialog::log(const QString& msg, const QColor& color) {
 }
 
 
-void PublishStatusDialog::complete() {
-    ui->buttonBox->setEnabled(true);
+bool PublishStatusDialog::complete() {
+    ui->completePushButton->setEnabled(true);
     if (ui->hideCheckBox->isChecked()) {
-        close();
+        accept();
+        return true;
     }
+    return false;
+}
+
+void PublishStatusDialog::on_completePushButton_clicked() {
+    accept();
 }
