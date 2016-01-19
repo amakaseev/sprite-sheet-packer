@@ -89,6 +89,7 @@ namespace PolyPack2D {
             : _content(other._content)
             , _offset(other.offset())
             , _polygons(other._polygons)
+            , _convexHull(other._convexHull)
             , _area(other._area)
             , _bounds(other._bounds)
         {
@@ -113,6 +114,7 @@ namespace PolyPack2D {
         double area() const { return _area; }
         const Point& offset() const { return _offset; }
         const Rect& bounds() const { return _bounds; }
+        const std::vector<Point>& convexHull() const { return _convexHull; }
 
         void setOffset(const Point& offset) {
             _offset = offset;
@@ -164,17 +166,17 @@ namespace PolyPack2D {
                 if (it == inputContent.begin()) {
                     _bounds = content.bounds();
                     _contentList.push_back(content);
+                    _convexHull = content.convexHull();
                 } else {
                     float startX = _bounds.left - (content.bounds().right - content.bounds().left) - step;
                     float startY = _bounds.top - (content.bounds().bottom - content.bounds().top) - step;
                     float endX = _bounds.right + step;
                     float endY = _bounds.bottom + step;
 
-                    qDebug() << startX << ":" << endX;
-
                     bool isPlaces = false;
-                    double bestArea = 0;
+                    float bestArea = 0;
                     Point bestOffset;
+                    std::vector<Point> bestConvexHull;
 
                     for (float y = startY; y < endY; y+= step) {
                         for (float x = startX; x < endX; x+= step) {
@@ -189,9 +191,20 @@ namespace PolyPack2D {
                             if (intersect) {
 
                             } else {
-                                double area = 0;
-                                bestOffset = Point(x, y);
-                                isPlaces = true;
+                                auto newConvexHull = _convexHull;
+                                for (auto it_point = content.convexHull().begin(); it_point != content.convexHull().end(); ++it_point) {
+                                    newConvexHull.push_back(Point((*it_point).x + x, (*it_point).y + y));
+                                }
+                                newConvexHull = createConvexHull(newConvexHull);
+                                float area = convexHullArea(newConvexHull);
+
+                                if ((bestArea > area) || (!isPlaces)) {
+                                    //qDebug() << area << bestArea;
+                                    bestArea = area;
+                                    bestOffset = Point(x, y);
+                                    bestConvexHull = newConvexHull;
+                                    isPlaces = true;
+                                }
 //                                placeVariant[0] = ClipperLib::IntPoint(x, y);
                             }
                         }
@@ -204,6 +217,7 @@ namespace PolyPack2D {
                         if (_bounds.top > content.bounds().top) _bounds.top = content.bounds().top;
                         if (_bounds.bottom < content.bounds().bottom) _bounds.bottom = content.bounds().bottom;
                         _contentList.push_back(content);
+                        _convexHull = bestConvexHull;
                     } else {
                         qDebug() << "Not placed";
                     }
@@ -227,6 +241,7 @@ namespace PolyPack2D {
     protected:
         Rect _bounds;
         ContentList<T> _contentList;
+        std::vector<Point> _convexHull;
     };
 
 }

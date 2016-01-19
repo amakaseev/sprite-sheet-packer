@@ -254,6 +254,12 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
             outlineItems.push_back(pathItem);
         }
 
+        QPolygon polygon;
+        for (auto point: spriteFrame.triangles.debugPoints) {
+            polygon << QPoint(point.x() + delta.x(), point.y() + delta.y());
+        }
+        outlineItems.push_back(_scene->addPolygon(polygon, QPen(Qt::red), QBrush(Qt::yellow)));
+
         for (auto point: spriteFrame.triangles.debugPoints) {
             auto rectItem = _scene->addRect(QRectF(point.x() + delta.x(), point.y() + delta.y(), 1, 1), QPen(Qt::red), QBrush(Qt::red));
             outlineItems.push_back(rectItem);

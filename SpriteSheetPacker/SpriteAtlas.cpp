@@ -420,6 +420,13 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
         spriteFrame.triangles = packContent.triangles();
         spriteFrame.frame = QRect(content.bounds().left, content.bounds().top, content.bounds().right, content.bounds().bottom);
 
+        spriteFrame.triangles.debugPoints.clear();
+        for (auto point: content.convexHull()) {
+            spriteFrame.triangles.debugPoints.push_back(QPointF(point.x, point.y));
+        }
+        qDebug() << spriteFrame.triangles.debugPoints.size();
+
+
         _spriteFrames[packContent.name()] = spriteFrame;
     }
 
