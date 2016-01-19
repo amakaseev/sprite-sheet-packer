@@ -35,6 +35,14 @@ namespace PolyPack2D {
 
         Point(): x(0), y(0) { }
         Point(float _x, float _y): x(_x), y(_y) { }
+
+        Point operator + (const Point& p) const {
+           return Point(this->x + p.x, this->y + p.y);
+        }
+
+        Point operator - (const Point& p) const {
+           return Point(this->x - p.x, this->y - p.y);
+        }
     };
 
     struct Rect {
@@ -44,9 +52,9 @@ namespace PolyPack2D {
         float bottom;
     };
 
-    float cross(const Point &o, const Point &a, const Point &b);
     std::vector<Point> createConvexHull(std::vector<Point> p);
-    float convexHullArea(std::vector<Point> p);
+    float convexHullArea(const std::vector<Point>& p);
+    bool convexHullIntersect(const std::vector<Point>& aConvexHull, const std::vector<Point>& bConvexHull);
     /////
 
 
@@ -96,20 +104,6 @@ namespace PolyPack2D {
 
         }
 
-//        bool intersection(std::vector<ClipperLib::Path> _polygons) {
-//            auto PolygonInPolygon = [](const ClipperLib::Path& p1, const ClipperLib::Path p2) {
-//                return false;
-//            };
-
-//            std::vector<ClipperLib::Path> offsetPolygons;
-//            for (auto it = _polygons.begin(); it != _polygons.end(); ++it) {
-//                for (auto p2_it = other._polygons.begin(); p2_it = other._polygons.begin())
-//                ClipperLib::Path polygon
-//                if (PolygonInPolygon((*it), polygon);
-//            }
-//            return false;
-//        }
-
         const T& content() const { return _content; }
         double area() const { return _area; }
         const Point& offset() const { return _offset; }
@@ -123,12 +117,20 @@ namespace PolyPack2D {
             _bounds.top += offset.y;
             _bounds.bottom += offset.y;
 
+            // translate polygons
             for (auto it = _polygons.begin(); it != _polygons.end(); ++it) {
                 for (auto it_p = (*it).begin(); it_p != (*it).end(); ++it_p) {
                     (*it_p).x += offset.x;
                     (*it_p).y += offset.y;
                 }
             }
+
+            // translate convexHull
+            for (auto it_point = _convexHull.begin(); it_point != _convexHull.end(); ++it_point) {
+                (*it_point).x += offset.x;
+                (*it_point).y += offset.y;
+            }
+
         }
 
     protected:
@@ -180,22 +182,24 @@ namespace PolyPack2D {
 
                     for (float y = startY; y < endY; y+= step) {
                         for (float x = startX; x < endX; x+= step) {
-//                            // test intersect intersection
-                            bool intersect = false;
-//                            for (auto in_it = _contentList.begin(); in_it != _contentList.end(); ++in_it) {
-////                                if ((*in_it).intersection(content, ClipperLib::IntPoint(x, y))) {
-////                                    intersect = true;
-////                                    break;
-////                                }
-//                            }
-                            if (intersect) {
+                            auto contentConvexHull = content.convexHull();
+                            for (auto it_point = contentConvexHull.begin(); it_point != contentConvexHull.end(); ++it_point) {
+                                (*it_point).x += x;
+                                (*it_point).y += y;
+                            }
 
-                            } else {
+                            // test intersect intersection
+                            bool intersect = false;
+                            intersect = convexHullIntersect(contentConvexHull, _convexHull);
+//                            for (auto in_it = _contentList.begin(); in_it != _contentList.end(); ++in_it) {
+//                                if (convexHullIntersect(contentConvexHull, (*in_it).convexHull())) {
+//                                    intersect = true;
+//                                    break;
+//                                }
+//                            }
+                            if (!intersect) {
                                 auto newConvexHull = _convexHull;
-                                for (auto it_point = content.convexHull().begin(); it_point != content.convexHull().end(); ++it_point) {
-                                    newConvexHull.push_back(Point((*it_point).x + x, (*it_point).y + y));
-                                }
-                                newConvexHull = createConvexHull(newConvexHull);
+                                newConvexHull.insert(newConvexHull.begin(), contentConvexHull.begin(), contentConvexHull.end());
                                 float area = convexHullArea(newConvexHull);
 
                                 if ((bestArea > area) || (!isPlaces)) {
@@ -205,7 +209,6 @@ namespace PolyPack2D {
                                     bestConvexHull = newConvexHull;
                                     isPlaces = true;
                                 }
-//                                placeVariant[0] = ClipperLib::IntPoint(x, y);
                             }
                         }
                     }

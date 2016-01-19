@@ -256,7 +256,7 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
 
         QPolygon polygon;
         for (auto point: spriteFrame.triangles.debugPoints) {
-            polygon << QPoint(point.x() + delta.x(), point.y() + delta.y());
+            polygon << QPoint(point.x(), point.y());
         }
         outlineItems.push_back(_scene->addPolygon(polygon, QPen(Qt::red), QBrush(Qt::yellow)));
 
