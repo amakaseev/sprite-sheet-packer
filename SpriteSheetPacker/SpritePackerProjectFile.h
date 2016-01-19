@@ -39,6 +39,9 @@ public:
     void setPow2(bool pow2) { _pow2 = pow2; }
     bool pow2() const { return _pow2; }
 
+    void setOptMode(const QString& optMode) { _optMode = optMode; }
+    QString optMode() const { return _optMode; }
+
     void setOptLevel(int optLevel) { _optLevel = optLevel; }
     int optLevel() const { return _optLevel; }
 
@@ -73,6 +76,7 @@ protected:
     int     _spriteBorder;
     int     _maxTextureSize;
     bool    _pow2;
+    QString _optMode;
     int     _optLevel;
 
     QVector<ScalingVariant> _scalingVariants;

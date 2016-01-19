@@ -39,7 +39,7 @@ void PublishSpriteSheet::addSpriteSheet(const SpriteAtlas &atlas, const QString 
     _fileNames.append(fileName);
 }
 
-bool PublishSpriteSheet::publish(const QString& format, int optLevel, bool errorMessage) {
+bool PublishSpriteSheet::publish(const QString& format, const QString& optMode, int optLevel, bool errorMessage) {
 
     if (_spriteAtlases.size() != _fileNames.size()) {
         return false;
@@ -59,9 +59,10 @@ bool PublishSpriteSheet::publish(const QString& format, int optLevel, bool error
         atlas.image().save(filePath + ".png");
     }
 
-    if (optLevel > 0) {
+    if (optMode != "None") {
         qDebug() << "Begin optimize image...";
-        optimizePNGInThread(_fileNames, optLevel);
+        // we use values 1-7 so that it is more user friendly, because 0 also means optimization.
+        optimizePNGInThread(_fileNames, optMode, optLevel - 1);
     }
 
     _spriteAtlases.clear();
@@ -166,16 +167,16 @@ bool PublishSpriteSheet::generateDataFile(const QString& filePath, const QString
     return true;
 }
 
-bool PublishSpriteSheet::optimizePNG(const QString& fileName, int optLevel, bool useOptiPng) {
+bool PublishSpriteSheet::optimizePNG(const QString& fileName, const QString& optMode, int optLevel) {
     bool result = false;
 
-    if (useOptiPng) {
+    if (optMode == "Lossless") {
         OptiPngOptimizer optimizer(optLevel);
 
         _mutex.lock();
         result = optimizer.optimizeFile(fileName + ".png");
         _mutex.unlock();
-    } else {
+    } else if (optMode == "Lossy") {
         PngQuantOptimizer optimizer(optLevel);
 
         _mutex.lock();
@@ -186,16 +187,13 @@ bool PublishSpriteSheet::optimizePNG(const QString& fileName, int optLevel, bool
     return result;
 }
 
-void PublishSpriteSheet::optimizePNGInThread(QStringList fileNames, int optLevel) {
+void PublishSpriteSheet::optimizePNGInThread(QStringList fileNames, const QString& optMode, int optLevel) {
     QObject::connect(&_watcher, SIGNAL(finished()), this, SIGNAL(onCompleted()));
 
     QFuture<bool> resultFuture;
-    QSettings settings;
-    QString imageOptimizer(settings.value("Preferences/imageOptimizer", "OptiPNG").toString());
-    bool useOptiPng = (QString::compare(imageOptimizer, "OptiPNG") == 0);
 
     for (const QString& fileName : fileNames) {
-        resultFuture = QtConcurrent::run(this, &PublishSpriteSheet::optimizePNG, fileName, optLevel, useOptiPng);
+        resultFuture = QtConcurrent::run(this, &PublishSpriteSheet::optimizePNG, fileName, optMode, optLevel);
     }
 
     _watcher.setFuture(resultFuture);

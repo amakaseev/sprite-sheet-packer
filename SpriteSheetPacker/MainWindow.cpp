@@ -66,6 +66,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_openButton, SIGNAL(pressed()), this, SLOT(on_actionOpen_triggered()));
     ui->mainToolBar->insertWidget(ui->actionSave, _openButton);
 
+    ui->optLevelSlider->setVisible(false);
+    ui->optLevelText->setVisible(false);
+    ui->optLevelLabel->setVisible(false);
+
     // layout preferences action on right side in toolbar
     QWidget* empty = new QWidget();
     empty->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
@@ -308,6 +312,7 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     ui->dataFormatComboBox->setCurrentText(projectFile->dataFormat());
     ui->destPathLineEdit->setText(projectFile->destPath());
     ui->spriteSheetLineEdit->setText(projectFile->spriteSheetName());
+    ui->optModeComboBox->setCurrentText(projectFile->optMode());
     ui->optLevelSlider->setValue(projectFile->optLevel());
 
     while(ui->scalingVariantsGroupBox->layout()->count() > 0){
@@ -369,6 +374,7 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
     projectFile->setDataFormat(ui->dataFormatComboBox->currentText());
     projectFile->setDestPath(ui->destPathLineEdit->text());
     projectFile->setSpriteSheetName(ui->spriteSheetLineEdit->text());
+    projectFile->setOptMode(ui->optModeComboBox->currentText());
     projectFile->setOptLevel(ui->optLevelSlider->value());
 
     QVector<ScalingVariant> scalingVariants;
@@ -538,7 +544,7 @@ void MainWindow::on_actionPublish_triggered() {
     PublishSpriteSheet* publisher = new PublishSpriteSheet();
 
     PublishStatusDialog* publishStatusDialog = new PublishStatusDialog(this);
-    publishStatusDialog->setAttribute(Qt::WA_DeleteOnClose);
+    //publishStatusDialog->setAttribute(Qt::WA_DeleteOnClose);
     publishStatusDialog->open();
 
     publishStatusDialog->log(QString("Publish to: " + dir.canonicalPath()), Qt::blue);
@@ -595,9 +601,9 @@ void MainWindow::on_actionPublish_triggered() {
         }
     }
 
-    publisher->publish(ui->dataFormatComboBox->currentText(), ui->optLevelSlider->value());
+    publisher->publish(ui->dataFormatComboBox->currentText(), ui->optModeComboBox->currentText(), ui->optLevelSlider->value());
 
-    if (ui->optLevelSlider->value() == 0) {
+    if (ui->optModeComboBox->currentText() == "None") {
         publishStatusDialog->log(QString("Publishing is finished."), Qt::blue);
         publishStatusDialog->complete();
         delete publisher;
@@ -763,4 +769,16 @@ void MainWindow::propertiesValueChanged(int val) {
 void MainWindow::on_displayOutlinesCheckBox_clicked(bool checked) {
     if (_outlinesGroup)
         _outlinesGroup->setVisible(checked);
+}
+
+void MainWindow::on_optModeComboBox_currentTextChanged(const QString &text) {
+    if (text == "Lossless") {
+        ui->optLevelSlider->setVisible(true);
+        ui->optLevelText->setVisible(true);
+        ui->optLevelLabel->setVisible(true);
+    } else {
+        ui->optLevelSlider->setVisible(false);
+        ui->optLevelText->setVisible(false);
+        ui->optLevelLabel->setVisible(false);
+    }
 }
