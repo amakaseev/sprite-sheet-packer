@@ -75,6 +75,8 @@ private:
     QToolButton*        _openButton;
     QGraphicsItemGroup* _outlinesGroup;
     bool                _blockUISignals;
+
+    PublishStatusDialog _publishStatusDialog;
 };
 
 #endif // MAINWINDOW_H

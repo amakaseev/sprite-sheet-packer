@@ -42,6 +42,7 @@ PublishStatusDialog::PublishStatusDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
+    setAttribute(Qt::WA_DeleteOnClose);
 
 
     if (parent) {
@@ -51,6 +52,8 @@ PublishStatusDialog::PublishStatusDialog(QWidget *parent) :
     }
 
     ui->logsTextEdit->setTextColor(Qt::darkGreen);
+
+    ui->progressBar->setRange(0, 3);
 
     gTextEdit = ui->logsTextEdit;
     qInstallMessageHandler(messageOutput);
@@ -102,4 +105,8 @@ bool PublishStatusDialog::complete() {
 
 void PublishStatusDialog::on_completePushButton_clicked() {
     accept();
+}
+
+QProgressBar* PublishStatusDialog::progressBar() {
+    return ui->progressBar;
 }

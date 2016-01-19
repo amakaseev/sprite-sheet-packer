@@ -549,10 +549,10 @@ void MainWindow::on_actionPublish_triggered() {
 
     PublishSpriteSheet* publisher = new PublishSpriteSheet();
 
-    PublishStatusDialog publishStatusDialog(this);
-    publishStatusDialog.open();
+    PublishStatusDialog* publishStatusDialog = new PublishStatusDialog(this);
+    publishStatusDialog->open();
 
-    publishStatusDialog.log(QString("Publish to: " + dir.canonicalPath()), Qt::blue);
+    publishStatusDialog->log(QString("Publish to: " + dir.canonicalPath()), Qt::blue);
     for (int i=0; i<ui->scalingVariantsGroupBox->layout()->count(); ++i) {
         ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(ui->scalingVariantsGroupBox->layout()->itemAt(i)->widget());
         if (scalingVariantWidget) {
@@ -573,12 +573,12 @@ void MainWindow::on_actionPublish_triggered() {
             destFileInfo.setFile(dir, spriteSheetName);
             if (dir.absolutePath() != destFileInfo.dir().absolutePath()) {
                 if (!dir.mkpath(destFileInfo.dir().absolutePath())) {
-                    publishStatusDialog.log("Imposible create path:" + destFileInfo.dir().absolutePath(), Qt::red);
+                    publishStatusDialog->log("Imposible create path:" + destFileInfo.dir().absolutePath(), Qt::red);
                     continue;
                 }
             }
 
-            publishStatusDialog.log(QString("Generating scale variant (%1) scale: %2.").arg(spriteSheetName).arg(scale));
+            publishStatusDialog->log(QString("Generating scale variant (%1) scale: %2.").arg(spriteSheetName).arg(scale));
 
             SpriteAtlas atlas(_spritesTreeWidget->contentList(),
                               ui->textureBorderSpinBox->value(),
@@ -596,7 +596,7 @@ void MainWindow::on_actionPublish_triggered() {
 
             if (!atlas.generate()) {
                 QMessageBox::critical(this, "Generate error", "Max texture size limit is small!");
-                publishStatusDialog.log("Generate error: Max texture size limit is small!", Qt::red);
+                publishStatusDialog->log("Generate error: Max texture size limit is small!", Qt::red);
                 continue;
             } else if (i==0) {
                 refreshAtlas(&atlas);
@@ -606,27 +606,24 @@ void MainWindow::on_actionPublish_triggered() {
         }
     }
 
-    publisher->publish(ui->dataFormatComboBox->currentText(), ui->optModeComboBox->currentText(), ui->optLevelSlider->value());
+    publisher->publish(ui->dataFormatComboBox->currentText(), ui->optModeComboBox->currentText(), ui->optLevelSlider->value(), true, publishStatusDialog);
 
-    if (ui->optModeComboBox->currentText() == "None") {
-        delete publisher;
-    } else {
-        // TODO: you need to wait previous image optimization if they are the same
-        QObject::connect(publisher, &PublishSpriteSheet::onCompleted, [this, publisher] () {
-            // TODO: it would be good to show here for information about the optimization
-            QMessageBox::information(this, "PNG Optimization", "PNG Optimization: complete.");
+        if (ui->optModeComboBox->currentText() == "None") {
+            publishStatusDialog->log(QString("Publishing is finished."), Qt::blue);
+            publishStatusDialog->complete();
+            publishStatusDialog->progressBar()->setValue(3);
+
             delete publisher;
-        });
-    }
 
-    publishStatusDialog.log(QString("Publishing is finished."), Qt::blue);
-    if (!publishStatusDialog.complete()) {
-        // This loop will wait for the window is finished
-        QEventLoop loop;
-        connect(&publishStatusDialog, SIGNAL(finished(int)), &loop, SLOT(quit()));
-        loop.exec();
-        qDebug() << "Finish publish";
-    }
+        } else {
+            QObject::connect(publisher, &PublishSpriteSheet::onCompleted, [publishStatusDialog, publisher] () {
+                publishStatusDialog->log(QString("Publishing is finished."), Qt::blue);
+                publishStatusDialog->complete();
+                publishStatusDialog->progressBar()->setValue(3);
+
+                delete publisher;
+            });
+        }
 }
 
 void MainWindow::on_actionAbout_triggered() {

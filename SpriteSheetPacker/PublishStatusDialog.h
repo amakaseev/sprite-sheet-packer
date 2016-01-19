@@ -14,6 +14,8 @@ public:
     explicit PublishStatusDialog(QWidget *parent = 0);
     ~PublishStatusDialog();
 
+    QProgressBar* progressBar();
+
 protected:
     void reject() override;
 
