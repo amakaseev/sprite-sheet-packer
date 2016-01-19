@@ -41,6 +41,8 @@ PublishStatusDialog::PublishStatusDialog(QWidget *parent) :
     ui(new Ui::PublishStatusDialog)
 {
     ui->setupUi(this);
+    setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
+
 
     if (parent) {
         int width = parent->width() / 2;

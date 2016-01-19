@@ -544,7 +544,6 @@ void MainWindow::on_actionPublish_triggered() {
     PublishSpriteSheet* publisher = new PublishSpriteSheet();
 
     PublishStatusDialog publishStatusDialog(this);
-    publishStatusDialog.setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
     publishStatusDialog.open();
 
     publishStatusDialog.log(QString("Publish to: " + dir.canonicalPath()), Qt::blue);
