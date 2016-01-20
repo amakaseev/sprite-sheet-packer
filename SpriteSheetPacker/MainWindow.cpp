@@ -217,8 +217,12 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
     QGraphicsPixmapItem* atlasPixmapItem = _scene->addPixmap(QPixmap::fromImage(atlasImage));
 
     QList<QGraphicsItem*> outlineItems;
+
     QColor brushColor(Qt::blue);
     brushColor.setAlpha(100);
+    QColor convexColor(Qt::yellow);
+    convexColor.setAlpha(100);
+
     for(auto it = atlas->spriteFrames().begin(); it != atlas->spriteFrames().end(); ++it) {
         bool skip = false;
         for (auto identicalFrame: atlas->identicalFrames()) {
@@ -258,7 +262,7 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
         for (auto point: spriteFrame.triangles.debugPoints) {
             polygon << QPoint(point.x(), point.y());
         }
-        outlineItems.push_back(_scene->addPolygon(polygon, QPen(Qt::red), QBrush(Qt::yellow)));
+        outlineItems.push_back(_scene->addPolygon(polygon, QPen(Qt::red), QBrush(convexColor)));
 
         for (auto point: spriteFrame.triangles.debugPoints) {
             auto rectItem = _scene->addRect(QRectF(point.x() + delta.x(), point.y() + delta.y(), 1, 1), QPen(Qt::red), QBrush(Qt::red));

@@ -407,7 +407,7 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
 
     auto outputContent = container.contentList();
 
-    _atlasImage = QImage(2000, 2000, QImage::Format_RGBA8888);
+    _atlasImage = QImage(container.bounds().width(), container.bounds().height(), QImage::Format_RGBA8888);
     _atlasImage.fill(QColor(0, 0, 0, 0));
 
     _spriteFrames.clear();
