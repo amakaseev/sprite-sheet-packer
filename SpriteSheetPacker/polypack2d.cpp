@@ -1,4 +1,5 @@
 #include "polypack2d.h"
+#include "3rdparty/triangle_triangle_intersection.c"
 
 namespace PolyPack2D {
     template<typename T> T max(T a, T b) {
@@ -14,6 +15,19 @@ namespace PolyPack2D {
 
     float dot2(const Point& vec1, const Point& vec2){
         return vec1.x * vec2.y - vec1.y * vec2.x;
+    }
+
+    float pointsArea(const std::vector<Point>& p) {
+        Rect bounds;
+        bounds.left = bounds.top = std::numeric_limits<float>::max();
+        bounds.right = bounds.bottom = std::numeric_limits<float>::min();
+        for (auto point: p) {
+            if (bounds.left > point.x) bounds.left = point.x;
+            if (bounds.right < point.x) bounds.right = point.x;
+            if (bounds.top > point.y) bounds.top = point.y;
+            if (bounds.bottom < point.y) bounds.bottom = point.y;
+        }
+        return bounds.area();
     }
 
     // Returns a list of points on the convex hull in counter-clockwise order.
@@ -44,27 +58,11 @@ namespace PolyPack2D {
         return result;
     }
 
-    float convexHullArea(const std::vector<Point>& p) {
-        float area = 0;
-        size_t length = p.size();
-        for(size_t a = 0; a < length; a++) {
-            int b = ((a+1) % length);
-            area += (p[a].x * p[b].y) - (p[b].x * p[a].y);
-        }
-        return area;
-    }
-
-    float pointsArea(const std::vector<Point>& p) {
-        Rect bounds;
-        bounds.left = bounds.top = std::numeric_limits<float>::max();
-        bounds.right = bounds.bottom = std::numeric_limits<float>::min();
-        for (auto point: p) {
-            if (bounds.left > point.x) bounds.left = point.x;
-            if (bounds.right < point.x) bounds.right = point.x;
-            if (bounds.top > point.y) bounds.top = point.y;
-            if (bounds.bottom < point.y) bounds.bottom = point.y;
-        }
-        return bounds.area();
+    bool rectIntersect(const Rect& r1, const Rect& r2) {
+        return !(r2.left > r1.right ||
+                 r2.right < r1.left ||
+                 r2.top > r1.bottom ||
+                 r2.bottom < r1.top);
     }
 
     bool pointInConvexHull(const Point& point, const std::vector<Point>& convexHull) {
@@ -86,8 +84,7 @@ namespace PolyPack2D {
     // 0 --> p, q and r are colinear
     // 1 --> Clockwise
     // 2 --> Counterclockwise
-    int orientation(Point p, Point q, Point r)
-    {
+    int orientation(Point p, Point q, Point r) {
         // See http://www.geeksforgeeks.org/orientation-3-ordered-points/
         // for details of below formula.
         int val = (q.y - p.y) * (r.x - q.x) -
@@ -100,8 +97,7 @@ namespace PolyPack2D {
 
     // Given three colinear points p, q, r, the function checks if
     // point q lies on line segment 'pr'
-    bool onSegment(Point p, Point q, Point r)
-    {
+    bool onSegment(Point p, Point q, Point r) {
         if (q.x <= max(p.x, r.x) && q.x >= min(p.x, r.x) &&
             q.y <= max(p.y, r.y) && q.y >= min(p.y, r.y))
            return true;
@@ -109,8 +105,7 @@ namespace PolyPack2D {
         return false;
     }
 
-    bool edgeIntersection(Point p1, Point q1, Point p2, Point q2)
-    {
+    bool edgeIntersection(const Point& p1, const Point& q1, const Point& p2, const Point& q2) {
         // Find the four orientations needed for general and
         // special cases
         int o1 = orientation(p1, q1, p2);
@@ -163,10 +158,23 @@ namespace PolyPack2D {
         return false;
     }
 
-    bool intersectRect(const Rect& r1, const Rect& r2) {
-        return !(r2.left > r1.right ||
-                 r2.right < r1.left ||
-                 r2.top > r1.bottom ||
-                 r2.bottom < r1.top);
+    bool trianglesIntersect(const Triangles& a, const Triangles& b) {
+        for (int i=0; i<a.indices.size(); i+=3) {
+            float a1[2] = { a.verts[a.indices[i+0]].x, a.verts[a.indices[i+0]].y };
+            float a2[2] = { a.verts[a.indices[i+1]].x, a.verts[a.indices[i+1]].y };
+            float a3[2] = { a.verts[a.indices[i+2]].x, a.verts[a.indices[i+2]].y };
+
+            for (int j=0; j<b.indices.size(); j+=3) {
+                float b1[2] = { b.verts[b.indices[j+0]].x, b.verts[b.indices[j+0]].y };
+                float b2[2] = { b.verts[b.indices[j+1]].x, b.verts[b.indices[j+1]].y };
+                float b3[2] = { b.verts[b.indices[j+2]].x, b.verts[b.indices[j+2]].y };
+
+                if (tri_tri_overlap_test_2d(a1, a2, a3, b1, b2, b3)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
+
 }

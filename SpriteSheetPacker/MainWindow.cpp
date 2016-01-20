@@ -239,30 +239,29 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
         auto spriteFrame = it.value();
         QPoint delta = spriteFrame.frame.topLeft();
 
-        if (ui->trimModeComboBox->currentText() == "Rect") {
+        if (ui->algorithmComboBox->currentText() == "Rect") {
             auto rectItem = _scene->addRect(spriteFrame.frame, QPen(Qt::white), QBrush(brushColor));
             rectItem->setToolTip(it.key());
             outlineItems.push_back(rectItem);
         }
 
         if (spriteFrame.triangles.indices.size()) {
-            QPainterPath trianglesPath;
             for (int i=0; i<spriteFrame.triangles.indices.size(); i+=3) {
                 QPointF v1 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+0]].v + delta;
                 QPointF v2 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+1]].v + delta;
                 QPointF v3 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+2]].v + delta;
-                trianglesPath.addPolygon(QPolygonF() << v1 << v2 << v3);
+
+                auto triangleItem = _scene->addPolygon(QPolygonF() << v1 << v2 << v3, QPen(Qt::white), QBrush(brushColor));
+                triangleItem->setToolTip(QString("%1\nTriangles: %2").arg(it.key()).arg(spriteFrame.triangles.indices.size() / 3));
+                outlineItems.push_back(triangleItem);
             }
-            auto pathItem = _scene->addPath(trianglesPath, QPen(Qt::white), QBrush(brushColor));
-            pathItem->setToolTip(QString("%1\nTriangles: %2").arg(it.key()).arg(spriteFrame.triangles.indices.size() / 3));
-            outlineItems.push_back(pathItem);
         }
 
-        QPolygon polygon;
-        for (auto point: spriteFrame.triangles.debugPoints) {
-            polygon << QPoint(point.x(), point.y());
-        }
-        outlineItems.push_back(_scene->addPolygon(polygon, QPen(Qt::red), QBrush(convexColor)));
+//        QPolygon polygon;
+//        for (auto point: spriteFrame.triangles.debugPoints) {
+//            polygon << QPoint(point.x(), point.y());
+//        }
+//        outlineItems.push_back(_scene->addPolygon(polygon, QPen(Qt::red), QBrush(convexColor)));
 
         for (auto point: spriteFrame.triangles.debugPoints) {
             auto rectItem = _scene->addRect(QRectF(point.x() + delta.x(), point.y() + delta.y(), 1, 1), QPen(Qt::red), QBrush(Qt::red));

@@ -392,7 +392,13 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
     // initialize content
     PolyPack2D::ContentList<PackContent> inputContent;
     for (auto packContent: content) {
-        inputContent += PolyPack2D::Content<PackContent>(packContent, packContent.polygons());
+        //TODO: remove convert
+        PolyPack2D::Triangles triangles;
+        for (auto vert: packContent.triangles().verts) {
+            triangles.verts.push_back(PolyPack2D::Point(vert.v.x(), vert.v.y()));
+        }
+        triangles.indices = packContent.triangles().indices.toStdVector();
+        inputContent += PolyPack2D::Content<PackContent>(packContent, triangles);
     }
 
     // Sort the input content by area... usually packs better.

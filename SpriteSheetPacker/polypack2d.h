@@ -68,48 +68,46 @@ namespace PolyPack2D {
         }
     };
 
-    std::vector<Point> createConvexHull(const std::vector<Point>& p);
-    float convexHullArea(const std::vector<Point>& p);
+    struct Triangles {
+        std::vector<Point> verts;
+        std::vector<unsigned short> indices;
+    };
+
     float pointsArea(const std::vector<Point>& p);
+    std::vector<Point> createConvexHull(const std::vector<Point>& p);
+
+    bool rectIntersect(const Rect& r1, const Rect& r2);
     bool convexHullIntersect(const std::vector<Point>& aConvexHull, const std::vector<Point>& bConvexHull);
-    bool intersectRect(const Rect& r1, const Rect& r2);
+    bool trianglesIntersect(const Triangles& a, const Triangles& b);
     /////
 
 
     template<class T> class Content {
     public:
-        Content(const T &content, std::vector<std::vector<QPointF>> polygons)
+        Content(const T &content, Triangles triangles)
         : _content(content)
+        , _triangles(triangles)
         , _area(0)
         {
             _offset.x = _offset.y = 0;
             _bounds.left = _bounds.top = std::numeric_limits<float>::max();
             _bounds.right = _bounds.bottom = std::numeric_limits<float>::min();
 
-            // convert and calculate bounding box
-            std::vector<Point> allPoints;
-            for (auto it = polygons.begin(); it != polygons.end(); ++it) {
-                std::vector<Point> polygon;
-                for (auto it_p = (*it).begin(); it_p != (*it).end(); ++it_p) {
-                    Point point(it_p->x(), it_p->y());
-                    polygon.push_back(point);
-
-                    if (_bounds.left > point.x) _bounds.left = point.x;
-                    if (_bounds.right < point.x) _bounds.right = point.x;
-                    if (_bounds.top > point.y) _bounds.top = point.y;
-                    if (_bounds.bottom < point.y) _bounds.bottom = point.y;
-                }
-                _polygons.push_back(polygon);
-                allPoints.insert(allPoints.end(), polygon.begin(), polygon.end());
+            // calculate bounding box
+            for (auto point: _triangles.verts) {
+                if (_bounds.left > point.x) _bounds.left = point.x;
+                if (_bounds.right < point.x) _bounds.right = point.x;
+                if (_bounds.top > point.y) _bounds.top = point.y;
+                if (_bounds.bottom < point.y) _bounds.bottom = point.y;
             }
 
-            _convexHull = createConvexHull(allPoints);
+            _convexHull = createConvexHull(_triangles.verts);
             _area = pointsArea(_convexHull);
         }
         Content(const Content& other)
             : _content(other._content)
             , _offset(other.offset())
-            , _polygons(other._polygons)
+            , _triangles(other._triangles)
             , _convexHull(other._convexHull)
             , _area(other._area)
             , _bounds(other._bounds)
@@ -121,6 +119,7 @@ namespace PolyPack2D {
         double area() const { return _area; }
         const Point& offset() const { return _offset; }
         const Rect& bounds() const { return _bounds; }
+        const Triangles& triangles() const { return _triangles; }
         const std::vector<Point>& convexHull() const { return _convexHull; }
 
         void setOffset(const Point& offset) {
@@ -130,12 +129,10 @@ namespace PolyPack2D {
             _bounds.top += offset.y;
             _bounds.bottom += offset.y;
 
-            // translate polygons
-            for (auto it = _polygons.begin(); it != _polygons.end(); ++it) {
-                for (auto it_p = (*it).begin(); it_p != (*it).end(); ++it_p) {
-                    (*it_p).x += offset.x;
-                    (*it_p).y += offset.y;
-                }
+            // translate triangles
+            for (auto it_p = _triangles.verts.begin(); it_p != _triangles.verts.end(); ++it_p) {
+                (*it_p).x += offset.x;
+                (*it_p).y += offset.y;
             }
 
             // translate convexHull
@@ -149,7 +146,7 @@ namespace PolyPack2D {
     protected:
         T _content;
         Point _offset;
-        std::vector<std::vector<Point>> _polygons;
+        Triangles _triangles;
         std::vector<Point> _convexHull;
         double _area;
         Rect _bounds;
@@ -210,13 +207,23 @@ namespace PolyPack2D {
                                 (*it_point).y += y;
                             }
 
+                            // translate triangles()
+                            auto contentTriangles = content.triangles();
+                            for (auto it_p = contentTriangles.verts.begin(); it_p != contentTriangles.verts.end(); ++it_p) {
+                                (*it_p).x += x;
+                                (*it_p).y += y;
+                            }
+
                             // test intersect intersection
                             bool intersect = false;
                             for (auto in_it = _contentList.begin(); in_it != _contentList.end(); ++in_it) {
-                                if (intersectRect(contentBounds, (*in_it).bounds())) {
+                                if (rectIntersect(contentBounds, (*in_it).bounds())) {
                                     if (convexHullIntersect(contentConvexHull, (*in_it).convexHull())) {
-                                        intersect = true;
-                                        break;
+                                        // polygon test
+                                        //if (trianglesIntersect(contentTriangles, (*in_it).triangles())) {
+                                            intersect = true;
+                                            break;
+                                        //}
                                     }
                                 }
                             }
@@ -244,17 +251,6 @@ namespace PolyPack2D {
                     } else {
                         qDebug() << "Not placed";
                     }
-
-//                    if (placeVariant.size()) {
-//                        content.setOffset((*placeVariant.begin()).second);
-//                        if (_bounds.left > content.bounds().left) _bounds.left = content.bounds().left;
-//                        if (_bounds.right < content.bounds().right) _bounds.right = content.bounds().right;
-//                        if (_bounds.top > content.bounds().top) _bounds.top = content.bounds().top;
-//                        if (_bounds.bottom < content.bounds().bottom) _bounds.bottom = content.bounds().bottom;
-//                        _contentList.push_back(content);
-//                    } else {
-//                        qDebug() << "Not placed";
-//                    }
                 }
             }
         }
