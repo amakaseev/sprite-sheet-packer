@@ -172,9 +172,6 @@ namespace PolyPack2D {
                 if (tri_tri_overlap_test_2d(a1, a2, a3, b1, b2, b3)) {
                     return true;
                 }
-                if (tri_tri_overlap_test_2d(b1, b2, b3, a1, a2, a3)) {
-                    return true;
-                }
             }
         }
         return false;

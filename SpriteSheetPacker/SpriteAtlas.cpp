@@ -413,10 +413,11 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
 
     auto outputContent = container.contentList();
 
+    _spriteFrames.clear();
     _atlasImage = QImage(container.bounds().width(), container.bounds().height(), QImage::Format_RGBA8888);
     _atlasImage.fill(QColor(0, 0, 0, 0));
 
-    _spriteFrames.clear();
+    QPainter painter(&_atlasImage);
     for(auto itor = outputContent.begin(); itor != outputContent.end(); itor++ ) {
         const PolyPack2D::Content<PackContent> &content = *itor;
 
@@ -424,7 +425,9 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
         const PackContent &packContent = content.content();
         SpriteFrameInfo spriteFrame;
         spriteFrame.triangles = packContent.triangles();
-        spriteFrame.frame = QRect(content.bounds().left, content.bounds().top, content.bounds().right, content.bounds().bottom);
+        spriteFrame.frame = QRect(QPoint(content.bounds().left, content.bounds().top), QPoint(content.bounds().right, content.bounds().bottom));
+
+        painter.drawImage(QPoint(content.bounds().left, content.bounds().top), packContent.image(), packContent.rect());
 
         spriteFrame.triangles.debugPoints.clear();
         for (auto point: content.convexHull()) {
