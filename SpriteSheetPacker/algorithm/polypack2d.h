@@ -220,10 +220,10 @@ namespace PolyPack2D {
                                 if (rectIntersect(contentBounds, (*in_it).bounds())) {
                                     if (convexHullIntersect(contentConvexHull, (*in_it).convexHull())) {
                                         // polygon test
-                                        //if (trianglesIntersect(contentTriangles, (*in_it).triangles())) {
+                                        if (trianglesIntersect(contentTriangles, (*in_it).triangles())) {
                                             intersect = true;
                                             break;
-                                        //}
+                                        }
                                     }
                                 }
                             }

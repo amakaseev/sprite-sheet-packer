@@ -14,7 +14,7 @@
 *                                                                           
 *  Several geometric predicates are defined.  Their parameters are all      
 *  points.  Each point is an array of two or three float precision
-*  floating point numbers. The geometric predicates implemented in          
+*  floating point numbers. The geometric predicates implemented in
 *  this file are:                                                            
 *                                                                           
 *    int tri_tri_overlap_test_3d(p1,q1,r1,p2,q2,r2)                         

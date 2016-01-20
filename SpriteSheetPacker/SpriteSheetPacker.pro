@@ -26,13 +26,11 @@ SOURCES += main.cpp\
     AboutDialog.cpp \
     SpritesTreeWidget.cpp \
     command-line.cpp \
-    PolygonImage.cpp \
-    polypack2d.cpp
+    PolygonImage.cpp
 
 HEADERS += MainWindow.h \
     ImageRotate.h \
     SpriteAtlas.h \
-    binpack2d.hpp \
     ScalingVariantWidget.h \
     SpritePackerProjectFile.h \
     PngOptimizer.h \
@@ -41,8 +39,19 @@ HEADERS += MainWindow.h \
     PublishStatusDialog.h \
     AboutDialog.h \
     SpritesTreeWidget.h \
-    PolygonImage.h \
-    polypack2d.h
+    PolygonImage.h
+
+#algorithm
+INCLUDEPATH += algorithm
+
+HEADERS += algorithm/binpack2d.hpp \
+    algorithm/triangle_triangle_intersection.h \
+    algorithm/polypack2d.h
+
+SOURCES += algorithm/polypack2d.cpp
+
+
+#other...
 
 FORMS += MainWindow.ui \
     ScalingVariantWidget.ui \
