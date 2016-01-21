@@ -181,8 +181,8 @@ namespace PolyPack2D {
                 } else {
                     float startX = 0;//_bounds.left - (content.bounds().right - content.bounds().left) - step;
                     float startY = 0;//_bounds.top - (content.bounds().bottom - content.bounds().top) - step;
-                    float endX = _bounds.right + step;
-                    float endY = _bounds.bottom + step;
+                    float endX = _bounds.right + step + (content.bounds().right - content.bounds().left);
+                    float endY = _bounds.bottom + step + (content.bounds().bottom - content.bounds().top);
 
                     bool isPlaces = false;
                     float bestArea = 0;
