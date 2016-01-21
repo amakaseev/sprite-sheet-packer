@@ -220,6 +220,8 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
 
     QColor brushColor(Qt::blue);
     brushColor.setAlpha(100);
+    QColor polygonColor(Qt::darkGreen);
+    polygonColor.setAlpha(100);
     QColor convexColor(Qt::yellow);
     convexColor.setAlpha(100);
 
@@ -251,7 +253,7 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
                 QPointF v2 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+1]].v + delta;
                 QPointF v3 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+2]].v + delta;
 
-                auto triangleItem = _scene->addPolygon(QPolygonF() << v1 << v2 << v3, QPen(Qt::white), QBrush(brushColor));
+                auto triangleItem = _scene->addPolygon(QPolygonF() << v1 << v2 << v3, QPen(Qt::white), QBrush(polygonColor));
                 triangleItem->setToolTip(QString("%1\nTriangles: %2").arg(it.key()).arg(spriteFrame.triangles.indices.size() / 3));
                 outlineItems.push_back(triangleItem);
             }
@@ -263,10 +265,10 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
 //        }
 //        outlineItems.push_back(_scene->addPolygon(polygon, QPen(Qt::red), QBrush(convexColor)));
 
-        for (auto point: spriteFrame.triangles.debugPoints) {
-            auto rectItem = _scene->addRect(QRectF(point.x() + delta.x(), point.y() + delta.y(), 1, 1), QPen(Qt::red), QBrush(Qt::red));
-            outlineItems.push_back(rectItem);
-        }
+//        for (auto point: spriteFrame.triangles.debugPoints) {
+//            auto rectItem = _scene->addRect(QRectF(point.x() + delta.x(), point.y() + delta.y(), 1, 1), QPen(Qt::red), QBrush(Qt::red));
+//            outlineItems.push_back(rectItem);
+//        }
 
         // show identical statistics
         auto identicalFrames = atlas->identicalFrames().find(it.key());

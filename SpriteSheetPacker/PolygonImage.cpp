@@ -31,20 +31,6 @@ PolygonImage::PolygonImage(const QImage& image, const QRectF& rect, const float 
     {
         auto p = trace(realRect, threshold);
         while (p.size() >= 3) {
-            // erase contour for find next
-            QPolygonF fillPolygon(QVector<QPointF>::fromStdVector(p));
-            fillPolygon.translate(rect.x(), rect.y());
-            QColor fillColor(0, 0, 0, 0);
-            QPen pen(fillColor);
-            pen.setWidthF(qMax(epsilon, 2.f));
-            QPainter painer(&_image);
-            painer.setPen(pen);
-            painer.setBrush(QBrush(fillColor));
-            painer.setCompositionMode(QPainter::CompositionMode_Source);
-            painer.drawPolygon(fillPolygon);
-            painer.end();
-            //_image.save("/Users/alekseymakaseev/Documents/Work/sprite-sheet-packer/test.png");
-
             // calculate area of polygon
             std::vector<QPointF> polyPoint = p;
             if (polyPoint.size() >= 9) {
@@ -53,6 +39,20 @@ PolygonImage::PolygonImage(const QImage& image, const QRectF& rect, const float 
             if (polyPoint.size() >= 3) {
                 polyPoint = expand(polyPoint, realRect, epsilon);
             }
+
+            // erase contour for find next
+            QPolygonF fillPolygon(QVector<QPointF>::fromStdVector(polyPoint));
+            fillPolygon.translate(rect.x(), rect.y());
+            QColor fillColor(0, 0, 0, 0);
+            QPen pen(fillColor);
+            pen.setWidthF(2);//qMax(epsilon, 2.f));
+            QPainter painer(&_image);
+            painer.setPen(pen);
+            painer.setBrush(QBrush(fillColor));
+            painer.setCompositionMode(QPainter::CompositionMode_Source);
+            painer.drawPolygon(fillPolygon);
+            painer.end();
+
             if (polyPoint.size() >= 3) {
                 ClipperLib::Path poly;
                 for(auto it = polyPoint.begin(); it<polyPoint.end(); ++it) {
@@ -78,32 +78,49 @@ PolygonImage::PolygonImage(const QImage& image, const QRectF& rect, const float 
     // finding all polygons (start with bigger)
     auto p = p_big;
     while (p.size() >= 3) {
-        // erase contour for find next
-        QPolygonF fillPolygon(QVector<QPointF>::fromStdVector(p));
-        fillPolygon.translate(rect.x(), rect.y());
-        QColor fillColor(0, 0, 0, 0);
-        QPen pen(fillColor);
-        pen.setWidthF(qMax(epsilon * 2, 10.f));
-        QPainter painer(&_image);
-        painer.setPen(pen);
-        painer.setBrush(QBrush(fillColor));
-        painer.setCompositionMode(QPainter::CompositionMode_Source);
-        painer.drawPolygon(fillPolygon);
-        painer.end();
-        //_image.save("/Users/alekseymakaseev/Documents/Work/sprite-sheet-packer/test.png");
-
         if (p.size() >= 9) {
             p = reduce(p, realRect, epsilon);
         }
         if (p.size() >= 3) {
             p = expand(p, realRect, epsilon);
         }
+
+        // erase contour for find next
+        QPolygonF fillPolygon(QVector<QPointF>::fromStdVector(p));
+        fillPolygon.translate(rect.x(), rect.y());
+        QColor fillColor(0, 0, 0, 0);
+        QPen pen(fillColor);
+        pen.setWidthF(2);//qMax(epsilon * 2, 10.f));
+        QPainter painer(&_image);
+        painer.setPen(pen);
+        painer.setBrush(QBrush(fillColor));
+        painer.setCompositionMode(QPainter::CompositionMode_Source);
+        painer.drawPolygon(fillPolygon);
+        painer.end();
+
         if (p.size() >= 3) {
             _polygons.push_back(p);
         }
 
         // find next
         p = trace(realRect, threshold);
+    }
+
+    // combine all polygons if posible
+    bool isCombine = true;
+    while (isCombine) {
+        isCombine = false;
+        for (auto it = _polygons.begin(); it != _polygons.end(); ++it) {
+            auto it_test = std::next(it, 1);
+            while (it_test != _polygons.end()) {
+                if (combine((*it), (*it_test), realRect, epsilon)) {
+                    it_test = _polygons.erase(it_test);
+                    isCombine = true;
+                    continue;
+                }
+                ++it_test;
+            }
+        }
     }
 
     // triangulate polygon(s)
@@ -391,6 +408,7 @@ std::vector<QPointF> PolygonImage::rdp(std::vector<QPointF> v, const float& opti
 }
 
 std::vector<QPointF> PolygonImage::reduce(const std::vector<QPointF>& points, const QRectF& rect , const float& epsilon) {
+    //return points;
     auto size = points.size();
     // if there are less than 3 points, then we have nothing
     if (size < 3) {
@@ -432,10 +450,10 @@ std::vector<QPointF> PolygonImage::expand(const std::vector<QPointF>& points, co
     }
 
     // clean
-    ClipperLib::CleanPolygon(subj, PRECISION * 2);
-    if (subj.size() < 3) {
-        return std::vector<QPointF>();
-    }
+//    ClipperLib::CleanPolygon(subj, PRECISION * 2);
+//    if (subj.size() < 3) {
+//        return std::vector<QPointF>();
+//    }
 
     ClipperLib::ClipperOffset co;
     co.AddPath(subj, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
@@ -478,24 +496,56 @@ std::vector<QPointF> PolygonImage::expand(const std::vector<QPointF>& points, co
     return outPoints;
 }
 
-bool PolygonImage::polyInPoly(std::vector<QPointF>& a, const std::vector<QPointF>& b) {
-    ClipperLib::Path subj;
-    for(std::vector<QPointF>::const_iterator it = b.begin(); it<b.end(); it++) {
-        subj << ClipperLib::IntPoint(it->x()* PRECISION, it->y() * PRECISION);
-    }
-
-    bool erase = false;
-    std::vector<QPointF>::iterator it = a.begin();
-    while (it != a.end()) {
-        ClipperLib::IntPoint pt(it->x()* PRECISION, it->y() * PRECISION);
-        if (ClipperLib::PointInPolygon(pt, subj) == 1) {
-            it = a.erase(it);
-            erase = true;
-        } else {
-            ++it;
+bool polyInPoly(const ClipperLib::Path& subjA, const ClipperLib::Path& subjB) {
+    for (auto p: subjA) {
+        if (ClipperLib::PointInPolygon(p, subjB) == 1) {
+            return true;
         }
     }
-    return erase;
+    for (auto p: subjB) {
+        if (ClipperLib::PointInPolygon(p, subjA) == 1) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool PolygonImage::combine(std::vector<QPointF>& a, const std::vector<QPointF>& b, const QRectF &rect, const float& epsilon) {
+    ClipperLib::Path subjA;
+    for(std::vector<QPointF>::const_iterator it = a.begin(); it<a.end(); it++) {
+        subjA << ClipperLib::IntPoint(it->x() * PRECISION, it->y() * PRECISION);
+    }
+
+    ClipperLib::Path subjB;
+    for(std::vector<QPointF>::const_iterator it = b.begin(); it<b.end(); it++) {
+        subjB << ClipperLib::IntPoint(it->x() * PRECISION, it->y() * PRECISION);
+    }
+
+    if (!polyInPoly(subjA, subjB)) return false;
+
+//    ClipperLib::PolyTree solution;
+    ClipperLib::PolyTree out;
+
+    //clamp into the specified rect
+    ClipperLib::Clipper cl;
+    cl.StrictlySimple(true);
+    cl.AddPath(subjA, ClipperLib::ptSubject, true);
+    cl.AddPath(subjB, ClipperLib::ptClip, true);
+    cl.Execute(ClipperLib::ctUnion, out);
+
+    ClipperLib::PolyNode* p2 = out.GetFirst();
+    while(p2->IsHole()){
+        p2 = p2->GetNext();
+    }
+    auto end = p2->Contour.end();
+
+    a.clear();
+    for(std::vector<ClipperLib::IntPoint>::const_iterator pt = p2->Contour.begin(); pt < end; pt++) {
+        a.push_back(QPointF(pt->X/PRECISION, pt->Y/PRECISION));
+    }
+
+    return true;
 }
 
 Triangles PolygonImage::triangulate(const std::vector<QPointF>& points) {
