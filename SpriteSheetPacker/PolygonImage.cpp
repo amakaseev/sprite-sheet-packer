@@ -31,7 +31,6 @@ PolygonImage::PolygonImage(const QImage& image, const QRectF& rect, const float 
     {
         auto p = trace(realRect, threshold);
         while (p.size() >= 3) {
-            // calculate area of polygon
             std::vector<QPointF> polyPoint = p;
             if (polyPoint.size() >= 9) {
                 polyPoint = reduce(polyPoint, realRect, epsilon);
@@ -53,6 +52,7 @@ PolygonImage::PolygonImage(const QImage& image, const QRectF& rect, const float 
             painer.drawPolygon(fillPolygon);
             painer.end();
 
+            // calculate area of polygon
             if (polyPoint.size() >= 3) {
                 ClipperLib::Path poly;
                 for(auto it = polyPoint.begin(); it<polyPoint.end(); ++it) {
