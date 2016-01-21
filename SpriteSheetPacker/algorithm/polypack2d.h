@@ -170,7 +170,7 @@ namespace PolyPack2D {
 
     template <class T> class Container: public std::vector<Content<T>> {
     public:
-        void place(const ContentList<T>& inputContent, int step = 5) {
+        void place(const ContentList<T>& inputContent, int sizeLimit = 8192, int step = 5) {
             int contentIndex = 0;
             for (auto it = inputContent.begin(); it != inputContent.end(); ++it, ++contentIndex) {
                 auto content = (*it);
@@ -197,29 +197,32 @@ namespace PolyPack2D {
                             contentBounds.bottom += y;
 
                             auto newBounds(_bounds + contentBounds);
-                            if (newBounds.width() > (newBounds.height()*2)) continue;
-                            if (newBounds.height() > (newBounds.width()*2)) continue;
-
-                            // translate convex
-                            auto contentConvexHull = content.convexHull();
-                            for (auto it_point = contentConvexHull.begin(); it_point != contentConvexHull.end(); ++it_point) {
-                                (*it_point).x += x;
-                                (*it_point).y += y;
+                            float area = newBounds.area();
+                            if ((area > bestArea) && (isPlaces)) {
+                                continue;
                             }
-
-                            // translate triangles()
-                            auto contentTriangles = content.triangles();
-                            for (auto it_p = contentTriangles.verts.begin(); it_p != contentTriangles.verts.end(); ++it_p) {
-                                (*it_p).x += x;
-                                (*it_p).y += y;
-                            }
+//                            if (newBounds.width() > (newBounds.height()*2)) continue;
+//                            if (newBounds.height() > (newBounds.width()*2)) continue;
+                            if (newBounds.width() > sizeLimit) continue;
+                            if (newBounds.height() > sizeLimit) continue;
 
                             // test intersect intersection
                             bool intersect = false;
                             for (auto in_it = _contentList.begin(); in_it != _contentList.end(); ++in_it) {
                                 if (rectIntersect(contentBounds, (*in_it).bounds())) {
+                                    // translate convex and test intersection
+                                    auto contentConvexHull = content.convexHull();
+                                    for (auto it_point = contentConvexHull.begin(); it_point != contentConvexHull.end(); ++it_point) {
+                                        (*it_point).x += x;
+                                        (*it_point).y += y;
+                                    }
                                     if (convexHullIntersect(contentConvexHull, (*in_it).convexHull())) {
-                                        // polygon test
+                                        // translate triangles and test intersection
+                                        auto contentTriangles = content.triangles();
+                                        for (auto it_p = contentTriangles.verts.begin(); it_p != contentTriangles.verts.end(); ++it_p) {
+                                            (*it_p).x += x;
+                                            (*it_p).y += y;
+                                        }
                                         if (trianglesIntersect(contentTriangles, (*in_it).triangles())) {
                                             intersect = true;
                                             break;
@@ -229,9 +232,7 @@ namespace PolyPack2D {
                             }
 
                             if (!intersect) {
-                                float area = newBounds.area();
-
-                                if ((bestArea > area) || (!isPlaces)) {
+                                if ((!isPlaces) || (area < bestArea)) {
                                     bestArea = area;
                                     bestOffset = Point(x, y);
                                     isPlaces = true;

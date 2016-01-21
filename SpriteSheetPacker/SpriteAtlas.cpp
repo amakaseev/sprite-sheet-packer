@@ -409,7 +409,7 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
     }
 
     PolyPack2D::Container<PackContent> container;
-    container.place(inputContent);
+    container.place(inputContent, _maxTextureSize);
 
     auto outputContent = container.contentList();
 
