@@ -313,6 +313,7 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     }
 
     _blockUISignals = true;
+    ui->algorithmComboBox->setCurrentText(projectFile->algorithm());
     ui->trimModeComboBox->setCurrentText(projectFile->trimMode());
     ui->trimSpinBox->setValue(projectFile->trimThreshold());
     ui->epsilonHorizontalSlider->setValue(projectFile->epsilon() * 10);
@@ -375,6 +376,7 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
         return;
     }
 
+    projectFile->setAlgorithm(ui->algorithmComboBox->currentText());
     projectFile->setTrimMode(ui->trimModeComboBox->currentText());
     projectFile->setTrimThreshold(ui->trimSpinBox->value());
     projectFile->setEpsilon(ui->epsilonHorizontalSlider->value() / 10.f);
