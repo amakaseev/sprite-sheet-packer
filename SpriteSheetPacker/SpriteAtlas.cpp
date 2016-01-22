@@ -371,13 +371,7 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
         if (identicalIt != _identicalFrames.end()) {
             QStringList identicalList;
             for (auto ident: (*identicalIt)) {
-                SpriteFrameInfo identSpriteFrameInfo = spriteFrame;
-                identSpriteFrameInfo.offset = QPoint(
-                            (packContent.rect().left() + (-packContent.image().width() + content.size.w - _spriteBorder) * 0.5f),
-                            (-packContent.rect().top() + ( packContent.image().height() - content.size.h + _spriteBorder) * 0.5f)
-                            );
-                identSpriteFrameInfo.sourceSize = packContent.image().size();
-                _spriteFrames[ident] = identSpriteFrameInfo;
+                _spriteFrames[ident] = spriteFrame;
 
                 identicalList.push_back(ident);
             }
@@ -395,7 +389,7 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
         //TODO: remove convert
         PolyPack2D::Triangles triangles;
         for (auto vert: packContent.triangles().verts) {
-            triangles.verts.push_back(PolyPack2D::Point(vert.v.x(), vert.v.y()));
+            triangles.verts.push_back(PolyPack2D::Point(vert.x(), vert.y()));
         }
         triangles.indices = packContent.triangles().indices.toStdVector();
         inputContent += PolyPack2D::Content<PackContent>(packContent, triangles);
@@ -426,11 +420,28 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
         SpriteFrameInfo spriteFrame;
         spriteFrame.triangles = packContent.triangles();
         spriteFrame.frame = QRect(QPoint(content.bounds().left, content.bounds().top), QPoint(content.bounds().right, content.bounds().bottom));
+        spriteFrame.offset = QPoint(
+                    (packContent.rect().left() + (-packContent.image().width() + content.bounds().width() - _spriteBorder) * 0.5f),
+                    (-packContent.rect().top() + ( packContent.image().height() - content.bounds().height() + _spriteBorder) * 0.5f)
+                    );
+        spriteFrame.rotated = false;
+        spriteFrame.sourceColorRect = packContent.rect();
+        spriteFrame.sourceSize = packContent.image().size();
 
         painter.drawImage(QPoint(content.bounds().left, content.bounds().top), packContent.image(), packContent.rect());
 
         _spriteFrames[packContent.name()] = spriteFrame;
-    }
+
+        // add ident to sprite frames
+        auto identicalIt = _identicalFrames.find(packContent.name());
+        if (identicalIt != _identicalFrames.end()) {
+            QStringList identicalList;
+            for (auto ident: (*identicalIt)) {
+                _spriteFrames[ident] = spriteFrame;
+
+                identicalList.push_back(ident);
+            }
+        }    }
 
     return true;
 }

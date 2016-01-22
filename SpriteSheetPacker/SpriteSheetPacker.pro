@@ -75,7 +75,9 @@ OTHER_FILES += \
 
 macx {
     ICON = SpritePacker.icns
+    #TODO: automate copy all files
     exportData.files += defaultFormats/cocos2d.js defaultFormats/cocos2d.png
+    exportData.files += defaultFormats/cocos2d-v3.js defaultFormats/cocos2d-v3.png
     exportData.files += defaultFormats/json.js defaultFormats/json.png
     exportData.path = Contents/MacOS/defaultFormats
     QMAKE_BUNDLE_DATA += exportData

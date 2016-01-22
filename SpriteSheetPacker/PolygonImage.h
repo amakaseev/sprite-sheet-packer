@@ -4,14 +4,9 @@
 #include <QtCore>
 #include <QtGui>
 
-struct V2F_T2F {
-    QPointF v;
-    QPointF t;
-};
-
 struct Triangles {
     /**Vertex data pointer.*/
-    QVector<V2F_T2F> verts;
+    QVector<QPointF> verts;
     /**Index data pointer.*/
     QVector<unsigned short> indices;
 
@@ -56,7 +51,6 @@ protected:
     bool combine(std::vector<QPointF>& a, const std::vector<QPointF>& b, const QRectF& rect, const float& epsilon);
 
     Triangles triangulate(const std::vector<QPointF>& points);
-    void calculateUV(const QRectF& rect, V2F_T2F* verts, const size_t& count);
 
 private:
     QImage        _image;

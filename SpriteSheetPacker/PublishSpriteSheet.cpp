@@ -30,6 +30,27 @@ QJSValue jsValue(QJSEngine& engine, const QPoint& point) {
     return value;
 }
 
+QJSValue jsValue(QJSEngine& engine, const Triangles& triangles) {
+    QJSValue value = engine.newObject();
+
+    int index = 0;
+    QJSValue verts = engine.newArray(triangles.verts.size());
+    for (auto vert: triangles.verts) {
+        verts.setProperty(index, jsValue(engine, QPoint(vert.x(), vert.y())));
+        ++index;
+    }
+    value.setProperty("verts", verts);
+
+    index = 0;
+    QJSValue indices = engine.newArray(triangles.indices.size());
+    for (auto idx: triangles.indices) {
+        indices.setProperty(index, idx);
+        ++index;
+    }
+    value.setProperty("indices", indices);
+    return value;
+}
+
 void JSConsole::log(QString msg) {
     qDebug() << "js:"<< msg;
 }
@@ -123,6 +144,7 @@ bool PublishSpriteSheet::generateDataFile(const QString& filePath, const QString
             spriteFrameValue.setProperty("rotated", it_f.value().rotated);
             spriteFrameValue.setProperty("sourceColorRect", jsValue(engine, it_f.value().sourceColorRect));
             spriteFrameValue.setProperty("sourceSize", jsValue(engine, it_f.value().sourceSize));
+            spriteFrameValue.setProperty("triangles", jsValue(engine, it_f.value().triangles));
 
             spriteFramesValue.setProperty(it_f.key(), spriteFrameValue);
         }

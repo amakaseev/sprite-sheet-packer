@@ -578,7 +578,7 @@ Triangles PolygonImage::triangulate(const std::vector<QPointF>& points) {
             size_t j;
             size_t length = vdx;
             for(j = 0; j < length; j++) {
-                if(triangles.verts[j].v == v2) {
+                if(triangles.verts[j] == v2) {
                     found = true;
                     break;
                 }
@@ -589,9 +589,7 @@ Triangles PolygonImage::triangulate(const std::vector<QPointF>& points) {
                 idx++;
             } else {
                 //vert does not exist yet, so we need to create a new one,
-                auto t2f = QPointF(0,0); // don't worry about tex coords now, we calculate that later
-                V2F_T2F vert = {v2, t2f};
-                triangles.verts.push_back(vert);
+                triangles.verts.push_back(v2);
                 triangles.indices.push_back(vdx);
                 idx++;
                 vdx++;
@@ -603,36 +601,4 @@ Triangles PolygonImage::triangulate(const std::vector<QPointF>& points) {
         delete j;
     };
     return triangles;
-}
-
-void PolygonImage::calculateUV(const QRectF& rect, V2F_T2F* verts, const size_t& count) {
-    /*
-     whole texture UV coordination
-     0,0                  1,0
-     +---------------------+
-     |                     |0.1
-     |                     |0.2
-     |     +--------+      |0.3
-     |     |texRect |      |0.4
-     |     |        |      |0.5
-     |     |        |      |0.6
-     |     +--------+      |0.7
-     |                     |0.8
-     |                     |0.9
-     +---------------------+
-     0,1                  1,1
-     */
-
-    Q_ASSERT_X(_width && _height, "please specify width and height for this AutoPolygon instance", "");
-    float texWidth  = _width;
-    float texHeight = _height;
-
-    auto end = &verts[count];
-    for(auto i = verts; i != end; i++) {
-        // for every point, offset with the center point
-        float u = (i->v.x() + rect.left()) / texWidth;
-        float v = (rect.top()+rect.size().height() - i->v.y()) / texHeight;
-        i->t.setX(u);
-        i->t.setY(v);
-    }
 }

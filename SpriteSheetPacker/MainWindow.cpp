@@ -249,9 +249,9 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
 
         if (spriteFrame.triangles.indices.size()) {
             for (int i=0; i<spriteFrame.triangles.indices.size(); i+=3) {
-                QPointF v1 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+0]].v + delta;
-                QPointF v2 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+1]].v + delta;
-                QPointF v3 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+2]].v + delta;
+                QPointF v1 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+0]] + delta;
+                QPointF v2 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+1]] + delta;
+                QPointF v3 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+2]] + delta;
 
                 auto triangleItem = _scene->addPolygon(QPolygonF() << v1 << v2 << v3, QPen(Qt::white), QBrush(polygonColor));
                 triangleItem->setToolTip(QString("%1\nTriangles: %2").arg(it.key()).arg(spriteFrame.triangles.indices.size() / 3));
