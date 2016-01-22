@@ -73,11 +73,7 @@ namespace PolyPack2D {
         std::vector<unsigned short> indices;
     };
 
-    float pointsArea(const std::vector<Point>& p);
-    std::vector<Point> createConvexHull(const std::vector<Point>& p);
-
     bool rectIntersect(const Rect& r1, const Rect& r2);
-    bool convexHullIntersect(const std::vector<Point>& aConvexHull, const std::vector<Point>& bConvexHull);
     bool trianglesIntersect(const Triangles& a, const Triangles& b);
     /////
 
@@ -101,14 +97,12 @@ namespace PolyPack2D {
                 if (_bounds.bottom < point.y) _bounds.bottom = point.y;
             }
 
-            _convexHull = createConvexHull(_triangles.verts);
-            _area = pointsArea(_convexHull);
+            _area = _bounds.area();
         }
         Content(const Content& other)
             : _content(other._content)
             , _offset(other.offset())
             , _triangles(other._triangles)
-            , _convexHull(other._convexHull)
             , _area(other._area)
             , _bounds(other._bounds)
         {
@@ -120,7 +114,6 @@ namespace PolyPack2D {
         const Point& offset() const { return _offset; }
         const Rect& bounds() const { return _bounds; }
         const Triangles& triangles() const { return _triangles; }
-        const std::vector<Point>& convexHull() const { return _convexHull; }
 
         void setOffset(const Point& offset) {
             _offset = offset;
@@ -134,20 +127,12 @@ namespace PolyPack2D {
                 (*it_p).x += offset.x;
                 (*it_p).y += offset.y;
             }
-
-            // translate convexHull
-            for (auto it_point = _convexHull.begin(); it_point != _convexHull.end(); ++it_point) {
-                (*it_point).x += offset.x;
-                (*it_point).y += offset.y;
-            }
-
         }
 
     protected:
         T _content;
         Point _offset;
         Triangles _triangles;
-        std::vector<Point> _convexHull;
         double _area;
         Rect _bounds;
     };
@@ -188,6 +173,9 @@ namespace PolyPack2D {
                     float bestArea = 0;
                     Point bestOffset;
 
+                    bool translateTriangles = false;
+                    Triangles contentTriangles;
+
                     for (float y = startY; y < endY; y+= step) {
                         for (float x = startX; x < endX; x+= step) {
                             auto contentBounds = content.bounds();
@@ -206,27 +194,24 @@ namespace PolyPack2D {
                             if (newBounds.width() > sizeLimit) continue;
                             if (newBounds.height() > sizeLimit) continue;
 
+                            translateTriangles = false;
+
                             // test intersect intersection
                             bool intersect = false;
                             for (auto in_it = _contentList.begin(); in_it != _contentList.end(); ++in_it) {
                                 if (rectIntersect(contentBounds, (*in_it).bounds())) {
-                                    // translate convex and test intersection
-                                    auto contentConvexHull = content.convexHull();
-                                    for (auto it_point = contentConvexHull.begin(); it_point != contentConvexHull.end(); ++it_point) {
-                                        (*it_point).x += x;
-                                        (*it_point).y += y;
-                                    }
-                                    if (convexHullIntersect(contentConvexHull, (*in_it).convexHull())) {
-                                        // translate triangles and test intersection
-                                        auto contentTriangles = content.triangles();
+                                    // translate triangles and test intersection
+                                    if (!translateTriangles) {
+                                        contentTriangles = content.triangles();
                                         for (auto it_p = contentTriangles.verts.begin(); it_p != contentTriangles.verts.end(); ++it_p) {
                                             (*it_p).x += x;
                                             (*it_p).y += y;
                                         }
-                                        if (trianglesIntersect(contentTriangles, (*in_it).triangles())) {
-                                            intersect = true;
-                                            break;
-                                        }
+                                        translateTriangles = true;
+                                    }
+                                    if (trianglesIntersect(contentTriangles, (*in_it).triangles())) {
+                                        intersect = true;
+                                        break;
                                     }
                                 }
                             }
