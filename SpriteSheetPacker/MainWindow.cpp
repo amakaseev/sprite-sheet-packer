@@ -781,7 +781,7 @@ void MainWindow::propertiesValueChanged(int val) {
     if (_blockUISignals) return;
     QSettings settings;
 
-    if (settings.value("Preferences/automaticPreview", true).toBool()) {
+    if (settings.value("MainWindow/automaticPreview", true).toBool()) {
         refreshAtlas();
     }
 }
