@@ -421,8 +421,8 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
         spriteFrame.triangles = packContent.triangles();
         spriteFrame.frame = QRect(QPoint(content.bounds().left, content.bounds().top), QPoint(content.bounds().right, content.bounds().bottom));
         spriteFrame.offset = QPoint(
-                    (packContent.rect().left() + (-packContent.image().width() + packContent.rect().width() - _spriteBorder) * 0.5f),
-                    (-packContent.rect().top() + ( packContent.image().height() - packContent.rect().height() + _spriteBorder) * 0.5f)
+                    packContent.rect().left(),
+                    packContent.rect().top()
                     );
         spriteFrame.rotated = false;
         spriteFrame.sourceColorRect = packContent.rect();
