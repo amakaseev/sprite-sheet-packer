@@ -6,7 +6,7 @@
 
 struct Triangles {
     /**Vertex data pointer.*/
-    QVector<QPointF> verts;
+    QVector<QPoint> verts;
     /**Index data pointer.*/
     QVector<unsigned short> indices;
 

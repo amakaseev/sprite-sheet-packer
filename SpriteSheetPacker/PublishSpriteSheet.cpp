@@ -36,7 +36,7 @@ QJSValue jsValue(QJSEngine& engine, const Triangles& triangles) {
     int index = 0;
     QJSValue verts = engine.newArray(triangles.verts.size());
     for (auto vert: triangles.verts) {
-        verts.setProperty(index, jsValue(engine, QPoint(vert.x(), vert.y())));
+        verts.setProperty(index, jsValue(engine, vert));
         ++index;
     }
     value.setProperty("verts", verts);
@@ -149,6 +149,8 @@ bool PublishSpriteSheet::generateDataFile(const QString& filePath, const QString
             spriteFramesValue.setProperty(it_f.key(), spriteFrameValue);
         }
         args << QJSValue(spriteFramesValue);
+
+        args << jsValue(engine, spriteAtlas.image().size());
 
         // run export
         QJSValue exportSpriteSheet = engine.globalObject().property("exportSpriteSheet");

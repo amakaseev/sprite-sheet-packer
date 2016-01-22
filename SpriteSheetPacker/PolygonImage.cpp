@@ -573,7 +573,7 @@ Triangles PolygonImage::triangulate(const std::vector<QPointF>& points) {
     for(std::vector<p2t::Triangle*>::const_iterator ite = tris.begin(); ite < tris.end(); ite++) {
         for(int i = 0; i < 3; i++) {
             auto p = (*ite)->GetPoint(i);
-            auto v2 = QPointF(p->x, p->y);
+            auto v2 = QPoint(p->x, p->y);
             bool found = false;
             size_t j;
             size_t length = vdx;
