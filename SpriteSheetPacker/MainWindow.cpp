@@ -82,6 +82,9 @@ MainWindow::MainWindow(QWidget *parent) :
     refreshOpenRecentMenu();
 
     QSettings settings;
+    
+    ui->displayOutlinesCheckBox->setChecked(settings.value("MainWindow/displayOutlines").toBool());
+    
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
     restoreState(settings.value("MainWindow/state").toByteArray());
 }
@@ -163,10 +166,10 @@ void MainWindow::createRefreshButton() {
     auto font = autoRefreshCheckbox->font();
     font.setPointSize(8);
     autoRefreshCheckbox->setFont(font);
-    autoRefreshCheckbox->setChecked(settings.value("Preferences/automaticPreview", true).toBool());
+    autoRefreshCheckbox->setChecked(settings.value("MainWindow/automaticPreview", true).toBool());
     connect(autoRefreshCheckbox, &QCheckBox::toggled, [](bool value) {
         QSettings settings;
-        settings.setValue("Preferences/automaticPreview", value);
+        settings.setValue("MainWindow/automaticPreview", value);
     });
     // layout
     vLayout->addWidget(refreshButton, 0, Qt::AlignHCenter);
@@ -784,6 +787,9 @@ void MainWindow::propertiesValueChanged(int val) {
 }
 
 void MainWindow::on_displayOutlinesCheckBox_clicked(bool checked) {
+    QSettings settings;
+    settings.setValue("MainWindow/displayOutlines", checked);
+
     if (_outlinesGroup)
         _outlinesGroup->setVisible(checked);
 }
