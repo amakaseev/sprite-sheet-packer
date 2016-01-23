@@ -408,7 +408,7 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
     auto outputContent = container.contentList();
 
     _spriteFrames.clear();
-    _atlasImage = QImage(container.bounds().width(), container.bounds().height(), QImage::Format_RGBA8888);
+    _atlasImage = QImage(container.bounds().width() + _textureBorder, container.bounds().height() + _textureBorder, QImage::Format_RGBA8888);
     _atlasImage.fill(QColor(0, 0, 0, 0));
 
     QPainter painter(&_atlasImage);
@@ -419,7 +419,7 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
         const PackContent &packContent = content.content();
         SpriteFrameInfo spriteFrame;
         spriteFrame.triangles = packContent.triangles();
-        spriteFrame.frame = QRect(QPoint(content.bounds().left, content.bounds().top), QPoint(content.bounds().right, content.bounds().bottom));
+        spriteFrame.frame = QRect(QPoint(content.bounds().left + _textureBorder, content.bounds().top + _textureBorder), QPoint(content.bounds().right, content.bounds().bottom));
         spriteFrame.offset = QPoint(
                     packContent.rect().left(),
                     packContent.rect().top()
@@ -428,7 +428,7 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
         spriteFrame.sourceColorRect = packContent.rect();
         spriteFrame.sourceSize = packContent.image().size();
 
-        painter.drawImage(QPoint(content.bounds().left, content.bounds().top), packContent.image(), packContent.rect());
+        painter.drawImage(QPoint(content.bounds().left + _textureBorder, content.bounds().top + _textureBorder), packContent.image(), packContent.rect());
 
         _spriteFrames[packContent.name()] = spriteFrame;
 
