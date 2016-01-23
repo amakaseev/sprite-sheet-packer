@@ -3,7 +3,6 @@
 #include "MainWindow.h"
 #include "PublishSpriteSheet.h"
 #include "ScalingVariantWidget.h"
-#include "SpritePackerProjectFile.h"
 #include "AboutDialog.h"
 #include "PreferencesDialog.h"
 #include "PublishStatusDialog.h"
@@ -37,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _outlinesGroup = NULL;
 
     _blockUISignals = false;
+    _projectDirty = false;
 
     _spritesTreeWidget = new SpritesTreeWidget(ui->spritesDockWidgetContents);
     connect(_spritesTreeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(spritesTreeWidgetItemSelectionChanged()));
@@ -46,15 +46,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->trimSpinBox->setValue(1);
     ui->textureBorderSpinBox->setValue(0);
     ui->spriteBorderSpinBox->setValue(2);
-
-    connect(ui->trimSpinBox, SIGNAL(valueChanged(int)), this, SLOT(propertiesValueChanged(int)));
-    connect(ui->textureBorderSpinBox, SIGNAL(valueChanged(int)), this, SLOT(propertiesValueChanged(int)));
-    connect(ui->spriteBorderSpinBox, SIGNAL(valueChanged(int)), this, SLOT(propertiesValueChanged(int)));
-    connect(ui->epsilonHorizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(propertiesValueChanged(int)));
-    connect(ui->pow2ComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(propertiesValueChanged(int)));
-    connect(ui->maxTextureSizeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(propertiesValueChanged(int)));
-    connect(ui->algorithmComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(propertiesValueChanged(int)));
-    connect(ui->trimModeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(propertiesValueChanged(int)));
 
     on_addScalingVariantPushButton_clicked();
 
@@ -450,6 +441,27 @@ void MainWindow::dropEvent(QDropEvent* event) {
     event->accept();
 }
 
+void MainWindow::closeEvent(QCloseEvent *event) {
+    if (_projectDirty) {
+        QMessageBox::StandardButton resBtn = QMessageBox::question(this, "Spritesheet Packer",
+                                                                    tr("Your project file has been modified.\nDo you want to save your changes?"),
+                                                                    QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,
+                                                                    QMessageBox::Yes);
+        if (resBtn == QMessageBox::Yes) {
+            if (_currentProjectFileName.isEmpty()) {
+                on_actionSaveAs_triggered();
+            } else {
+                saveSpritePackerProject(_currentProjectFileName);
+            }
+            event->accept();
+        } else if (resBtn == QMessageBox::Cancel) {
+            event->ignore();
+        } else {
+            event->accept();
+        }
+    }
+}
+
 void MainWindow::on_actionNew_triggered() {
     ui->spriteSheetLineEdit->setText("");
     _spritesTreeWidget->clear();
@@ -697,10 +709,6 @@ void MainWindow::on_zoomSlider_valueChanged(int value) {
     ui->labelZoomPercent->setText(QString::number((int)(scale * 100)) + " %");
 }
 
-void MainWindow::on_optLevelSlider_valueChanged(int value) {
-    ui->optLevelText->setText(QString::number(value));
-}
-
 void MainWindow::spritesTreeWidgetItemSelectionChanged() {
     ui->actionRemove->setEnabled(false);
     foreach (QTreeWidgetItem* item, _spritesTreeWidget->selectedItems()) {
@@ -774,6 +782,9 @@ void MainWindow::removeScalingVariant() {
         ui->scalingVariantsGroupBox->layout()->removeWidget(scalingVariantWidget);
         delete scalingVariantWidget;
     }
+
+    if (_blockUISignals) return;
+    _projectDirty = true;
 //    QAction* senderAction = dynamic_cast<QAction*>(sender());
 }
 
@@ -795,13 +806,82 @@ void MainWindow::on_displayOutlinesCheckBox_clicked(bool checked) {
 }
 
 void MainWindow::on_optModeComboBox_currentTextChanged(const QString &text) {
-    if (text == "Lossless") {
-        ui->optLevelSlider->setVisible(true);
-        ui->optLevelText->setVisible(true);
-        ui->optLevelLabel->setVisible(true);
-    } else {
-        ui->optLevelSlider->setVisible(false);
-        ui->optLevelText->setVisible(false);
-        ui->optLevelLabel->setVisible(false);
-    }
+    bool visible = text == "Lossless";
+
+    ui->optLevelSlider->setVisible(visible);
+    ui->optLevelText->setVisible(visible);
+    ui->optLevelLabel->setVisible(visible);
+
+    if (_blockUISignals) return;
+    _projectDirty = true;
+}
+
+void MainWindow::on_optLevelSlider_valueChanged(int value) {
+    ui->optLevelText->setText(QString::number(value));
+
+    if (_blockUISignals) return;
+    _projectDirty = true;
+}
+
+void MainWindow::on_trimSpinBox_valueChanged(int value) {
+    propertiesValueChanged(value);
+    if (_blockUISignals) return;
+    _projectDirty = true;
+}
+
+void MainWindow::on_textureBorderSpinBox_valueChanged(int value) {
+    propertiesValueChanged(value);
+    if (_blockUISignals) return;
+    _projectDirty = true;
+}
+
+void MainWindow::on_spriteBorderSpinBox_valueChanged(int value) {
+    propertiesValueChanged(value);
+    if (_blockUISignals) return;
+    _projectDirty = true;
+}
+
+void MainWindow::on_epsilonHorizontalSlider_valueChanged(int value) {
+    propertiesValueChanged(value);
+    if (_blockUISignals) return;
+    _projectDirty = true;
+}
+
+void MainWindow::on_pow2ComboBox_currentIndexChanged(int value) {
+    propertiesValueChanged(value);
+    if (_blockUISignals) return;
+    _projectDirty = true;
+}
+
+void MainWindow::on_maxTextureSizeComboBox_currentIndexChanged(int value) {
+    propertiesValueChanged(value);
+    if (_blockUISignals) return;
+    _projectDirty = true;
+}
+
+void MainWindow::on_algorithmComboBox_currentIndexChanged(int value) {
+    propertiesValueChanged(value);
+    if (_blockUISignals) return;
+    _projectDirty = true;
+}
+
+void MainWindow::on_trimModeComboBox_currentIndexChanged(int value) {
+    propertiesValueChanged(value);
+    if (_blockUISignals) return;
+    _projectDirty = true;
+}
+
+void MainWindow::on_dataFormatComboBox_currentIndexChanged(int value) {
+    if (_blockUISignals) return;
+    //_projectDirty = true;
+}
+
+void MainWindow::on_destPathLineEdit_textChanged(const QString& text) {
+    if (_blockUISignals) return;
+    _projectDirty = true;
+}
+
+void MainWindow::on_spriteSheetLineEdit_textChanged(const QString& text) {
+    if (_blockUISignals) return;
+    _projectDirty = true;
 }

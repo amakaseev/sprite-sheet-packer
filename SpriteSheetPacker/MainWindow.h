@@ -5,6 +5,7 @@
 #include "SpriteAtlas.h"
 #include "SpritesTreeWidget.h"
 #include "PublishStatusDialog.h"
+#include "SpritePackerProjectFile.h"
 
 namespace Ui {
 class MainWindow;
@@ -29,8 +30,9 @@ protected:
     void saveSpritePackerProject(const QString& fileName);
 
 protected:
-    void dragEnterEvent(QDragEnterEvent *event);
+    void dragEnterEvent(QDragEnterEvent* event);
     void dropEvent(QDropEvent* event);
+    void closeEvent(QCloseEvent* event);
 
 private slots:
     void openRecent();
@@ -52,8 +54,6 @@ private slots:
     void on_toolButtonZoomFit_clicked();
     void on_zoomSlider_valueChanged(int value);
 
-    void on_optLevelSlider_valueChanged(int value);
-
     void on_maxTextureSizeComboBox_currentTextChanged(const QString &arg1);
     void on_destFolderToolButton_clicked();
     void on_dataFormatSetupToolButton_clicked();
@@ -65,7 +65,20 @@ private slots:
     void propertiesValueChanged(int val);
 
     void on_displayOutlinesCheckBox_clicked(bool checked);
+
+    void on_algorithmComboBox_currentIndexChanged(int value);
+    void on_trimModeComboBox_currentIndexChanged(int value);
+    void on_trimSpinBox_valueChanged(int value);
+    void on_epsilonHorizontalSlider_valueChanged(int value);
+    void on_textureBorderSpinBox_valueChanged(int value);
+    void on_spriteBorderSpinBox_valueChanged(int value);
+    void on_maxTextureSizeComboBox_currentIndexChanged(int value);
+    void on_pow2ComboBox_currentIndexChanged(int value);
+    void on_dataFormatComboBox_currentIndexChanged(int value);
+    void on_destPathLineEdit_textChanged(const QString& text);
+    void on_spriteSheetLineEdit_textChanged(const QString& text);
     void on_optModeComboBox_currentTextChanged(const QString &text);
+    void on_optLevelSlider_valueChanged(int value);
 
 private:
     Ui::MainWindow*      ui;
@@ -75,6 +88,7 @@ private:
     QToolButton*        _openButton;
     QGraphicsItemGroup* _outlinesGroup;
     bool                _blockUISignals;
+    bool                _projectDirty;
 };
 
 #endif // MAINWINDOW_H
