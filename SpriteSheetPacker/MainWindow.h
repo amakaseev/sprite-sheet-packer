@@ -63,11 +63,11 @@ private slots:
     void spritesTreeWidgetItemSelectionChanged();
     void removeScalingVariant();
 
-    void propertiesValueChanged(int val);
+    void propertiesValueChanged();
 
     void on_displayOutlinesCheckBox_clicked(bool checked);
 
-    void on_algorithmComboBox_currentIndexChanged(int value);
+    void on_algorithmComboBox_currentTextChanged(const QString& text);
     void on_trimModeComboBox_currentIndexChanged(int value);
     void on_trimSpinBox_valueChanged(int value);
     void on_epsilonHorizontalSlider_valueChanged(int value);

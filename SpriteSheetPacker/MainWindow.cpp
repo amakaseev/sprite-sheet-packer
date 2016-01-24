@@ -793,7 +793,7 @@ void MainWindow::removeScalingVariant() {
 //    QAction* senderAction = dynamic_cast<QAction*>(sender());
 }
 
-void MainWindow::propertiesValueChanged(int val) {
+void MainWindow::propertiesValueChanged() {
     if (_blockUISignals) return;
     QSettings settings;
 
@@ -827,27 +827,27 @@ void MainWindow::on_optLevelSlider_valueChanged(int value) {
 }
 
 void MainWindow::on_trimSpinBox_valueChanged(int value) {
-    propertiesValueChanged(value);
+    propertiesValueChanged();
     setProjectDirty();
 }
 
 void MainWindow::on_textureBorderSpinBox_valueChanged(int value) {
-    propertiesValueChanged(value);
+    propertiesValueChanged();
     setProjectDirty();
 }
 
 void MainWindow::on_spriteBorderSpinBox_valueChanged(int value) {
-    propertiesValueChanged(value);
+    propertiesValueChanged();
     setProjectDirty();
 }
 
 void MainWindow::on_epsilonHorizontalSlider_valueChanged(int value) {
-    propertiesValueChanged(value);
+    propertiesValueChanged();
     setProjectDirty();
 }
 
 void MainWindow::on_pow2ComboBox_currentIndexChanged(int value) {
-    propertiesValueChanged(value);
+    propertiesValueChanged();
     setProjectDirty();
 }
 
@@ -865,17 +865,21 @@ void MainWindow::on_maxTextureSizeComboBox_currentTextChanged(const QString& tex
     }
     ui->maxTextureSizeComboBox->setPalette(comboboxPalette);
 
-    propertiesValueChanged(0);
+    propertiesValueChanged();
     setProjectDirty();
 }
 
-void MainWindow::on_algorithmComboBox_currentIndexChanged(int value) {
-    propertiesValueChanged(value);
+void MainWindow::on_algorithmComboBox_currentTextChanged(const QString& text) {
+    if (text == "Polygon") {
+        ui->trimModeComboBox->setCurrentText("Polygon");
+    }
+
+    propertiesValueChanged();
     setProjectDirty();
 }
 
 void MainWindow::on_trimModeComboBox_currentIndexChanged(int value) {
-    propertiesValueChanged(value);
+    propertiesValueChanged();
     setProjectDirty();
 }
 
