@@ -72,6 +72,7 @@ include(3rdparty/lodepng/lodepng.pri)
 OTHER_FILES += \
     defaultFormats/cocos2d.js \
     defaultFormats/json.js \
+	defaultFormats/cocos2d-v3.js
 
 macx {
     ICON = SpritePacker.icns
