@@ -23,10 +23,12 @@ public:
 
 signals:
     void remove();
+    void valueChanged();
 
 private slots:
     void on_removePushButton_clicked();
     void on_scaleComboBox_editTextChanged(const QString &arg1);
+    void on_nameLineEdit_textChanged(const QString &arg1);
 
 private:
     Ui::ScalingVariantWidget *ui;

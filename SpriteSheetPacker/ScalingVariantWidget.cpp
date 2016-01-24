@@ -45,4 +45,11 @@ void ScalingVariantWidget::on_scaleComboBox_editTextChanged(const QString &arg1)
         comboboxPalette.setColor(QPalette::Text, Qt::black);
     }
     ui->scaleComboBox->setPalette(comboboxPalette);
+
+    emit valueChanged();
 }
+
+void ScalingVariantWidget::on_nameLineEdit_textChanged(const QString &arg1) {
+    emit valueChanged();
+}
+

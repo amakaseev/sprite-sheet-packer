@@ -29,6 +29,8 @@ protected:
     void openSpritePackerProject(const QString& fileName);
     void saveSpritePackerProject(const QString& fileName);
 
+    void setProjectDirty();
+
 protected:
     void dragEnterEvent(QDragEnterEvent* event);
     void dropEvent(QDropEvent* event);
@@ -54,7 +56,6 @@ private slots:
     void on_toolButtonZoomFit_clicked();
     void on_zoomSlider_valueChanged(int value);
 
-    void on_maxTextureSizeComboBox_currentTextChanged(const QString &arg1);
     void on_destFolderToolButton_clicked();
     void on_dataFormatSetupToolButton_clicked();
     void on_addScalingVariantPushButton_clicked();
@@ -62,23 +63,25 @@ private slots:
     void spritesTreeWidgetItemSelectionChanged();
     void removeScalingVariant();
 
-    void propertiesValueChanged(int val);
+    void propertiesValueChanged();
 
     void on_displayOutlinesCheckBox_clicked(bool checked);
 
-    void on_algorithmComboBox_currentIndexChanged(int value);
+    void on_algorithmComboBox_currentTextChanged(const QString& text);
     void on_trimModeComboBox_currentIndexChanged(int value);
     void on_trimSpinBox_valueChanged(int value);
     void on_epsilonHorizontalSlider_valueChanged(int value);
     void on_textureBorderSpinBox_valueChanged(int value);
     void on_spriteBorderSpinBox_valueChanged(int value);
-    void on_maxTextureSizeComboBox_currentIndexChanged(int value);
+    void on_maxTextureSizeComboBox_currentTextChanged(const QString &arg1);
     void on_pow2ComboBox_currentIndexChanged(int value);
     void on_dataFormatComboBox_currentIndexChanged(int value);
     void on_destPathLineEdit_textChanged(const QString& text);
     void on_spriteSheetLineEdit_textChanged(const QString& text);
     void on_optModeComboBox_currentTextChanged(const QString &text);
     void on_optLevelSlider_valueChanged(int value);
+
+    void scalingVariantWidgetValueChanged();
 
 private:
     Ui::MainWindow*      ui;
