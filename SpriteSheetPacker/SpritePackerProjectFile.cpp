@@ -211,7 +211,7 @@ bool SpritePackerProjectFileTPS::read(const QString &fileName) {
     }
 
     if (tpsMap.find("pngOptimizationLevel") != tpsMap.end()) {
-         _optLevel = tpsMap["pngOptimizationLevel"].toInt();
+         _optLevel = qBound(1, tpsMap["pngOptimizationLevel"].toInt(), 7);
          _optMode = "Lossless";
     }
 
