@@ -141,6 +141,7 @@ bool PublishSpriteSheet::generateDataFile(const QString& filePath, const QString
             QJSValue spriteFrameValue = engine.newObject();
             spriteFrameValue.setProperty("frame", jsValue(engine, it_f.value().frame));
             spriteFrameValue.setProperty("offset", jsValue(engine, it_f.value().offset));
+            spriteFrameValue.setProperty("vertexOffset", jsValue(engine, it_f.value().vertexOffset));
             spriteFrameValue.setProperty("rotated", it_f.value().rotated);
             spriteFrameValue.setProperty("sourceColorRect", jsValue(engine, it_f.value().sourceColorRect));
             spriteFrameValue.setProperty("sourceSize", jsValue(engine, it_f.value().sourceSize));

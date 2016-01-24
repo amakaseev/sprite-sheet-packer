@@ -351,6 +351,7 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
                     (packContent.rect().left() + (-packContent.image().width() + content.size.w - _spriteBorder) * 0.5f),
                     (-packContent.rect().top() + ( packContent.image().height() - content.size.h + _spriteBorder) * 0.5f)
                     );
+        spriteFrame.vertexOffset = QPoint(0, 0);
         spriteFrame.rotated = content.rotated;
         spriteFrame.sourceColorRect = packContent.rect();
         spriteFrame.sourceSize = packContent.image().size();
@@ -408,7 +409,7 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
     auto outputContent = container.contentList();
 
     _spriteFrames.clear();
-    _atlasImage = QImage(container.bounds().width(), container.bounds().height(), QImage::Format_RGBA8888);
+    _atlasImage = QImage(container.bounds().width() + _textureBorder * 2, container.bounds().height() + _textureBorder * 2, QImage::Format_RGBA8888);
     _atlasImage.fill(QColor(0, 0, 0, 0));
 
     QPainter painter(&_atlasImage);
@@ -419,16 +420,18 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
         const PackContent &packContent = content.content();
         SpriteFrameInfo spriteFrame;
         spriteFrame.triangles = packContent.triangles();
-        spriteFrame.frame = QRect(QPoint(content.bounds().left, content.bounds().top), QPoint(content.bounds().right, content.bounds().bottom));
+
+        spriteFrame.frame = QRect(QPoint(content.bounds().left + _textureBorder, content.bounds().top + _textureBorder), QPoint(content.bounds().right, content.bounds().bottom));
         spriteFrame.offset = QPoint(
                     packContent.rect().left(),
                     packContent.rect().top()
                     );
+        spriteFrame.vertexOffset = QPoint(spriteFrame.offset.x() + _textureBorder, spriteFrame.offset.y() + _textureBorder);
         spriteFrame.rotated = false;
         spriteFrame.sourceColorRect = packContent.rect();
         spriteFrame.sourceSize = packContent.image().size();
 
-        painter.drawImage(QPoint(content.bounds().left, content.bounds().top), packContent.image(), packContent.rect());
+        painter.drawImage(QPoint(content.bounds().left + _textureBorder, content.bounds().top + _textureBorder), packContent.image(), packContent.rect());
 
         _spriteFrames[packContent.name()] = spriteFrame;
 

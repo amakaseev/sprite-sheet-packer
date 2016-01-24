@@ -10,6 +10,7 @@ struct SpriteFrameInfo {
 public:
     QRect   frame;
     QPoint  offset;
+    QPoint  vertexOffset;
     bool    rotated;
     QRect   sourceColorRect;
     QSize   sourceSize;
