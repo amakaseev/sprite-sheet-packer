@@ -105,6 +105,7 @@ void MainWindow::refreshFormats() {
         }
     }
 
+    _blockUISignals = true;
     QString prevFormat = ui->dataFormatComboBox->currentText();
     ui->dataFormatComboBox->clear();
     for (auto format: PublishSpriteSheet::formats().keys()) {
@@ -112,6 +113,7 @@ void MainWindow::refreshFormats() {
         ui->dataFormatComboBox->addItem(QIcon(fileName.left(fileName.lastIndexOf(".")) + ".png"), format);
     }
     ui->dataFormatComboBox->setCurrentText(prevFormat);
+    _blockUISignals = false;
 }
 
 void MainWindow::refreshOpenRecentMenu() {
@@ -329,6 +331,7 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     for (auto scalingVariant: projectFile->scalingVariants()) {
         ScalingVariantWidget* scalingVariantWidget = new ScalingVariantWidget(this, scalingVariant.name, scalingVariant.scale);
         connect(scalingVariantWidget, SIGNAL(remove()), this, SLOT(removeScalingVariant()));
+        connect(scalingVariantWidget, SIGNAL(valueChanged()), this, SLOT(scalingVariantWidgetValueChanged()));
         ui->scalingVariantsGroupBox->layout()->addWidget(scalingVariantWidget);
 
         if (ui->scalingVariantsGroupBox->layout()->count() == 1) {
@@ -439,6 +442,14 @@ void MainWindow::dropEvent(QDropEvent* event) {
         refreshAtlas();
     }
     event->accept();
+
+    setProjectDirty();
+}
+
+void MainWindow::setProjectDirty() {
+    if (!_blockUISignals) {
+        _projectDirty = true;
+    }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -498,6 +509,7 @@ void MainWindow::on_actionSave_triggered() {
     } else {
         saveSpritePackerProject(_currentProjectFileName);
     }
+    _projectDirty = false;
 }
 
 void MainWindow::on_actionSaveAs_triggered() {
@@ -529,6 +541,8 @@ void MainWindow::on_actionAddSprites_triggered() {
         _spritesTreeWidget->addContent(fileNames);
         refreshAtlas();
     }
+
+    setProjectDirty();
 }
 
 void MainWindow::on_actionAddFolder_triggered() {
@@ -542,6 +556,8 @@ void MainWindow::on_actionAddFolder_triggered() {
         _spritesTreeWidget->addContent(QStringList() << pathName);
         refreshAtlas();
     }
+
+    setProjectDirty();
 }
 
 void MainWindow::on_actionRemove_triggered() {
@@ -552,6 +568,8 @@ void MainWindow::on_actionRemove_triggered() {
         }
     }
     refreshAtlas();
+
+    setProjectDirty();
 }
 
 void MainWindow::on_actionPublish_triggered() {
@@ -719,21 +737,6 @@ void MainWindow::spritesTreeWidgetItemSelectionChanged() {
     }
 }
 
-void MainWindow::on_maxTextureSizeComboBox_currentTextChanged(const QString &) {
-    bool isValideSaze;
-    if (ui->maxTextureSizeComboBox->currentText().toInt(&isValideSaze) > 8192) {
-        isValideSaze = false;
-    }
-
-    QPalette comboboxPalette = ui->maxTextureSizeComboBox->palette();
-    if (!isValideSaze) {
-        comboboxPalette.setColor(QPalette::Text, Qt::red);
-    } else {
-        comboboxPalette.setColor(QPalette::Text, Qt::black);
-    }
-    ui->maxTextureSizeComboBox->setPalette(comboboxPalette);
-}
-
 void MainWindow::on_destFolderToolButton_clicked() {
     QString destPath = ui->destPathLineEdit->text();
     destPath = QFileDialog::getExistingDirectory(this,
@@ -748,7 +751,6 @@ void MainWindow::on_destFolderToolButton_clicked() {
 void MainWindow::on_dataFormatSetupToolButton_clicked() {
     on_actionPreferences_triggered();
 }
-
 
 void MainWindow::on_addScalingVariantPushButton_clicked() {
     std::vector<std::pair<std::string, float>> defaultScaling = {
@@ -765,6 +767,7 @@ void MainWindow::on_addScalingVariantPushButton_clicked() {
 
     ScalingVariantWidget* scalingVariantWidget = new ScalingVariantWidget(this, defaultScaling[index].first.c_str(), defaultScaling[index].second);
     connect(scalingVariantWidget, SIGNAL(remove()), this, SLOT(removeScalingVariant()));
+    connect(scalingVariantWidget, SIGNAL(valueChanged()), this, SLOT(scalingVariantWidgetValueChanged()));
     ui->scalingVariantsGroupBox->layout()->addWidget(scalingVariantWidget);
 
     if (ui->scalingVariantsGroupBox->layout()->count() == 1) {
@@ -772,6 +775,8 @@ void MainWindow::on_addScalingVariantPushButton_clicked() {
         if (scalingVariantWidget) {
            scalingVariantWidget->setRemoveEnabled(false);
         }
+    } else{
+        setProjectDirty();
     }
 }
 
@@ -779,12 +784,12 @@ void MainWindow::removeScalingVariant() {
     qDebug() << "remove" << sender();
     ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(sender());
     if (scalingVariantWidget) {
+        disconnect(scalingVariantWidget, SIGNAL(valueChanged()), this, SLOT(scalingVariantWidgetValueChanged()));
         ui->scalingVariantsGroupBox->layout()->removeWidget(scalingVariantWidget);
         delete scalingVariantWidget;
     }
 
-    if (_blockUISignals) return;
-    _projectDirty = true;
+    setProjectDirty();
 //    QAction* senderAction = dynamic_cast<QAction*>(sender());
 }
 
@@ -812,76 +817,80 @@ void MainWindow::on_optModeComboBox_currentTextChanged(const QString &text) {
     ui->optLevelText->setVisible(visible);
     ui->optLevelLabel->setVisible(visible);
 
-    if (_blockUISignals) return;
-    _projectDirty = true;
+    setProjectDirty();
 }
 
 void MainWindow::on_optLevelSlider_valueChanged(int value) {
     ui->optLevelText->setText(QString::number(value));
 
-    if (_blockUISignals) return;
-    _projectDirty = true;
+    setProjectDirty();
 }
 
 void MainWindow::on_trimSpinBox_valueChanged(int value) {
     propertiesValueChanged(value);
-    if (_blockUISignals) return;
-    _projectDirty = true;
+    setProjectDirty();
 }
 
 void MainWindow::on_textureBorderSpinBox_valueChanged(int value) {
     propertiesValueChanged(value);
-    if (_blockUISignals) return;
-    _projectDirty = true;
+    setProjectDirty();
 }
 
 void MainWindow::on_spriteBorderSpinBox_valueChanged(int value) {
     propertiesValueChanged(value);
-    if (_blockUISignals) return;
-    _projectDirty = true;
+    setProjectDirty();
 }
 
 void MainWindow::on_epsilonHorizontalSlider_valueChanged(int value) {
     propertiesValueChanged(value);
-    if (_blockUISignals) return;
-    _projectDirty = true;
+    setProjectDirty();
 }
 
 void MainWindow::on_pow2ComboBox_currentIndexChanged(int value) {
     propertiesValueChanged(value);
-    if (_blockUISignals) return;
-    _projectDirty = true;
+    setProjectDirty();
 }
 
-void MainWindow::on_maxTextureSizeComboBox_currentIndexChanged(int value) {
-    propertiesValueChanged(value);
-    if (_blockUISignals) return;
-    _projectDirty = true;
+void MainWindow::on_maxTextureSizeComboBox_currentTextChanged(const QString& text) {
+    bool isValidSize;
+    if (text.toInt(&isValidSize) > 8192) {
+        isValidSize = false;
+    }
+
+    QPalette comboboxPalette = ui->maxTextureSizeComboBox->palette();
+    if (!isValidSize) {
+        comboboxPalette.setColor(QPalette::Text, Qt::red);
+    } else {
+        comboboxPalette.setColor(QPalette::Text, Qt::black);
+    }
+    ui->maxTextureSizeComboBox->setPalette(comboboxPalette);
+
+    propertiesValueChanged(0);
+    setProjectDirty();
 }
 
 void MainWindow::on_algorithmComboBox_currentIndexChanged(int value) {
     propertiesValueChanged(value);
-    if (_blockUISignals) return;
-    _projectDirty = true;
+    setProjectDirty();
 }
 
 void MainWindow::on_trimModeComboBox_currentIndexChanged(int value) {
     propertiesValueChanged(value);
-    if (_blockUISignals) return;
-    _projectDirty = true;
+    setProjectDirty();
 }
 
 void MainWindow::on_dataFormatComboBox_currentIndexChanged(int value) {
-    if (_blockUISignals) return;
-    //_projectDirty = true;
+    setProjectDirty();
 }
 
 void MainWindow::on_destPathLineEdit_textChanged(const QString& text) {
-    if (_blockUISignals) return;
-    _projectDirty = true;
+    setProjectDirty();
 }
 
 void MainWindow::on_spriteSheetLineEdit_textChanged(const QString& text) {
-    if (_blockUISignals) return;
-    _projectDirty = true;
+    setProjectDirty();
+}
+
+void MainWindow::scalingVariantWidgetValueChanged() {
+    setProjectDirty();
 }
