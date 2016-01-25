@@ -28,7 +28,6 @@ protected:
 
     void openSpritePackerProject(const QString& fileName);
     void saveSpritePackerProject(const QString& fileName);
-
     void setProjectDirty();
 
 protected:

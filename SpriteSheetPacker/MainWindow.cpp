@@ -421,6 +421,12 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
     refreshOpenRecentMenu();
 }
 
+void MainWindow::setProjectDirty() {
+    if (!_blockUISignals) {
+        _projectDirty = true;
+    }
+}
+
 void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
     if (event->mimeData()) {
         if (event->mimeData()->hasUrls()) {
@@ -446,14 +452,10 @@ void MainWindow::dropEvent(QDropEvent* event) {
     setProjectDirty();
 }
 
-void MainWindow::setProjectDirty() {
-    if (!_blockUISignals) {
-        _projectDirty = true;
-    }
-}
-
 void MainWindow::closeEvent(QCloseEvent *event) {
-    if (_projectDirty) {
+    //alreadyClosed use only for fix bug on MacOS: https://bugreports.qt.io/browse/QTBUG-43344
+    static bool alreadyClosed = false;
+    if (_projectDirty && !alreadyClosed) {
         QMessageBox::StandardButton resBtn = QMessageBox::question(this, "Spritesheet Packer",
                                                                     tr("Your project file has been modified.\nDo you want to save your changes?"),
                                                                     QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,
@@ -465,10 +467,12 @@ void MainWindow::closeEvent(QCloseEvent *event) {
                 saveSpritePackerProject(_currentProjectFileName);
             }
             event->accept();
+            alreadyClosed = true;
         } else if (resBtn == QMessageBox::Cancel) {
             event->ignore();
         } else {
             event->accept();
+            alreadyClosed = true;
         }
     }
 }
