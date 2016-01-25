@@ -35,6 +35,16 @@ namespace PolyPack2D {
 
         Point(): x(0), y(0) { }
         Point(float _x, float _y): x(_x), y(_y) { }
+        Point(const Point& other): x(other.x), y(other.y) { }
+
+        Point normalize() {
+            float len = sqrtf(x*x + y*y);
+            if (len != 0) {
+                this->x /= len;
+                this->y /= len;
+            }
+            return (*this);
+        }
 
         Point operator + (const Point& p) const {
            return Point(this->x + p.x, this->y + p.y);
@@ -43,7 +53,17 @@ namespace PolyPack2D {
         Point operator - (const Point& p) const {
            return Point(this->x - p.x, this->y - p.y);
         }
+
+        Point operator * (float a) const {
+           return Point(this->x * a, this->y * a);
+        }
     };
+
+    inline Point normal(const Point& a, const Point& b) {
+        float dx = b.x - a.x;
+        float dy = b.y - a.y;
+        return Point(-dy, dx).normalize();
+    }
 
     struct Rect {
         float left;
@@ -80,7 +100,7 @@ namespace PolyPack2D {
 
     template<class T> class Content {
     public:
-        Content(const T &content, Triangles triangles)
+        Content(const T &content, Triangles triangles, int border = 0)
         : _content(content)
         , _triangles(triangles)
         , _area(0)
@@ -88,6 +108,33 @@ namespace PolyPack2D {
             _offset.x = _offset.y = 0;
             _bounds.left = _bounds.top = std::numeric_limits<float>::max();
             _bounds.right = _bounds.bottom = std::numeric_limits<float>::min();
+
+            if (border) {
+                // calculate normals
+                std::vector<Point> norms(_triangles.verts.size());
+                for (size_t i = 0; i < _triangles.indices.size(); i += 3) {
+                    auto i1 = _triangles.indices[i + 0];
+                    auto i2 = _triangles.indices[i + 1];
+                    auto i3 = _triangles.indices[i + 2];
+
+                    Point v1(_triangles.verts[i1]);
+                    Point v2(_triangles.verts[i2]);
+                    Point v3(_triangles.verts[i3]);
+
+                    Point n1 = (normal(v1, v3) + normal(v2, v1)).normalize();
+                    Point n2 = (normal(v2, v1) + normal(v3, v2)).normalize();
+                    Point n3 = (normal(v3, v2) + normal(v1, v3)).normalize();
+
+                    // smooth mormals
+                    norms[i1] = ((norms[i1] + n1) * 0.5f).normalize();
+                    norms[i2] = ((norms[i2] + n2) * 0.5f).normalize();
+                    norms[i3] = ((norms[i3] + n3) * 0.5f).normalize();
+                }
+                // increase polygons with normals
+                for (size_t v = 0; v < _triangles.verts.size(); ++v) {
+                    _triangles.verts[v] = _triangles.verts[v] + norms[v] * border;
+                }
+            }
 
             // calculate bounding box
             for (auto point: _triangles.verts) {
@@ -97,6 +144,7 @@ namespace PolyPack2D {
                 if (_bounds.bottom < point.y) _bounds.bottom = point.y;
             }
 
+            setOffset(Point(-_bounds.left, -_bounds.top));
             _area = _bounds.area();
         }
         Content(const Content& other)

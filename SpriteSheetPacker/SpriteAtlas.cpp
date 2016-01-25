@@ -399,7 +399,7 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
             triangles.verts.push_back(PolyPack2D::Point(vert.x(), vert.y()));
         }
         triangles.indices = packContent.triangles().indices.toStdVector();
-        inputContent += PolyPack2D::Content<PackContent>(packContent, triangles);
+        inputContent += PolyPack2D::Content<PackContent>(packContent, triangles, _spriteBorder);
     }
 
     // Sort the input content by area... usually packs better.
@@ -425,8 +425,8 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
         // retreive your data.
         const PackContent &packContent = content.content();
         SpriteFrameInfo spriteFrame;
-        spriteFrame.triangles = packContent.triangles();
 
+        spriteFrame.triangles = packContent.triangles();
         spriteFrame.frame = QRect(QPoint(content.bounds().left + _textureBorder, content.bounds().top + _textureBorder), QPoint(content.bounds().right, content.bounds().bottom));
         spriteFrame.offset = QPoint(
                     packContent.rect().left(),
@@ -436,6 +436,7 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
         spriteFrame.sourceColorRect = packContent.rect();
         spriteFrame.sourceSize = packContent.image().size();
 
+        //TODO: draw image with clipping polygon
         painter.drawImage(QPoint(content.bounds().left + _textureBorder, content.bounds().top + _textureBorder), packContent.image(), packContent.rect());
 
         _spriteFrames[packContent.name()] = spriteFrame;
