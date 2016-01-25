@@ -68,6 +68,7 @@ include(3rdparty/clipper/clipper.pri)
 include(3rdparty/poly2tri/poly2tri.pri)
 include(3rdparty/pngquant/pngquant.pri)
 include(3rdparty/lodepng/lodepng.pri)
+include(3rdparty/PVRTexTool/PVRTexTool.pri)
 
 OTHER_FILES += \
     defaultFormats/cocos2d.js \
@@ -76,21 +77,17 @@ OTHER_FILES += \
 
 macx {
     ICON = SpritePacker.icns
-    #TODO: automate copy all files
-    exportData.files += defaultFormats/cocos2d.js defaultFormats/cocos2d.png
-    exportData.files += defaultFormats/cocos2d-v3.js defaultFormats/cocos2d-v3.png
-    exportData.files += defaultFormats/json.js defaultFormats/json.png
-    exportData.path = Contents/MacOS/defaultFormats
-    QMAKE_BUNDLE_DATA += exportData
+    exportFormats.files = $$files(defaultFormats/*.*)
+    exportFormats.path = Contents/MacOS/defaultFormats
+    QMAKE_BUNDLE_DATA += exportFormats
 }
 
 win32 {
     RC_ICONS = SpritePacker.ico
-    exportData.files = defaultFormats/*.*
-    exportData.path = defaultFormats
-    DEPLOYMENT += exportData
+    exportFormats.files = $$files(defaultFormats/*.*)
+    exportFormats.path = defaultFormats
+    DEPLOYMENT += exportFormats
 }
-
 
 isEmpty(TARGET_EXT) {
     win32 {
@@ -114,6 +111,6 @@ CONFIG(release,debug|release) {
     # release
     DEPLOY_TARGET = $$shell_quote($$shell_path($${OUT_PWD}/$${TARGET}$${TARGET_CUSTOM_EXT}))
 
-    warning($${DEPLOY_COMMAND} $${DEPLOY_TARGET})
-    QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET} -dmg
+    macx: QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET} -dmg
+    win32: QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}
 }
