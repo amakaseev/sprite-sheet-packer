@@ -347,10 +347,17 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
         SpriteFrameInfo spriteFrame;
         spriteFrame.triangles = packContent.triangles();
         spriteFrame.frame = QRect(content.coord.x + _textureBorder, content.coord.y + _textureBorder, content.size.w - _spriteBorder, content.size.h - _spriteBorder);
-        spriteFrame.offset = QPoint(
-                    (packContent.rect().left() + (-packContent.image().width() + content.size.w - _spriteBorder) * 0.5f),
-                    (-packContent.rect().top() + ( packContent.image().height() - content.size.h + _spriteBorder) * 0.5f)
-                    );
+        if (spriteFrame.triangles.indices.size()) {
+            spriteFrame.offset = QPoint(
+                        packContent.rect().left(),
+                        packContent.rect().top()
+                        );
+        } else {
+            spriteFrame.offset = QPoint(
+                        (packContent.rect().left() + (-packContent.image().width() + content.size.w - _spriteBorder) * 0.5f),
+                        (-packContent.rect().top() + ( packContent.image().height() - content.size.h + _spriteBorder) * 0.5f)
+                        );
+        }
         spriteFrame.rotated = content.rotated;
         spriteFrame.sourceColorRect = packContent.rect();
         spriteFrame.sourceSize = packContent.image().size();
