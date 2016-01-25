@@ -45,7 +45,7 @@ function exportSpriteSheet(dataFilePath, imageFilePath, spriteFrames, textureSiz
             var verticesUV = "";
             for (var v in spriteFrame.triangles.verts) {
                 var vtx = spriteFrame.triangles.verts[v];
-                vertices += (vtx.x + spriteFrame.vertexOffset.x) + " " + (vtx.y + spriteFrame.vertexOffset.y) + " ";
+                vertices += (vtx.x + spriteFrame.offset.x) + " " + (vtx.y + spriteFrame.offset.y) + " ";
                 verticesUV += (spriteFrame.frame.x + vtx.x) + " " + (spriteFrame.frame.y + vtx.y) + " ";
             }
             for (var i in spriteFrame.triangles.indices) {

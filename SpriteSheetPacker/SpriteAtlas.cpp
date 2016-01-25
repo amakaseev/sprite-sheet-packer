@@ -351,7 +351,6 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
                     (packContent.rect().left() + (-packContent.image().width() + content.size.w - _spriteBorder) * 0.5f),
                     (-packContent.rect().top() + ( packContent.image().height() - content.size.h + _spriteBorder) * 0.5f)
                     );
-        spriteFrame.vertexOffset = QPoint(0, 0);
         spriteFrame.rotated = content.rotated;
         spriteFrame.sourceColorRect = packContent.rect();
         spriteFrame.sourceSize = packContent.image().size();
@@ -426,7 +425,6 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
                     packContent.rect().left(),
                     packContent.rect().top()
                     );
-        spriteFrame.vertexOffset = QPoint(spriteFrame.offset.x() + _textureBorder, spriteFrame.offset.y() + _textureBorder);
         spriteFrame.rotated = false;
         spriteFrame.sourceColorRect = packContent.rect();
         spriteFrame.sourceSize = packContent.image().size();
