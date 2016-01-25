@@ -7,6 +7,7 @@
 
 ## Developers:
 * [TheCodez](https://github.com/TheCodez)
+	* Add save dialog on exit if project is dirty
 	* Add optipng and pngquant optimizer
     * Generate spritesheet from commandline using existing project file.
     * Added automatically refreshed preview.
