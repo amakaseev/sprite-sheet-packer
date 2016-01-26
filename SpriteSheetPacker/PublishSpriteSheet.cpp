@@ -4,8 +4,22 @@
 #include "PListSerializer.h"
 #include <QMessageBox>
 #include "PngOptimizer.h"
+#include "PVRTexture.h"
+#include "PVRTextureUtilities.h"
+
+using namespace pvrtexture;
 
 QMap<QString, QString> PublishSpriteSheet::_formats;
+
+QString imagePrefix(ImageFormat imageFormat) {
+    switch (imageFormat) {
+        case kPNG: return ".png";
+        case kPKM: return ".pkm";
+        case kPVR: return ".pvr";
+        case kPVR_CCZ: return ".pvr.ccz";
+        default: return ".png";
+    }
+}
 
 QJSValue jsValue(QJSEngine& engine, const QRect& rect) {
     QJSValue value = engine.newObject();
@@ -55,6 +69,12 @@ void JSConsole::log(QString msg) {
     qDebug() << "js:"<< msg;
 }
 
+
+PublishSpriteSheet::PublishSpriteSheet() {
+    _imageFormat = kPNG;
+    _pixelFormat = kRGBA8888;
+}
+
 void PublishSpriteSheet::addSpriteSheet(const SpriteAtlas &atlas, const QString &fileName) {
     _spriteAtlases.append(atlas);
     _fileNames.append(fileName);
@@ -75,12 +95,38 @@ bool PublishSpriteSheet::publish(const QString& format, const QString& optMode, 
             return false;
         }
 
-        // save png image
-        qDebug() << "Save image:" << filePath + ".png";
-        atlas.image().save(filePath + ".png");
+        // save image
+        qDebug() << "Save image:" << filePath + imagePrefix(_imageFormat);
+        if (_imageFormat == kPNG) {
+            if (_pixelFormat == kRGB888) {
+                QImage image = atlas.image().convertToFormat(QImage::Format_RGB888);
+                image.save(filePath + imagePrefix(_imageFormat), 0, 0);
+            } else {
+                atlas.image().save(filePath + imagePrefix(_imageFormat), 0, 0);
+            }
+        } else if ((_imageFormat == kPKM) || (_imageFormat == kPVR) || (_imageFormat == kPVR_CCZ)) {
+            CPVRTextureHeader pvrHeader(PVRStandard8PixelType.PixelTypeID, atlas.image().width(), atlas.image().height());
+
+            // create the texture
+            CPVRTexture pvrTexture(pvrHeader, atlas.image().bits());
+            switch (_pixelFormat) {
+                case kETC1: Transcode(pvrTexture, ePVRTPF_ETC1, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+                case kPVRTC2: Transcode(pvrTexture, ePVRTPF_PVRTCI_2bpp_RGB, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+                case kPVRTC2A: Transcode(pvrTexture, ePVRTPF_PVRTCI_2bpp_RGBA, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+                case kPVRTC4: Transcode(pvrTexture, ePVRTPF_PVRTCI_4bpp_RGB, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+                case kPVRTC4A: Transcode(pvrTexture, ePVRTPF_PVRTCI_4bpp_RGBA, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+                default: Transcode(pvrTexture, ePVRTPF_ETC1, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+            }
+            // save the file
+            if (_imageFormat == kPVR_CCZ) {
+                //TODO: use qCompress
+            } else {
+                pvrTexture.saveFile((filePath + imagePrefix(_imageFormat)).toStdString().c_str());
+            }
+        }
     }
 
-    if (optMode != "None") {
+    if ((_imageFormat == kPNG) && (optMode != "None")) {
         qDebug() << "Begin optimize image...";
         // we use values 1-7 so that it is more user friendly, because 0 also means optimization.
         optimizePNGInThread(_fileNames, optMode, optLevel - 1);
@@ -132,7 +178,7 @@ bool PublishSpriteSheet::generateDataFile(const QString& filePath, const QString
     if (engine.globalObject().hasOwnProperty("exportSpriteSheet")) {
         QJSValueList args;
         args << QJSValue(filePath);
-        args << QJSValue(filePath + ".png");
+        args << QJSValue(filePath + imagePrefix(_imageFormat));
 
         // collect sprite frames
         QJSValue spriteFramesValue = engine.newObject();

@@ -74,6 +74,8 @@ private slots:
     void on_spriteBorderSpinBox_valueChanged(int value);
     void on_maxTextureSizeComboBox_currentTextChanged(const QString &arg1);
     void on_pow2ComboBox_currentIndexChanged(int value);
+    void on_imageFormatComboBox_currentIndexChanged(int index);
+    void on_pixelFormatComboBox_currentIndexChanged(int index);
     void on_dataFormatComboBox_currentIndexChanged(int value);
     void on_destPathLineEdit_textChanged(const QString& text);
     void on_spriteSheetLineEdit_textChanged(const QString& text);

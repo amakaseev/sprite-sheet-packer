@@ -15,6 +15,48 @@
 #define MAX_SCALE 10.f
 #define MIN_SCALE 0.1f
 
+static inline QString toString(ImageFormat imageFormat) {
+    switch (imageFormat) {
+        case kPNG: return "PNG";
+        case kPKM: return "PKM";
+        case kPVR: return "PVR";
+        case kPVR_CCZ: return "PVR_CCZ";
+        default: return "PNG";
+    }
+}
+
+static inline ImageFormat imageFormatFromString(const QString& imageFormat) {
+    if (imageFormat == "PNG") return kPNG;
+    if (imageFormat == "PKM") return kPKM;
+    if (imageFormat == "PVR") return kPVR;
+    if (imageFormat == "PVR_CCZ") return kPVR_CCZ;
+    return kPNG;
+}
+
+static inline QString toString(PixelFormat pixelFormat) {
+    switch (pixelFormat) {
+        case kRGB888: return "RGB888";
+        case kRGBA8888: return "RGBA8888";
+        case kETC1: return "ETC1";
+        case kPVRTC2: return "PVRTC2";
+        case kPVRTC2A: return "PVRTC2A";
+        case kPVRTC4: return "PVRTC4";
+        case kPVRTC4A: return "PVRTC4A";
+        default: return "RGBA8888";
+    }
+}
+
+static inline PixelFormat pixelFormatFromString(const QString& pixelFormat) {
+    if (pixelFormat == "RGB888") return kRGB888;
+    if (pixelFormat == "RGBA8888") return kRGBA8888;
+    if (pixelFormat == "ETC1") return kETC1;
+    if (pixelFormat == "PVRTC2") return kPVRTC2;
+    if (pixelFormat == "PVRTC2A") return kPVRTC2A;
+    if (pixelFormat == "PVRTC4") return kPVRTC4;
+    if (pixelFormat == "PVRTC4A") return kPVRTC4A;
+    return kRGBA8888;
+}
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -42,6 +84,21 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_spritesTreeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(spritesTreeWidgetItemSelectionChanged()));
     ui->spritesDockWidgetLayout->addWidget(_spritesTreeWidget);
 
+    // init image and pixel formats
+    ui->pixelFormatComboBox->addItem(toString(kRGB888));
+    ui->pixelFormatComboBox->addItem(toString(kRGBA8888));
+    ui->pixelFormatComboBox->addItem(toString(kETC1));
+    ui->pixelFormatComboBox->addItem(toString(kPVRTC2));
+    ui->pixelFormatComboBox->addItem(toString(kPVRTC2A));
+    ui->pixelFormatComboBox->addItem(toString(kPVRTC4));
+    ui->pixelFormatComboBox->addItem(toString(kPVRTC4A));
+    ui->pixelFormatComboBox->setCurrentIndex(kRGBA8888);
+    ui->imageFormatComboBox->insertItem(kPNG, "PNG (.png)");
+    ui->imageFormatComboBox->insertItem(kPKM, "PKM with ETC1 (.pkm)");
+    ui->imageFormatComboBox->insertItem(kPVR, "PVR (.pvr)");
+    ui->imageFormatComboBox->insertItem(kPVR_CCZ, "PVR+zlib (.pvr.ccz)");
+    ui->imageFormatComboBox->setCurrentIndex(kPNG);
+
     // configure default values
     ui->trimSpinBox->setValue(1);
     ui->textureBorderSpinBox->setValue(0);
@@ -63,7 +120,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // layout preferences action on right side in toolbar
     QWidget* empty = new QWidget();
-    empty->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+    empty->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     ui->mainToolBar->insertWidget(ui->actionPreferences ,empty);
 
     createRefreshButton();
@@ -71,6 +128,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     refreshFormats();
     refreshOpenRecentMenu();
+
+    // reset dirty
+    _projectDirty = false;
 
     QSettings settings;
     
@@ -320,6 +380,8 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     ui->dataFormatComboBox->setCurrentText(projectFile->dataFormat());
     ui->destPathLineEdit->setText(projectFile->destPath());
     ui->spriteSheetLineEdit->setText(projectFile->spriteSheetName());
+    ui->imageFormatComboBox->setCurrentIndex(imageFormatFromString(projectFile->imageFormat()));
+    ui->pixelFormatComboBox->setCurrentIndex(pixelFormatFromString(projectFile->pixelFormat()));
     ui->optModeComboBox->setCurrentText(projectFile->optMode());
     ui->optLevelSlider->setValue(projectFile->optLevel());
 
@@ -384,6 +446,8 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
     projectFile->setDataFormat(ui->dataFormatComboBox->currentText());
     projectFile->setDestPath(ui->destPathLineEdit->text());
     projectFile->setSpriteSheetName(ui->spriteSheetLineEdit->text());
+    projectFile->setImageFormat(toString((ImageFormat)ui->imageFormatComboBox->currentIndex()));
+    projectFile->setPixelFormat(toString((PixelFormat)ui->pixelFormatComboBox->currentIndex()));
     projectFile->setOptMode(ui->optModeComboBox->currentText());
     projectFile->setOptLevel(ui->optLevelSlider->value());
 
@@ -592,6 +656,8 @@ void MainWindow::on_actionPublish_triggered() {
     }
 
     PublishSpriteSheet* publisher = new PublishSpriteSheet();
+    publisher->setImageFormat((ImageFormat)ui->imageFormatComboBox->currentIndex());
+    publisher->setPixelFormat((PixelFormat)ui->pixelFormatComboBox->currentIndex());
 
     PublishStatusDialog publishStatusDialog(this);
     publishStatusDialog.open();
@@ -884,6 +950,72 @@ void MainWindow::on_algorithmComboBox_currentTextChanged(const QString& text) {
 
 void MainWindow::on_trimModeComboBox_currentIndexChanged(int value) {
     propertiesValueChanged();
+    setProjectDirty();
+}
+
+void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
+    auto setEnabledComboBoxItem = [](QComboBox* comboBox, int row, bool enable) {
+        QStandardItemModel* model = qobject_cast<QStandardItemModel*>(comboBox->model());
+        if (model) {
+            QModelIndex index = model->index(row, comboBox->modelColumn());//, comboBox->rootModelIndex());
+            QStandardItem* item = model->itemFromIndex(index);
+            if (item) {
+                item->setEnabled(enable);
+            }
+        }
+    };
+    ImageFormat imageFormat = (ImageFormat)index;
+    if (imageFormat == kPNG) {
+        ui->imageFormatStackedWidget->setVisible(true);
+        ui->imageFormatStackedWidget->setCurrentIndex(0);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB888, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGBA8888, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC1, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4A, false);
+        if (ui->pixelFormatComboBox->currentIndex() > kRGBA8888) {
+            ui->pixelFormatComboBox->setCurrentIndex(kRGBA8888);
+        }
+    } else if (imageFormat == kPKM) {
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB888, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGBA8888, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC1, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4A, false);
+        ui->pixelFormatComboBox->setCurrentIndex(kETC1);
+    } else if ((imageFormat == kPVR)||(imageFormat == kPVR_CCZ)) {
+        ui->imageFormatStackedWidget->setVisible(false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB888, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGBA8888, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC1, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4A, true);
+        if (ui->pixelFormatComboBox->currentIndex() < kPVRTC2) {
+            ui->pixelFormatComboBox->setCurrentIndex(kPVRTC4);
+        }
+    }
+
+    setProjectDirty();
+}
+
+void MainWindow::on_pixelFormatComboBox_currentIndexChanged(int index) {
+    PixelFormat pixelFormat = (PixelFormat)index;
+    if ((pixelFormat == kPVRTC2) ||
+            (pixelFormat == kPVRTC2A) ||
+            (pixelFormat == kPVRTC4) ||
+            (pixelFormat == kPVRTC4A))
+    {
+        ui->pow2ComboBox->setCurrentIndex(1);
+        ui->pow2ComboBox->setEnabled(false);
+    } else {
+        ui->pow2ComboBox->setEnabled(true);
+    }
     setProjectDirty();
 }
 

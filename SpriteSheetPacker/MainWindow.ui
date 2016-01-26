@@ -203,7 +203,7 @@
      <x>0</x>
      <y>0</y>
      <width>1222</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <property name="defaultUp">
@@ -313,8 +313,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>320</width>
-          <height>848</height>
+          <width>314</width>
+          <height>917</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -754,7 +754,7 @@
               <item>
                <widget class="QLabel" name="label_9">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -763,7 +763,7 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>Image format</string>
+                 <string>Image format:</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -771,28 +771,23 @@
                </widget>
               </item>
               <item>
-               <widget class="QComboBox" name="comboBox_2">
+               <widget class="QComboBox" name="imageFormatComboBox">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Algorithm&lt;/span&gt;&lt;/p&gt;&lt;p&gt;There are currently 2 algorithms&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;MaxRects&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Currently the best packing algorithm. Tries to use the last texture space by applying different heuristics when placing the sprites.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Basic&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Simple layout by filling sprites from left to right until the maximum width of the texture is reached. Good for fixed-size sprites.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
-                <item>
-                 <property name="text">
-                  <string>PNG (.png)</string>
-                 </property>
-                </item>
                </widget>
               </item>
              </layout>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_15">
+             <layout class="QHBoxLayout" name="horizontalLayout_17">
               <item>
-               <widget class="QLabel" name="label_12">
+               <widget class="QLabel" name="label_11">
                 <property name="text">
-                 <string>PNG Optimization:</string>
+                 <string>Pixel format:</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -800,65 +795,103 @@
                </widget>
               </item>
               <item>
-               <widget class="QComboBox" name="optModeComboBox">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;PNG Optimization&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Optimizes the png's file size.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;None&lt;/span&gt;&lt;/p&gt;&lt;p&gt;No optimization at all(fastest).&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Lossless&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=color:#323333;&quot;&gt;Uses optipng to optimize the filesize. The reduction is mostly small but doesn't harm image quality.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Lossy&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=color:#323333;&quot;&gt;Uses pngquant to optimize the filesize. The reduction is mostly about 70%, but the image quality gets a bit worse.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <item>
-                 <property name="text">
-                  <string>None</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Lossless</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Lossy</string>
-                 </property>
-                </item>
-               </widget>
+               <widget class="QComboBox" name="pixelFormatComboBox"/>
               </item>
              </layout>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_12">
-              <item>
-               <widget class="QLabel" name="optLevelLabel">
-                <property name="text">
-                 <string>PNG Opt Level:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSlider" name="optLevelSlider">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;PNG Optimization level&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Sets the optimization value for the losless png optimizer. A value of 2 is most of the time sufficent.&lt;p&gt;1 = least possible optimization&lt;/p&gt;&lt;p&gt;2-7 apply better optimization(higher values take longer)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="minimum">
-                 <number>1</number>
-                </property>
-                <property name="maximum">
-                 <number>7</number>
-                </property>
-                <property name="pageStep">
-                 <number>1</number>
-                </property>
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="optLevelText">
-                <property name="text">
-                 <string>1</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             <widget class="QStackedWidget" name="imageFormatStackedWidget">
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="currentIndex">
+               <number>0</number>
+              </property>
+              <widget class="QWidget" name="page">
+               <layout class="QVBoxLayout" name="verticalLayout_2">
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_15">
+                  <item>
+                   <widget class="QLabel" name="label_12">
+                    <property name="text">
+                     <string>PNG Optimization:</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QComboBox" name="optModeComboBox">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;PNG Optimization&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Optimizes the png's file size.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;None&lt;/span&gt;&lt;/p&gt;&lt;p&gt;No optimization at all(fastest).&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Lossless&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=color:#323333;&quot;&gt;Uses optipng to optimize the filesize. The reduction is mostly small but doesn't harm image quality.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Lossy&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=color:#323333;&quot;&gt;Uses pngquant to optimize the filesize. The reduction is mostly about 70%, but the image quality gets a bit worse.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <item>
+                     <property name="text">
+                      <string>None</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Lossless</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Lossy</string>
+                     </property>
+                    </item>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_12">
+                  <item>
+                   <widget class="QLabel" name="optLevelLabel">
+                    <property name="text">
+                     <string>PNG Opt Level:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QSlider" name="optLevelSlider">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;PNG Optimization level&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Sets the optimization value for the losless png optimizer. A value of 2 is most of the time sufficent.&lt;p&gt;1 = least possible optimization&lt;/p&gt;&lt;p&gt;2-7 apply better optimization(higher values take longer)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="minimum">
+                     <number>1</number>
+                    </property>
+                    <property name="maximum">
+                     <number>7</number>
+                    </property>
+                    <property name="pageStep">
+                     <number>1</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="optLevelText">
+                    <property name="text">
+                     <string>1</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+            <item>
+             <widget class="Line" name="line">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
             </item>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_13">
