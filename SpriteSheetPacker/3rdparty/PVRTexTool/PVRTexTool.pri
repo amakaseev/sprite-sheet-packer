@@ -24,6 +24,8 @@ macx {
     QMAKE_BUNDLE_DATA += export_dylib
 }
 
+DEFINES += _WINDLL_EXPORT
+
 #TODO: test on windows platform
 win32:contains(QMAKE_HOST.arch, x86_64) {
     LIBS += $$PWD/Windows_x86_64/PVRTexLib.lib
