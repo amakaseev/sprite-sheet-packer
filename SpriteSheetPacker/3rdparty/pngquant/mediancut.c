@@ -269,7 +269,7 @@ inline static double color_weight(f_pixel median, hist_item h)
 static void set_colormap_from_boxes(colormap *map, struct box* bv, unsigned int boxes, hist_item *achv);
 static void adjust_histogram(hist_item *achv, const colormap *map, const struct box* bv, unsigned int boxes);
 
-static double box_error(const struct box *box, const hist_item achv[])
+double box_error(const struct box *box, const hist_item achv[])
 {
     f_pixel avg = box->color;
 
@@ -314,7 +314,10 @@ static bool total_box_error_below_target(double target_mse, struct box bv[], uns
 LIQ_PRIVATE colormap *mediancut(histogram *hist, unsigned int newcolors, const double target_mse, const double max_mse, void* (*malloc)(size_t), void (*free)(void*))
 {
     hist_item *achv = hist->achv;
-    struct box bv[newcolors];
+    struct box *bv = malloc(newcolors * sizeof(struct box));
+    if (!bv) {
+        return NULL;
+    }
 
     /*
      ** Set up the initial box.
@@ -398,6 +401,7 @@ LIQ_PRIVATE colormap *mediancut(histogram *hist, unsigned int newcolors, const d
 
     adjust_histogram(achv, map, bv, boxes);
 
+    free(bv);
     return map;
 }
 
@@ -433,22 +437,7 @@ static void adjust_histogram(hist_item *achv, const colormap *map, const struct 
     }
 }
 
-inline static f_pixel setalpha(f_pixel px, float new_a) {
-    if (px.a) {
-        px.r /= px.a;
-        px.g /= px.a;
-        px.b /= px.a;
-    }
-
-    px.r *= new_a;
-    px.g *= new_a;
-    px.b *= new_a;
-    px.a = new_a;
-
-    return px;
-}
-
-static f_pixel averagepixels(unsigned int clrs, const hist_item achv[], f_pixel center)
+static f_pixel averagepixels(unsigned int clrs, const hist_item achv[], const f_pixel center)
 {
     double r = 0, g = 0, b = 0, a = 0, new_a=0, sum = 0;
     float maxa = 0;
@@ -465,13 +454,11 @@ static f_pixel averagepixels(unsigned int clrs, const hist_item achv[], f_pixel 
 
     if (sum) new_a /= sum;
 
-    center = setalpha(center, new_a);
-
     sum=0;
     // reverse iteration for cache locality with previous loop
     for(int i = clrs-1; i >= 0; i--) {
         double tmp, weight = 1.0f;
-        f_pixel px = setalpha(achv[i].acolor, new_a);
+        f_pixel px = achv[i].acolor;
 
         /* give more weight to colors that are further away from average
          this is intended to prevent desaturation of images and fading of whites
@@ -482,23 +469,27 @@ static f_pixel averagepixels(unsigned int clrs, const hist_item achv[], f_pixel 
         weight += tmp*tmp;
         tmp = (center.b - px.b);
         weight += tmp*tmp;
-        tmp = (center.a - px.a);
-        weight += tmp*tmp;
 
         weight *= achv[i].adjusted_weight;
         sum += weight;
 
-        r += px.r * weight;
-        g += px.g * weight;
-        b += px.b * weight;
-        a += px.a * weight;
+        if (px.a) {
+            px.r /= px.a;
+            px.g /= px.a;
+            px.b /= px.a;
+        }
+
+        r += px.r * new_a * weight;
+        g += px.g * new_a * weight;
+        b += px.b * new_a * weight;
+        a += new_a * weight;
     }
 
     if (sum) {
-        a /= sum;
-        r /= sum;
-        g /= sum;
-        b /= sum;
+    a /= sum;
+    r /= sum;
+    g /= sum;
+    b /= sum;
     }
 
     assert(!isnan(r) && !isnan(g) && !isnan(b) && !isnan(a));
