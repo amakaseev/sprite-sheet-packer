@@ -29,7 +29,8 @@
 #define MAX_DIFF 1e20
 
 #ifndef USE_SSE
-#  if defined(__SSE__) && (defined(__amd64__) || defined(__X86_64__) || defined(_WIN64) || defined(WIN32) || defined(__WIN32__))
+   // SSE default on x86_64 and Windows
+#  if defined(__SSE__) && (defined(__x86_64__) || defined(__amd64) || defined(WIN32) || defined(__WIN32__) || defined(_WIN64))
 #    define USE_SSE 1
 #  else
 #    define USE_SSE 0
@@ -166,12 +167,38 @@ inline static float colordifference_stdc(const f_pixel px, const f_pixel py)
            colordifference_ch(px.b, py.b, alphas);
 }
 
+ALWAYS_INLINE static double min_colordifference_ch(const double x, const double y, const double alphas);
+inline static double min_colordifference_ch(const double x, const double y, const double alphas)
+{
+    const double black = x-y, white = black+alphas;
+    return MIN(black*black , white*white) * 2.f;
+}
+
+/* least possible difference between colors (difference varies depending on background they're blended on) */
+ALWAYS_INLINE static float min_colordifference(const f_pixel px, const f_pixel py);
+inline static float min_colordifference(const f_pixel px, const f_pixel py)
+{
+    const double alphas = py.a-px.a;
+    return min_colordifference_ch(px.r, py.r, alphas) +
+           min_colordifference_ch(px.g, py.g, alphas) +
+           min_colordifference_ch(px.b, py.b, alphas);
+}
+
 ALWAYS_INLINE static float colordifference(f_pixel px, f_pixel py);
 inline static float colordifference(f_pixel px, f_pixel py)
 {
 #if USE_SSE
+#ifdef _MSC_VER
+    /* In MSVC we cannot use the align attribute in parameters.
+     * This is used a lot, so we just use an unaligned load.
+     * Also the compiler incorrectly inlines vpx and vpy without
+     * the volatile when optimization is applied for x86_64. */
+    const volatile __m128 vpx = _mm_loadu_ps((const float*)&px);
+    const volatile __m128 vpy = _mm_loadu_ps((const float*)&py);
+#else
     const __m128 vpx = _mm_load_ps((const float*)&px);
     const __m128 vpy = _mm_load_ps((const float*)&py);
+#endif
 
     // y.a - x.a
     __m128 alphas = _mm_sub_ss(vpy, vpx);

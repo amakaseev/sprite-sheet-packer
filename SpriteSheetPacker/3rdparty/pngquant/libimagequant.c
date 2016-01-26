@@ -131,12 +131,20 @@ LIQ_NONNULL static void liq_verbose_printf(const liq_attr *context, const char *
         int required_space = vsnprintf(NULL, 0, fmt, va)+1; // +\0
         va_end(va);
 
-        char buf[required_space];
+        char *buf = malloc(required_space * sizeof(char));
         va_start(va, fmt);
+        if (buf) {
         vsnprintf(buf, required_space, fmt, va);
         va_end(va);
+        } else {
+            fprintf(stderr, "Could not allocate memory for printing message:\n");
+            vfprintf(stderr, fmt, va);
+            va_end(va);
+            return;
+        }
 
         context->log_callback(context, buf, context->log_callback_user_info);
+        free(buf);
     }
 }
 
@@ -157,8 +165,13 @@ LIQ_NONNULL static void liq_verbose_printf_flush(liq_attr *attr)
 #if USE_SSE
 inline static bool is_sse_available()
 {
-#if (defined(__x86_64__) || defined(__amd64))
+#if (defined(__x86_64__) || defined(__amd64) || defined(_WIN64))
     return true;
+#elif _MSC_VER
+    int info[4];
+    __cpuid(info, 1);
+    /* bool is implemented as a built-in type of size 1 in MSVC */
+    return info[3] & (1<<26) ? true : false;
 #else
     int a,b,c,d;
         cpuid(1, a, b, c, d);
@@ -229,12 +242,6 @@ static unsigned int mse_to_quality(double mse)
     return 0;
 }
 
-/** internally MSE is a sum of all channels with pixels 0..1 range,
- but other software gives per-RGB-channel MSE for 0..255 range */
-static double mse_to_standard_mse(double mse) {
-    return mse * 65536.0/6.0;
-}
-
 LIQ_EXPORT LIQ_NONNULL liq_error liq_set_quality(liq_attr* attr, int minimum, int target)
 {
     if (!CHECK_STRUCT_TYPE(attr, liq_attr)) return LIQ_INVALID_POINTER;
@@ -295,7 +302,7 @@ LIQ_EXPORT LIQ_NONNULL liq_error liq_set_speed(liq_attr* attr, int speed)
     if (!CHECK_STRUCT_TYPE(attr, liq_attr)) return LIQ_INVALID_POINTER;
     if (speed < 1 || speed > 10) return LIQ_VALUE_OUT_OF_RANGE;
 
-    unsigned int iterations = MAX(8-speed, 0); iterations += iterations * iterations/2;
+    int iterations = MAX(8-speed,0); iterations += iterations * iterations/2;
     attr->voronoi_iterations = iterations;
     attr->voronoi_iteration_limit = 1.0/(double)(1<<(23-speed));
     attr->feedback_loop_trials = MAX(56-9*speed, 0);
@@ -584,7 +591,7 @@ LIQ_EXPORT liq_image *liq_image_create_rgba_rows(liq_attr *attr, void* rows[], i
         if (!CHECK_USER_POINTER(rows+i) || !CHECK_USER_POINTER(rows[i])) {
             liq_log_error(attr, "invalid row pointers");
             return NULL;
-        }
+    }
     }
     return liq_image_create_internal(attr, (rgba_pixel**)rows, NULL, NULL, width, height, gamma);
 }
@@ -652,7 +659,9 @@ LIQ_NONNULL static const rgba_pixel *liq_image_get_row_rgba(liq_image *img, unsi
 LIQ_NONNULL static void convert_row_to_f(liq_image *img, f_pixel *row_f_pixels, const unsigned int row, const float gamma_lut[])
 {
     assert(row_f_pixels);
+#ifndef _MSC_VER
     assert(!USE_SSE || 0 == ((uintptr_t)row_f_pixels & 15));
+#endif
 
     const rgba_pixel *const row_pixels = liq_image_get_row_rgba(img, row);
 
@@ -762,7 +771,7 @@ LIQ_EXPORT LIQ_NONNULL void liq_image_destroy(liq_image *input_image)
 
 LIQ_EXPORT LIQ_NONNULL liq_result *liq_quantize_image(liq_attr *attr, liq_image *img)
 {
-    if (!CHECK_STRUCT_TYPE(attr, liq_attr)) return NULL;
+    if (!CHECK_STRUCT_TYPE(attr, liq_attr)) { return NULL; }
     if (!CHECK_STRUCT_TYPE(img, liq_image)) {
         liq_log_error(attr, "invalid image pointer");
         return NULL;
@@ -849,45 +858,34 @@ LIQ_EXPORT LIQ_NONNULL void liq_result_destroy(liq_result *res)
     res->free(res);
 }
 
-
-LIQ_EXPORT LIQ_NONNULL double liq_get_quantization_error(liq_result *result) {
+LIQ_EXPORT LIQ_NONNULL double liq_get_quantization_error(liq_result *result)
+{
     if (!CHECK_STRUCT_TYPE(result, liq_result)) return -1;
 
     if (result->palette_error >= 0) {
-        return mse_to_standard_mse(result->palette_error);
+        return result->palette_error*65536.0/6.0;
     }
-
-    return -1;
-}
-
-LIQ_EXPORT LIQ_NONNULL double liq_get_remapping_error(liq_result *result) {
-    if (!CHECK_STRUCT_TYPE(result, liq_result)) return -1;
 
     if (result->remapping && result->remapping->palette_error >= 0) {
-        return mse_to_standard_mse(result->remapping->palette_error);
+        return result->remapping->palette_error*65536.0/6.0;
     }
 
-    return -1;
+    return result->palette_error;
 }
 
-LIQ_EXPORT LIQ_NONNULL int liq_get_quantization_quality(liq_result *result) {
+LIQ_EXPORT LIQ_NONNULL int liq_get_quantization_quality(liq_result *result)
+{
     if (!CHECK_STRUCT_TYPE(result, liq_result)) return -1;
 
     if (result->palette_error >= 0) {
         return mse_to_quality(result->palette_error);
     }
 
-    return -1;
-}
-
-LIQ_EXPORT LIQ_NONNULL int liq_get_remapping_quality(liq_result *result) {
-    if (!CHECK_STRUCT_TYPE(result, liq_result)) return -1;
-
     if (result->remapping && result->remapping->palette_error >= 0) {
         return mse_to_quality(result->remapping->palette_error);
     }
 
-    return -1;
+    return result->palette_error;
 }
 
 LIQ_NONNULL static int compare_popularity(const void *ch1, const void *ch2)
@@ -916,21 +914,21 @@ LIQ_NONNULL static void sort_palette(colormap *map, const liq_attr *options)
     ** therefore be omitted from the tRNS chunk.
     */
     if (options->last_index_transparent) {
-        for(unsigned int i=0; i < map->colors; i++) {
+    	for(unsigned int i=0; i < map->colors; i++) {
             if (map->palette[i].acolor.a < 1.0/256.0) {
                 const unsigned int old = i, transparent_dest = map->colors-1;
 
                 SWAP_PALETTE(map, transparent_dest, old);
 
                 /* colors sorted by popularity make pngs slightly more compressible */
-                sort_palette_qsort(map, 0, map->colors-1);
+        		sort_palette_qsort(map, 0, map->colors-1);
                 return;
             }
         }
     }
 
     unsigned int non_fixed_colors = 0;
-    for(unsigned int i = 0; i < map->colors; i++) {
+    for(int i = 0; i < map->colors; i++) {
         if (map->palette[i].fixed) {
             break;
         }
@@ -1021,7 +1019,10 @@ LIQ_NONNULL static float remap_to_palette(liq_image *const input_image, unsigned
     struct nearest_map *const n = nearest_init(map, fast);
 
     const unsigned int max_threads = omp_get_max_threads();
-    viter_state average_color[(VITER_CACHE_LINE_GAP+map->colors) * max_threads];
+    viter_state *average_color = malloc((VITER_CACHE_LINE_GAP+map->colors) * max_threads * sizeof(viter_state));
+    if (!average_color) {
+        return -1;
+    }
     viter_init(map, max_threads, average_color);
 
     #pragma omp parallel for if (rows*cols > 3000) \
@@ -1042,6 +1043,7 @@ LIQ_NONNULL static float remap_to_palette(liq_image *const input_image, unsigned
 
     nearest_free(n);
 
+    free(average_color);
     return remapping_error / (input_image->width * input_image->height);
 }
 
@@ -1335,7 +1337,7 @@ LIQ_NONNULL static void modify_alpha(liq_image *input_image, rgba_pixel *const r
  */
 LIQ_NONNULL static void contrast_maps(liq_image *image)
 {
-    const unsigned int cols = image->width, rows = image->height;
+    const int cols = image->width, rows = image->height;
     if (cols < 4 || rows < 4 || (3*cols*rows) > LIQ_HIGH_MEMORY_LIMIT) {
         return;
     }
@@ -1345,22 +1347,22 @@ LIQ_NONNULL static void contrast_maps(liq_image *image)
     unsigned char *restrict tmp = image->malloc(cols*rows);
 
     if (!noise || !edges || !tmp) {
-        image->free(noise);
+		image->free(noise);
         image->free(edges);
-        image->free(tmp);
+		image->free(tmp);
         return;
     }
 
     const f_pixel *curr_row, *prev_row, *next_row;
     curr_row = prev_row = next_row = liq_image_get_row_f(image, 0);
 
-    for (unsigned int j=0; j < rows; j++) {
+    for (int j=0; j < rows; j++) {
         prev_row = curr_row;
         curr_row = next_row;
         next_row = liq_image_get_row_f(image, MIN(rows-1,j+1));
 
         f_pixel prev, curr = curr_row[0], next=curr;
-        for (unsigned int i=0; i < cols; i++) {
+        for (int i=0; i < cols; i++) {
             prev=curr;
             curr=next;
             next = curr_row[MIN(cols-1,i+1)];
@@ -1408,7 +1410,7 @@ LIQ_NONNULL static void contrast_maps(liq_image *image)
 
     liq_min3(edges, tmp, cols, rows);
     liq_max3(tmp, edges, cols, rows);
-    for(unsigned int i=0; i < cols*rows; i++) edges[i] = MIN(noise[i], edges[i]);
+    for(int i=0; i < cols*rows; i++) edges[i] = MIN(noise[i], edges[i]);
 
     image->free(tmp);
 
@@ -1645,8 +1647,8 @@ LIQ_NONNULL static liq_result *pngquant_quantize(histogram *hist, const liq_attr
 
         if (palette_error > max_mse) {
             liq_verbose_printf(options, "  image degradation MSE=%.3f (Q=%d) exceeded limit of %.3f (%d)",
-                               mse_to_standard_mse(palette_error), mse_to_quality(palette_error),
-                               mse_to_standard_mse(max_mse), mse_to_quality(max_mse));
+                               palette_error*65536.0/6.0, mse_to_quality(palette_error),
+                               max_mse*65536.0/6.0, mse_to_quality(max_mse));
             pam_freecolormap(acolormap);
             return NULL;
         }
@@ -1687,12 +1689,17 @@ LIQ_EXPORT LIQ_NONNULL liq_error liq_write_remapped_image(liq_result *result, li
         return LIQ_BUFFER_TOO_SMALL;
     }
 
-    unsigned char *rows[input_image->height];
+    unsigned char **rows = malloc(input_image->height * sizeof(unsigned char *));
+    if (!rows) {
+        return LIQ_OUT_OF_MEMORY;
+    }
     unsigned char *buffer_bytes = buffer;
     for(unsigned int i=0; i < input_image->height; i++) {
         rows[i] = &buffer_bytes[input_image->width * i];
     }
-    return liq_write_remapped_image_rows(result, input_image, rows);
+    liq_error error = liq_write_remapped_image_rows(result, input_image, rows);
+    free(rows);
+    return error;
 }
 
 LIQ_EXPORT LIQ_NONNULL liq_error liq_write_remapped_image_rows(liq_result *quant, liq_image *input_image, unsigned char **row_pointers)
