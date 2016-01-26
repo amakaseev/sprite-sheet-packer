@@ -14,7 +14,7 @@ QMap<QString, QString> PublishSpriteSheet::_formats;
 QString imagePrefix(ImageFormat imageFormat) {
     switch (imageFormat) {
         case kPNG: return ".png";
-        case kPKM: return ".pkm";
+        case kPKM: return ".pvr";
         case kPVR: return ".pvr";
         case kPVR_CCZ: return ".pvr.ccz";
         default: return ".png";
