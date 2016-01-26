@@ -18,11 +18,33 @@ public slots:
     void log(QString msg);
 };
 
-class PublishSpriteSheet : public QObject {
+enum ImageFormat {
+    kPNG = 0,
+    kPKM,
+    kPVR,
+    kPVR_CCZ
+};
+
+enum PixelFormat {
+    kRGB888 = 0,
+    kRGBA8888,
+    kETC1,
+    kPVRTC2,
+    kPVRTC2A,
+    kPVRTC4,
+    kPVRTC4A
+};
+
+
+class PublishSpriteSheet: public QObject {
     Q_OBJECT
 
 public:
+    PublishSpriteSheet();
+
     void addSpriteSheet(const SpriteAtlas& atlas, const QString& fileName);
+    void setImageFormat(const ImageFormat& imageFormat) { _imageFormat = imageFormat; }
+    void setPixelFormat(const PixelFormat& pixelFormat) { _pixelFormat = pixelFormat; }
 
     bool publish(const QString& format, const QString& optMode, int optLevel, bool errorMessage = true);
     bool generateDataFile(const QString& filePath, const QString& format, const SpriteAtlas &atlas, bool errorMessage = true);
@@ -36,14 +58,17 @@ public:
 signals:
     void onCompleted();
 
-private:
-    static QMap<QString, QString> _formats;
+protected:
     QFutureWatcher<bool> _watcher;
     QMutex _mutex;
 
     QList<SpriteAtlas> _spriteAtlases;
     QStringList _fileNames;
 
+    ImageFormat _imageFormat;
+    PixelFormat _pixelFormat;
+
+    static QMap<QString, QString> _formats;
 };
 
 #endif // PUBLISHSPRITESHEET_H

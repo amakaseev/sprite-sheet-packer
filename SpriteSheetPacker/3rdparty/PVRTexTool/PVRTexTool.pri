@@ -32,7 +32,8 @@ win32:contains(QMAKE_HOST.arch, x86_64) {
     export_dll.files = $$PWD/Windows_x86_64/PVRTexLib.dll
     export_dll.path = ./
     DEPLOYMENT += export_dll
-} else {
+}
+win32:contains(QMAKE_HOST.arch, x86_32) {
     LIBS += $$PWD/Windows_x86_32/PVRTexLib.lib
     export_dll.files = $$PWD/Windows_x86_32/PVRTexLib.dll
     export_dll.path = ./

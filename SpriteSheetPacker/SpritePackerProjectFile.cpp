@@ -10,13 +10,15 @@ SpritePackerProjectFile::SpritePackerProjectFile() {
     _algorithm = "Rect";
     _trimMode = "Rect";
     _trimThreshold = 1;
+    _epsilon = 5;
     _textureBorder = 0;
     _spriteBorder = 2;
     _maxTextureSize = 8192;
     _pow2 = false;
+    _imageFormat = "PNG";
+    _pixelFormat = "RGBA8888";
     _optMode = "None";
     _optLevel = 1;
-    _epsilon = 5;
 }
 
 SpritePackerProjectFile::~SpritePackerProjectFile() {
@@ -37,14 +39,16 @@ bool SpritePackerProjectFile::read(const QString &fileName) {
 
     if (json.contains("algorithm")) _algorithm = json["algorithm"].toString();
     if (json.contains("trimMode")) _trimMode = json["trimMode"].toString();
-    if (json.contains("optMode")) _optMode = json["optMode"].toString();
-    _trimThreshold = json["trimThreshold"].toInt();
+    if (json.contains("trimThreshold")) _trimThreshold = json["trimThreshold"].toInt();
     if (json.contains("epsilon")) _epsilon = json["epsilon"].toDouble();
-    _textureBorder = json["textureBorder"].toInt();
-    _spriteBorder = json["spriteBorder"].toInt();
-    _maxTextureSize = json["maxTextureSize"].toInt();
-    _pow2 = json["pow2"].toBool();
-    _optLevel = json["optLevel"].toInt();
+    if (json.contains("textureBorder")) _textureBorder = json["textureBorder"].toInt();
+    if (json.contains("spriteBorder")) _spriteBorder = json["spriteBorder"].toInt();
+    if (json.contains("maxTextureSize")) _maxTextureSize = json["maxTextureSize"].toInt();
+    if (json.contains("pow2")) _pow2 = json["pow2"].toBool();
+    if (json.contains("imageFormat")) _imageFormat = json["imageFormat"].toString();
+    if (json.contains("pixelFormat")) _pixelFormat = json["pixelFormat"].toString();
+    if (json.contains("optMode")) _optMode = json["optMode"].toString();
+    if (json.contains("optLevel")) _optLevel = json["optLevel"].toInt();
 
     _scalingVariants.clear();
     QJsonArray scalingVariants = json["scalingVariants"].toArray();
@@ -56,9 +60,9 @@ bool SpritePackerProjectFile::read(const QString &fileName) {
         _scalingVariants.push_back(scalingVariant);
     }
 
-    _dataFormat = json["dataFormat"].toString();
-    _destPath = QDir(dir.absoluteFilePath(json["destPath"].toString())).canonicalPath();
-    _spriteSheetName = json["spriteSheetName"].toString();
+    if (json.contains("dataFormat"))  _dataFormat = json["dataFormat"].toString();
+    if (json.contains("destPath")) _destPath = QDir(dir.absoluteFilePath(json["destPath"].toString())).canonicalPath();
+    if (json.contains("spriteSheetName")) _spriteSheetName = json["spriteSheetName"].toString();
 
     _srcList.clear();
     QJsonArray srcRelative = json["srcList"].toArray();
@@ -81,6 +85,8 @@ bool SpritePackerProjectFile::write(const QString &fileName) {
     json["spriteBorder"] = _spriteBorder;
     json["maxTextureSize"] = _maxTextureSize;
     json["pow2"] = _pow2;
+    json["imageFormat"] = _imageFormat;
+    json["pixelFormat"] = _pixelFormat;
     json["optMode"] = _optMode;
     json["optLevel"] = _optLevel;
 

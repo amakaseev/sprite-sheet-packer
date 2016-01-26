@@ -5,11 +5,6 @@
 #include "ImageRotate.h"
 #include "PolygonImage.h"
 
-#include "PVRTexture.h"
-#include "PVRTextureUtilities.h"
-
-using namespace pvrtexture;
-
 int pow2(int len) {
     int order = 1;
     while(pow(2,order) < len)
@@ -185,15 +180,6 @@ bool SpriteAtlas::generate() {
     int elapsed = timePerform.elapsed();
     qDebug() << "Generate time mc:" <<  elapsed/1000.f << "sec";
 
-    //_atlasImage = _atlasImage.convertToFormat(QImage::Format_Alpha8);
-
-//    CPVRTextureHeader pvrHeader(PVRStandard8PixelType.PixelTypeID, _atlasImage.width(), _atlasImage.height());
-//    // Create the image.
-//    CPVRTexture pvrTexture(pvrHeader, _atlasImage.bits());
-//    Transcode(pvrTexture, ePVRTPF_PVRTCI_2bpp_RGB, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB);
-//    // Save the file
-//    pvrTexture.saveFile("/Users/alekseymakaseev/Documents/Work/sprite-sheet-packer/out.pvr");
-    _atlasImage.save("/Users/alekseymakaseev/Documents/Work/sprite-sheet-packer/out.png", 0, 0);
     return result;
 }
 
