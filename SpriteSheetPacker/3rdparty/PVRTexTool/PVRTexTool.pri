@@ -24,7 +24,7 @@ macx {
     QMAKE_BUNDLE_DATA += export_dylib
 }
 
-DEFINES += _WINDLL_EXPORT
+DEFINES += _WINDLL_IMPORT
 
 #TODO: test on windows platform
 win32:contains(QMAKE_HOST.arch, x86_64) {
