@@ -72,6 +72,7 @@ include(3rdparty/PVRTexTool/PVRTexTool.pri)
 
 OTHER_FILES += \
     defaultFormats/cocos2d.js \
+    defaultFormats/cocos2d-old.js \
     defaultFormats/json.js
 
 macx {
