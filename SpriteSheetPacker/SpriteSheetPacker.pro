@@ -72,8 +72,7 @@ include(3rdparty/PVRTexTool/PVRTexTool.pri)
 
 OTHER_FILES += \
     defaultFormats/cocos2d.js \
-    defaultFormats/json.js \
-	defaultFormats/cocos2d-v3.js
+    defaultFormats/json.js
 
 macx {
     ICON = SpritePacker.icns
