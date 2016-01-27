@@ -436,7 +436,12 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
         spriteFrame.sourceColorRect = packContent.rect();
         spriteFrame.sourceSize = packContent.image().size();
 
-        //TODO: draw image with clipping polygon
+        QPainterPath clipPath;
+        for (auto polygon: packContent.polygons()) {
+            clipPath.addPolygon(QPolygonF(QVector<QPointF>::fromStdVector(polygon)));
+        }
+        clipPath.translate(content.bounds().left + _textureBorder, content.bounds().top + _textureBorder);
+        painter.setClipPath(clipPath);
         painter.drawImage(QPoint(content.bounds().left + _textureBorder, content.bounds().top + _textureBorder), packContent.image(), packContent.rect());
 
         _spriteFrames[packContent.name()] = spriteFrame;
