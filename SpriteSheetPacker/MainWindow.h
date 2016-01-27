@@ -94,6 +94,7 @@ private:
     SpriteAtlas         _spriteAtlas;
     bool                _blockUISignals;
     bool                _projectDirty;
+    bool                _atlasDirty;
 };
 
 #endif // MAINWINDOW_H

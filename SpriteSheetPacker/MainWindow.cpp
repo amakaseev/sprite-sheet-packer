@@ -131,6 +131,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // reset dirty
     _projectDirty = false;
+    _atlasDirty = false;
 
     QSettings settings;
     
@@ -348,6 +349,8 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
     //1024x1024x4 (RAM: 4.00MB)
     float ram = (atlasImage.width() * atlasImage.height() * 4) / 1024.f / 1024.f;
     ui->labelAtlasInfo->setText(QString("%1x%2x%3 (RAM: %4MB)").arg(atlasImage.width()).arg(atlasImage.height()).arg(4).arg(ram, 0, 'f', 2));
+
+    _atlasDirty = false;
 }
 
 void MainWindow::openSpritePackerProject(const QString& fileName) {
@@ -684,7 +687,7 @@ void MainWindow::on_actionPublish_triggered() {
                 }
             }
 
-            if ((i == 0) && (!_projectDirty)) {
+            if ((i == 0) && (!_atlasDirty)) {
                 publisher->addSpriteSheet(_spriteAtlas, destFileInfo.filePath());
             } else {
                 publishStatusDialog.log(QString("Generating scale variant (%1) scale: %2.").arg(spriteSheetName).arg(scale));
@@ -860,7 +863,6 @@ void MainWindow::removeScalingVariant() {
     }
 
     setProjectDirty();
-//    QAction* senderAction = dynamic_cast<QAction*>(sender());
 }
 
 void MainWindow::propertiesValueChanged() {
@@ -869,6 +871,8 @@ void MainWindow::propertiesValueChanged() {
 
     if (settings.value("MainWindow/automaticPreview", true).toBool()) {
         refreshAtlas();
+    } else {
+        _atlasDirty = true;
     }
 }
 
