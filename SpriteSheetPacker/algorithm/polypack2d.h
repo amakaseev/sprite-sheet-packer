@@ -88,6 +88,10 @@ namespace PolyPack2D {
         }
     };
 
+    inline bool operator == (const Rect& a, const Rect& b) {
+        return ((a.left == b.left) && (a.top == b.top) && (a.right == b.right) && (a.bottom == b.bottom));
+    }
+
     struct Triangles {
         std::vector<Point> verts;
         std::vector<unsigned short> indices;
@@ -224,6 +228,7 @@ namespace PolyPack2D {
                     bool translateTriangles = false;
                     Triangles contentTriangles;
 
+                    bool completePlaceContent = false;
                     for (float y = startY; y < endY; y+= step) {
                         for (float x = startX; x < endX; x+= step) {
                             auto contentBounds = content.bounds();
@@ -271,7 +276,13 @@ namespace PolyPack2D {
                                     isPlaces = true;
                                 }
                             }
+
+                            if ((isPlaces) && (_bounds == newBounds)) {
+                                completePlaceContent = true;
+                                break;
+                            }
                         }
+                        if (completePlaceContent) break;
                     }
 
                     if (isPlaces) {

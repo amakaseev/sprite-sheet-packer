@@ -231,7 +231,6 @@ void MainWindow::createRefreshButton() {
 }
 
 void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
-    bool deleteAtlas = false;
     if (!atlas) {
         float scale = 1;
         if (ui->scalingVariantsGroupBox->layout()->count()) {
@@ -241,7 +240,7 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
             }
         }
 
-        atlas = new SpriteAtlas(_spritesTreeWidget->contentList(),
+        _spriteAtlas = SpriteAtlas(_spritesTreeWidget->contentList(),
                                 ui->textureBorderSpinBox->value(),
                                 ui->spriteBorderSpinBox->value(),
                                 ui->trimSpinBox->value(),
@@ -249,21 +248,22 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
                                 ui->maxTextureSizeComboBox->currentText().toInt(),
                                 scale);
 
-        atlas->setAlgorithm(ui->algorithmComboBox->currentText());
+        _spriteAtlas.setAlgorithm(ui->algorithmComboBox->currentText());
 
         if (ui->trimModeComboBox->currentText() == "Polygon") {
-            atlas->enablePolygonMode(true, ui->epsilonHorizontalSlider->value() / 10.f);
+            _spriteAtlas.enablePolygonMode(true, ui->epsilonHorizontalSlider->value() / 10.f);
         }
 
-        if (!atlas->generate()) {
+        if (!_spriteAtlas.generate()) {
             QMessageBox::critical(this, "Generate error", "Max texture size limit is small!");
             delete atlas;
             return;
         }
-        deleteAtlas = true;
+    } else {
+        _spriteAtlas = (*atlas);
     }
 
-    const QImage& atlasImage = atlas->image();
+    const QImage& atlasImage = _spriteAtlas.image();
 
     if (_outlinesGroup)
         _scene->destroyItemGroup(_outlinesGroup);
@@ -281,9 +281,9 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
     QColor convexColor(Qt::yellow);
     convexColor.setAlpha(100);
 
-    for(auto it = atlas->spriteFrames().begin(); it != atlas->spriteFrames().end(); ++it) {
+    for(auto it = _spriteAtlas.spriteFrames().begin(); it != _spriteAtlas.spriteFrames().end(); ++it) {
         bool skip = false;
-        for (auto identicalFrame: atlas->identicalFrames()) {
+        for (auto identicalFrame: _spriteAtlas.identicalFrames()) {
             if (skip) break;
             for (auto frame: identicalFrame) {
                 if (frame == it.key()) {
@@ -327,8 +327,8 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
 //        }
 
         // show identical statistics
-        auto identicalFrames = atlas->identicalFrames().find(it.key());
-        if (identicalFrames != atlas->identicalFrames().end()) {
+        auto identicalFrames = _spriteAtlas.identicalFrames().find(it.key());
+        if (identicalFrames != _spriteAtlas.identicalFrames().end()) {
             auto identicalItem = _scene->addPixmap(QPixmap(":/res/identical.png"));
             QString identicalString;
             identicalString += it.key() + "\n";
@@ -348,10 +348,6 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
     //1024x1024x4 (RAM: 4.00MB)
     float ram = (atlasImage.width() * atlasImage.height() * 4) / 1024.f / 1024.f;
     ui->labelAtlasInfo->setText(QString("%1x%2x%3 (RAM: %4MB)").arg(atlasImage.width()).arg(atlasImage.height()).arg(4).arg(ram, 0, 'f', 2));
-
-    if (deleteAtlas) {
-        delete atlas;
-    }
 }
 
 void MainWindow::openSpritePackerProject(const QString& fileName) {
@@ -688,31 +684,35 @@ void MainWindow::on_actionPublish_triggered() {
                 }
             }
 
-            publishStatusDialog.log(QString("Generating scale variant (%1) scale: %2.").arg(spriteSheetName).arg(scale));
+            if ((i == 0) && (!_projectDirty)) {
+                publisher->addSpriteSheet(_spriteAtlas, destFileInfo.filePath());
+            } else {
+                publishStatusDialog.log(QString("Generating scale variant (%1) scale: %2.").arg(spriteSheetName).arg(scale));
 
-            SpriteAtlas atlas(_spritesTreeWidget->contentList(),
-                              ui->textureBorderSpinBox->value(),
-                              ui->spriteBorderSpinBox->value(),
-                              ui->trimSpinBox->value(),
-                              ui->pow2ComboBox->currentIndex()? true:false,
-                              ui->maxTextureSizeComboBox->currentText().toInt(),
-                              scale);
+                SpriteAtlas atlas(_spritesTreeWidget->contentList(),
+                                  ui->textureBorderSpinBox->value(),
+                                  ui->spriteBorderSpinBox->value(),
+                                  ui->trimSpinBox->value(),
+                                  ui->pow2ComboBox->currentIndex()? true:false,
+                                  ui->maxTextureSizeComboBox->currentText().toInt(),
+                                  scale);
 
-            atlas.setAlgorithm(ui->algorithmComboBox->currentText());
+                atlas.setAlgorithm(ui->algorithmComboBox->currentText());
 
-            if (ui->trimModeComboBox->currentText() == "Polygon") {
-                atlas.enablePolygonMode(true, ui->epsilonHorizontalSlider->value() / 10.f);
+                if (ui->trimModeComboBox->currentText() == "Polygon") {
+                    atlas.enablePolygonMode(true, ui->epsilonHorizontalSlider->value() / 10.f);
+                }
+
+                if (!atlas.generate()) {
+                    QMessageBox::critical(this, "Generate error", "Max texture size limit is small!");
+                    publishStatusDialog.log("Generate error: Max texture size limit is small!", Qt::red);
+                    continue;
+                } else if (i==0) {
+                    refreshAtlas(&atlas);
+                }
+
+                publisher->addSpriteSheet(atlas, destFileInfo.filePath());
             }
-
-            if (!atlas.generate()) {
-                QMessageBox::critical(this, "Generate error", "Max texture size limit is small!");
-                publishStatusDialog.log("Generate error: Max texture size limit is small!", Qt::red);
-                continue;
-            } else if (i==0) {
-                refreshAtlas(&atlas);
-            }
-
-            publisher->addSpriteSheet(atlas, destFileInfo.filePath());
         }
     }
 

@@ -91,6 +91,7 @@ private:
     QString             _currentProjectFileName;
     QToolButton*        _openButton;
     QGraphicsItemGroup* _outlinesGroup;
+    SpriteAtlas         _spriteAtlas;
     bool                _blockUISignals;
     bool                _projectDirty;
 };
