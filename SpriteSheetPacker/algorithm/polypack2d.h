@@ -228,7 +228,6 @@ namespace PolyPack2D {
                     bool translateTriangles = false;
                     Triangles contentTriangles;
 
-                    bool completePlaceContent = false;
                     for (float y = startY; y < endY; y+= step) {
                         for (float x = startX; x < endX; x+= step) {
                             auto contentBounds = content.bounds();
@@ -276,13 +275,7 @@ namespace PolyPack2D {
                                     isPlaces = true;
                                 }
                             }
-
-                            if ((isPlaces) && (_bounds == newBounds)) {
-                                completePlaceContent = true;
-                                break;
-                            }
                         }
-                        if (completePlaceContent) break;
                     }
 
                     if (isPlaces) {
