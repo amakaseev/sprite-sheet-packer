@@ -12,23 +12,29 @@ class ScalingVariantWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit ScalingVariantWidget(QWidget *parent = 0, const QString& name = "", float scale = 1);
+    explicit ScalingVariantWidget(QWidget *parent = 0, const QString& name = "", float scale = 1, int maxTextureSize = 2048, bool pow2 = false);
     ~ScalingVariantWidget();
 
     void setRemoveEnabled(bool enable);
-    bool isValideScale();
 
     QString name();
     float   scale();
+    int     maxTextureSize();
+    bool    pow2();
+
+    void    setPow2(bool enable);
+    void    setEnabledPow2(bool enable);
 
 signals:
     void remove();
-    void valueChanged();
+    void valueChanged(bool needRefresh);
 
 private slots:
     void on_removePushButton_clicked();
     void on_scaleComboBox_editTextChanged(const QString &arg1);
     void on_nameLineEdit_textChanged(const QString &arg1);
+    void on_maxTextureSizeComboBox_currentTextChanged(const QString &arg1);
+    void on_pow2CheckBox_toggled(bool checked);
 
 private:
     Ui::ScalingVariantWidget *ui;

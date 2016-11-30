@@ -314,7 +314,7 @@
           <x>0</x>
           <y>0</y>
           <width>314</width>
-          <height>917</height>
+          <height>839</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -559,139 +559,6 @@
                    <property name="value">
                     <number>2</number>
                    </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item>
-             <widget class="QGroupBox" name="groupBox_3">
-              <property name="title">
-               <string>Texture</string>
-              </property>
-              <layout class="QVBoxLayout" name="verticalLayout_7">
-               <item>
-                <layout class="QHBoxLayout" name="horizontalLayout_7">
-                 <item>
-                  <widget class="QLabel" name="label_7">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Max size:</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QComboBox" name="maxTextureSizeComboBox">
-                   <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Max size&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Sets the maximum size for the texture, default is 8192.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <property name="editable">
-                    <bool>true</bool>
-                   </property>
-                   <property name="currentIndex">
-                    <number>8</number>
-                   </property>
-                   <item>
-                    <property name="text">
-                     <string>32</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>64</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>128</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>256</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>512</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>1024</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>2048</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>4096</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>8192</string>
-                    </property>
-                   </item>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <layout class="QHBoxLayout" name="horizontalLayout_8">
-                 <item>
-                  <widget class="QLabel" name="label_8">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Size constraints:</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QComboBox" name="pow2ComboBox">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Size constraints&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Free size&lt;/span&gt; - Allow the texture to have any size. SpriteSheet packer tries to find the minimum size.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Power of 2&lt;/span&gt; - Forces the texture to have power of 2 size (32, 64, 128...)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <property name="currentIndex">
-                    <number>0</number>
-                   </property>
-                   <item>
-                    <property name="text">
-                     <string>Free size</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Power of 2</string>
-                    </property>
-                   </item>
                   </widget>
                  </item>
                 </layout>

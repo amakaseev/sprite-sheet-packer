@@ -97,8 +97,6 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
             epsilon = projectFile->epsilon();
             textureBorder = projectFile->textureBorder();
             spriteBorder = projectFile->spriteBorder();
-            pow2 = projectFile->pow2();
-            maxSize = projectFile->maxTextureSize();
             optMode = projectFile->optMode();
             optLevel = projectFile->optLevel();
 
@@ -193,7 +191,8 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
 
             QString variantName = variant.name;
             float scale = variant.scale;
-
+            maxSize = variant.maxTextureSize;
+            pow2 = variant.pow2;
             QString spriteSheetName = projectFile->spriteSheetName();
             if (spriteSheetName.contains("{v}")) {
                 spriteSheetName.replace("{v}", variantName);

@@ -234,19 +234,24 @@ void MainWindow::createRefreshButton() {
 void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
     if (!atlas) {
         float scale = 1;
+        int maxTextureSize = 2048;
+        bool pow2 = false;
         if (ui->scalingVariantsGroupBox->layout()->count()) {
             ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(ui->scalingVariantsGroupBox->layout()->itemAt(0)->widget());
             if (scalingVariantWidget) {
                 scale = scalingVariantWidget->scale();
+                maxTextureSize = scalingVariantWidget->maxTextureSize();
+                pow2 = scalingVariantWidget->pow2();
             }
         }
+
 
         _spriteAtlas = SpriteAtlas(_spritesTreeWidget->contentList(),
                                 ui->textureBorderSpinBox->value(),
                                 ui->spriteBorderSpinBox->value(),
                                 ui->trimSpinBox->value(),
-                                ui->pow2ComboBox->currentIndex()? true:false,
-                                ui->maxTextureSizeComboBox->currentText().toInt(),
+                                pow2,
+                                maxTextureSize,
                                 scale);
 
         _spriteAtlas.setAlgorithm(ui->algorithmComboBox->currentText());
@@ -266,85 +271,110 @@ void MainWindow::refreshAtlas(SpriteAtlas* atlas) {
 
     const QImage& atlasImage = _spriteAtlas.image();
 
+    qDebug() << "outputData:" << _spriteAtlas.outputData().size();
+
     if (_outlinesGroup)
         _scene->destroyItemGroup(_outlinesGroup);
-    _scene->clear();
-    _scene->addRect(atlasImage.rect(), QPen(Qt::darkRed), QBrush(QPixmap("://res/background_tran.png")));
 
-    QGraphicsPixmapItem* atlasPixmapItem = _scene->addPixmap(QPixmap::fromImage(atlasImage));
+    if (_scene) {
+        delete _scene;
+    }
+
+    _scene = new QGraphicsScene(this);
+    _scene->setBackgroundBrush(QBrush(Qt::darkGray));
+    ui->graphicsView->setScene(_scene);
 
     QList<QGraphicsItem*> outlineItems;
 
-    QColor brushColor(Qt::blue);
-    brushColor.setAlpha(100);
-    QColor polygonColor(Qt::darkGreen);
-    polygonColor.setAlpha(100);
-    QColor convexColor(Qt::yellow);
-    convexColor.setAlpha(100);
+    for (auto it = _spriteAtlas.outputData().begin(); it != _spriteAtlas.outputData().end(); ++it) {
+        auto outputData = (*it);
+        auto atlasImage = outputData._atlasImage;
+        auto spriteFrames = outputData._spriteFrames;
 
-    for(auto it = _spriteAtlas.spriteFrames().begin(); it != _spriteAtlas.spriteFrames().end(); ++it) {
-        bool skip = false;
-        for (auto identicalFrame: _spriteAtlas.identicalFrames()) {
-            if (skip) break;
-            for (auto frame: identicalFrame) {
-                if (frame == it.key()) {
-                    skip = true;
-                    break;
+        QGraphicsPixmapItem* atlasPixmapItem = new QGraphicsPixmapItem(QPixmap::fromImage(atlasImage));
+        if (it == _spriteAtlas.outputData().begin()) {
+            atlasPixmapItem->setPos(_scene->sceneRect().width(), 0);
+        } else {
+            atlasPixmapItem->setPos(_scene->sceneRect().width() + 100, 0);
+        }
+        _scene->addItem(atlasPixmapItem);
+
+        auto rect = _scene->addRect(atlasPixmapItem->sceneBoundingRect(), QPen(Qt::darkRed), QBrush(QPixmap("://res/background_tran.png")));
+        rect->setZValue(-1);
+
+        QColor brushColor(Qt::blue);
+        brushColor.setAlpha(100);
+        QColor polygonColor(Qt::darkGreen);
+        polygonColor.setAlpha(100);
+        QColor convexColor(Qt::yellow);
+        convexColor.setAlpha(100);
+
+        for(auto it = spriteFrames.begin(); it != spriteFrames.end(); ++it) {
+            bool skip = false;
+            for (auto identicalFrame: _spriteAtlas.identicalFrames()) {
+                if (skip) break;
+                for (auto frame: identicalFrame) {
+                    if (frame == it.key()) {
+                        skip = true;
+                        break;
+                    }
                 }
             }
-        }
-        if (skip) continue;
+            if (skip) continue;
 
-        auto spriteFrame = it.value();
-        QPoint delta = spriteFrame.frame.topLeft();
+            auto spriteFrame = it.value();
+            QPoint delta = spriteFrame.frame.topLeft();
 
-        if (ui->algorithmComboBox->currentText() == "Rect") {
-            auto rectItem = _scene->addRect(spriteFrame.frame, QPen(Qt::white), QBrush(brushColor));
-            rectItem->setToolTip(it.key());
-            outlineItems.push_back(rectItem);
-        }
-
-        if (spriteFrame.triangles.indices.size()) {
-            for (int i=0; i<spriteFrame.triangles.indices.size(); i+=3) {
-                QPointF v1 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+0]] + delta;
-                QPointF v2 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+1]] + delta;
-                QPointF v3 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+2]] + delta;
-
-                auto triangleItem = _scene->addPolygon(QPolygonF() << v1 << v2 << v3, QPen(Qt::white), QBrush(polygonColor));
-                triangleItem->setToolTip(QString("%1\nTriangles: %2").arg(it.key()).arg(spriteFrame.triangles.indices.size() / 3));
-                outlineItems.push_back(triangleItem);
+            if (ui->algorithmComboBox->currentText() == "Rect") {
+                auto rectItem = _scene->addRect(spriteFrame.frame, QPen(Qt::white), QBrush(brushColor));
+                rectItem->setPos(atlasPixmapItem->pos());
+                rectItem->setToolTip(it.key());
+                outlineItems.push_back(rectItem);
             }
-        }
 
-//        QPolygon polygon;
-//        for (auto point: spriteFrame.triangles.debugPoints) {
-//            polygon << QPoint(point.x(), point.y());
-//        }
-//        outlineItems.push_back(_scene->addPolygon(polygon, QPen(Qt::red), QBrush(convexColor)));
+            if (spriteFrame.triangles.indices.size()) {
+                for (int i=0; i<spriteFrame.triangles.indices.size(); i+=3) {
+                    QPointF v1 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+0]] + delta;
+                    QPointF v2 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+1]] + delta;
+                    QPointF v3 = spriteFrame.triangles.verts[spriteFrame.triangles.indices[i+2]] + delta;
 
-//        for (auto point: spriteFrame.triangles.debugPoints) {
-//            auto rectItem = _scene->addRect(QRectF(point.x() + delta.x(), point.y() + delta.y(), 1, 1), QPen(Qt::red), QBrush(Qt::red));
-//            outlineItems.push_back(rectItem);
-//        }
-
-        // show identical statistics
-        auto identicalFrames = _spriteAtlas.identicalFrames().find(it.key());
-        if (identicalFrames != _spriteAtlas.identicalFrames().end()) {
-            auto identicalItem = _scene->addPixmap(QPixmap(":/res/identical.png"));
-            QString identicalString;
-            identicalString += it.key() + "\n";
-            for (auto frame: identicalFrames.value()) {
-                identicalString += frame + "\n";
+                    auto triangleItem = _scene->addPolygon(QPolygonF() << v1 << v2 << v3, QPen(Qt::white), QBrush(polygonColor));
+                    triangleItem->setPos(atlasPixmapItem->pos());
+                    triangleItem->setToolTip(QString("%1\nTriangles: %2").arg(it.key()).arg(spriteFrame.triangles.indices.size() / 3));
+                    outlineItems.push_back(triangleItem);
+                }
             }
-            identicalItem->setToolTip(identicalString);
-            identicalItem->setPos(spriteFrame.frame.topLeft());
+
+    //        QPolygon polygon;
+    //        for (auto point: spriteFrame.triangles.debugPoints) {
+    //            polygon << QPoint(point.x(), point.y());
+    //        }
+    //        outlineItems.push_back(_scene->addPolygon(polygon, QPen(Qt::red), QBrush(convexColor)));
+
+    //        for (auto point: spriteFrame.triangles.debugPoints) {
+    //            auto rectItem = _scene->addRect(QRectF(point.x() + delta.x(), point.y() + delta.y(), 1, 1), QPen(Qt::red), QBrush(Qt::red));
+    //            outlineItems.push_back(rectItem);
+    //        }
+
+            // show identical statistics
+            auto identicalFrames = _spriteAtlas.identicalFrames().find(it.key());
+            if (identicalFrames != _spriteAtlas.identicalFrames().end()) {
+                auto identicalItem = _scene->addPixmap(QPixmap(":/res/identical.png"));
+                QString identicalString;
+                identicalString += it.key() + "\n";
+                for (auto frame: identicalFrames.value()) {
+                    identicalString += frame + "\n";
+                }
+                identicalItem->setToolTip(identicalString);
+                identicalItem->setPos(spriteFrame.frame.topLeft());
+            }
         }
     }
 
     _outlinesGroup = _scene->createItemGroup(outlineItems);
     _outlinesGroup->setVisible(ui->displayOutlinesCheckBox->isChecked());
 
-    _scene->setSceneRect(atlasPixmapItem->boundingRect());
+    //_scene->setSceneRect(atlasPixmapItem->boundingRect());
 
     //1024x1024x4 (RAM: 4.00MB)
     float ram = (atlasImage.width() * atlasImage.height() * 4) / 1024.f / 1024.f;
@@ -374,8 +404,6 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     ui->epsilonHorizontalSlider->setValue(projectFile->epsilon() * 10);
     ui->textureBorderSpinBox->setValue(projectFile->textureBorder());
     ui->spriteBorderSpinBox->setValue(projectFile->spriteBorder());
-    ui->maxTextureSizeComboBox->setCurrentText(QString::number(projectFile->maxTextureSize()));
-    ui->pow2ComboBox->setCurrentIndex(projectFile->pow2()? 1:0);
     ui->dataFormatComboBox->setCurrentText(projectFile->dataFormat());
     ui->destPathLineEdit->setText(projectFile->destPath());
     ui->spriteSheetLineEdit->setText(projectFile->spriteSheetName());
@@ -390,9 +418,13 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
         delete item;
     }
     for (auto scalingVariant: projectFile->scalingVariants()) {
-        ScalingVariantWidget* scalingVariantWidget = new ScalingVariantWidget(this, scalingVariant.name, scalingVariant.scale);
+        ScalingVariantWidget* scalingVariantWidget = new ScalingVariantWidget(this,
+                                                                              scalingVariant.name,
+                                                                              scalingVariant.scale,
+                                                                              scalingVariant.maxTextureSize,
+                                                                              scalingVariant.pow2);
         connect(scalingVariantWidget, SIGNAL(remove()), this, SLOT(removeScalingVariant()));
-        connect(scalingVariantWidget, SIGNAL(valueChanged()), this, SLOT(scalingVariantWidgetValueChanged()));
+        connect(scalingVariantWidget, SIGNAL(valueChanged(bool)), this, SLOT(scalingVariantWidgetValueChanged(bool)));
         ui->scalingVariantsGroupBox->layout()->addWidget(scalingVariantWidget);
 
         if (ui->scalingVariantsGroupBox->layout()->count() == 1) {
@@ -440,8 +472,6 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
     projectFile->setEpsilon(ui->epsilonHorizontalSlider->value() / 10.f);
     projectFile->setTextureBorder(ui->textureBorderSpinBox->value());
     projectFile->setSpriteBorder(ui->spriteBorderSpinBox->value());
-    projectFile->setMaxTextureSize(ui->maxTextureSizeComboBox->currentText().toInt());
-    projectFile->setPow2(ui->pow2ComboBox->currentIndex()? true:false);
     projectFile->setDataFormat(ui->dataFormatComboBox->currentText());
     projectFile->setDestPath(ui->destPathLineEdit->text());
     projectFile->setSpriteSheetName(ui->spriteSheetLineEdit->text());
@@ -457,6 +487,8 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
             ScalingVariant scalingVariant;
             scalingVariant.name = scalingVariantWidget->name();
             scalingVariant.scale = scalingVariantWidget->scale();
+            scalingVariant.maxTextureSize = scalingVariantWidget->maxTextureSize();
+            scalingVariant.pow2 = scalingVariantWidget->pow2();
             scalingVariants.push_back(scalingVariant);
         }
     }
@@ -667,6 +699,8 @@ void MainWindow::on_actionPublish_triggered() {
         if (scalingVariantWidget) {
             QString variantName = scalingVariantWidget->name();
             float scale = scalingVariantWidget->scale();
+            int maxTextureSize = scalingVariantWidget->maxTextureSize();
+            bool pow2 = scalingVariantWidget->pow2();
 
             QString spriteSheetName = ui->spriteSheetLineEdit->text();
             if (spriteSheetName.contains("{v}")) {
@@ -696,8 +730,8 @@ void MainWindow::on_actionPublish_triggered() {
                                   ui->textureBorderSpinBox->value(),
                                   ui->spriteBorderSpinBox->value(),
                                   ui->trimSpinBox->value(),
-                                  ui->pow2ComboBox->currentIndex()? true:false,
-                                  ui->maxTextureSizeComboBox->currentText().toInt(),
+                                  pow2,
+                                  maxTextureSize,
                                   scale);
 
                 atlas.setAlgorithm(ui->algorithmComboBox->currentText());
@@ -767,7 +801,13 @@ void MainWindow::on_toolButtonZoom1x1_clicked() {
 }
 
 void MainWindow::on_toolButtonZoomFit_clicked() {
-    ui->graphicsView->fitInView(_scene->sceneRect(), Qt::KeepAspectRatio);
+    QRectF rect = _scene->sceneRect();
+    rect.setLeft(rect.left() - rect.width() * 0.05f);
+    rect.setRight(rect.right() + rect.width() * 0.05f);
+    rect.setTop(rect.top() - rect.height() * 0.05f);
+    rect.setBottom(rect.bottom() + rect.height() * 0.05f);
+
+    ui->graphicsView->fitInView(rect, Qt::KeepAspectRatio);
     QTransform tr = ui->graphicsView->transform();
     float scale = tr.m11() - 1;
     int value = 0;
@@ -832,7 +872,7 @@ void MainWindow::on_addScalingVariantPushButton_clicked() {
         std::make_pair("sd/", 0.25f),
     };
 
-    int index = ui->scalingVariantsGroupBox->layout()->count();
+    unsigned int index = ui->scalingVariantsGroupBox->layout()->count();
     if (index >= defaultScaling.size()) {
         QMessageBox::warning(this, "Scaling variants", "Scaling variants is limited by 3.");
         return;
@@ -840,7 +880,7 @@ void MainWindow::on_addScalingVariantPushButton_clicked() {
 
     ScalingVariantWidget* scalingVariantWidget = new ScalingVariantWidget(this, defaultScaling[index].first.c_str(), defaultScaling[index].second);
     connect(scalingVariantWidget, SIGNAL(remove()), this, SLOT(removeScalingVariant()));
-    connect(scalingVariantWidget, SIGNAL(valueChanged()), this, SLOT(scalingVariantWidgetValueChanged()));
+    connect(scalingVariantWidget, SIGNAL(valueChanged(bool)), this, SLOT(scalingVariantWidgetValueChanged(bool)));
     ui->scalingVariantsGroupBox->layout()->addWidget(scalingVariantWidget);
 
     if (ui->scalingVariantsGroupBox->layout()->count() == 1) {
@@ -857,7 +897,7 @@ void MainWindow::removeScalingVariant() {
     qDebug() << "remove" << sender();
     ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(sender());
     if (scalingVariantWidget) {
-        disconnect(scalingVariantWidget, SIGNAL(valueChanged()), this, SLOT(scalingVariantWidgetValueChanged()));
+        disconnect(scalingVariantWidget, SIGNAL(valueChanged(bool)), this, SLOT(scalingVariantWidgetValueChanged(bool)));
         ui->scalingVariantsGroupBox->layout()->removeWidget(scalingVariantWidget);
         delete scalingVariantWidget;
     }
@@ -900,45 +940,22 @@ void MainWindow::on_optLevelSlider_valueChanged(int value) {
     setProjectDirty();
 }
 
-void MainWindow::on_trimSpinBox_valueChanged(int value) {
+void MainWindow::on_trimSpinBox_valueChanged(int) {
     propertiesValueChanged();
     setProjectDirty();
 }
 
-void MainWindow::on_textureBorderSpinBox_valueChanged(int value) {
+void MainWindow::on_textureBorderSpinBox_valueChanged(int) {
     propertiesValueChanged();
     setProjectDirty();
 }
 
-void MainWindow::on_spriteBorderSpinBox_valueChanged(int value) {
+void MainWindow::on_spriteBorderSpinBox_valueChanged(int) {
     propertiesValueChanged();
     setProjectDirty();
 }
 
-void MainWindow::on_epsilonHorizontalSlider_valueChanged(int value) {
-    propertiesValueChanged();
-    setProjectDirty();
-}
-
-void MainWindow::on_pow2ComboBox_currentIndexChanged(int value) {
-    propertiesValueChanged();
-    setProjectDirty();
-}
-
-void MainWindow::on_maxTextureSizeComboBox_currentTextChanged(const QString& text) {
-    bool isValidSize;
-    if (text.toInt(&isValidSize) > 8192) {
-        isValidSize = false;
-    }
-
-    QPalette comboboxPalette = ui->maxTextureSizeComboBox->palette();
-    if (!isValidSize) {
-        comboboxPalette.setColor(QPalette::Text, Qt::red);
-    } else {
-        comboboxPalette.setColor(QPalette::Text, Qt::black);
-    }
-    ui->maxTextureSizeComboBox->setPalette(comboboxPalette);
-
+void MainWindow::on_epsilonHorizontalSlider_valueChanged(int) {
     propertiesValueChanged();
     setProjectDirty();
 }
@@ -952,7 +969,7 @@ void MainWindow::on_algorithmComboBox_currentTextChanged(const QString& text) {
     setProjectDirty();
 }
 
-void MainWindow::on_trimModeComboBox_currentIndexChanged(int value) {
+void MainWindow::on_trimModeComboBox_currentIndexChanged(int) {
     propertiesValueChanged();
     setProjectDirty();
 }
@@ -1015,26 +1032,39 @@ void MainWindow::on_pixelFormatComboBox_currentIndexChanged(int index) {
             (pixelFormat == kPVRTC4) ||
             (pixelFormat == kPVRTC4A))
     {
-        ui->pow2ComboBox->setCurrentIndex(1);
-        ui->pow2ComboBox->setEnabled(false);
+        for (int i=0; i<ui->scalingVariantsGroupBox->layout()->count(); ++i) {
+            ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(ui->scalingVariantsGroupBox->layout()->itemAt(i)->widget());
+            if (scalingVariantWidget) {
+                scalingVariantWidget->setPow2(true);
+                scalingVariantWidget->setEnabledPow2(false);
+            }
+        }
     } else {
-        ui->pow2ComboBox->setEnabled(true);
+        for (int i=0; i<ui->scalingVariantsGroupBox->layout()->count(); ++i) {
+            ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(ui->scalingVariantsGroupBox->layout()->itemAt(i)->widget());
+            if (scalingVariantWidget) {
+                scalingVariantWidget->setEnabledPow2(true);
+            }
+        }
     }
     setProjectDirty();
 }
 
-void MainWindow::on_dataFormatComboBox_currentIndexChanged(int value) {
+void MainWindow::on_dataFormatComboBox_currentIndexChanged(int) {
     setProjectDirty();
 }
 
-void MainWindow::on_destPathLineEdit_textChanged(const QString& text) {
+void MainWindow::on_destPathLineEdit_textChanged(const QString&) {
     setProjectDirty();
 }
 
-void MainWindow::on_spriteSheetLineEdit_textChanged(const QString& text) {
+void MainWindow::on_spriteSheetLineEdit_textChanged(const QString&) {
     setProjectDirty();
 }
 
-void MainWindow::scalingVariantWidgetValueChanged() {
+void MainWindow::scalingVariantWidgetValueChanged(bool refresh) {
+    if (refresh) {
+        propertiesValueChanged();
+    }
     setProjectDirty();
 }

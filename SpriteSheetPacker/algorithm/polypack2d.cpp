@@ -10,12 +10,12 @@ namespace PolyPack2D {
     }
 
     bool trianglesIntersect(const Triangles& a, const Triangles& b) {
-        for (int i=0; i<a.indices.size(); i+=3) {
+        for (size_t i=0; i<a.indices.size(); i+=3) {
             float a1[2] = { a.verts[a.indices[i+0]].x, a.verts[a.indices[i+0]].y };
             float a2[2] = { a.verts[a.indices[i+1]].x, a.verts[a.indices[i+1]].y };
             float a3[2] = { a.verts[a.indices[i+2]].x, a.verts[a.indices[i+2]].y };
 
-            for (int j=0; j<b.indices.size(); j+=3) {
+            for (size_t j=0; j<b.indices.size(); j+=3) {
                 float b1[2] = { b.verts[b.indices[j+0]].x, b.verts[b.indices[j+0]].y };
                 float b2[2] = { b.verts[b.indices[j+1]].x, b.verts[b.indices[j+1]].y };
                 float b3[2] = { b.verts[b.indices[j+2]].x, b.verts[b.indices[j+2]].y };

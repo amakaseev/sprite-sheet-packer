@@ -11,10 +11,10 @@ public:
     ~PngOptimizer() {}
 	
 public:
-    virtual bool optimizeFiles(const QStringList& fileNames) { return true; }
-    virtual bool optimizeFile(const QString& fileName) { return true; }
+    virtual bool optimizeFiles(const QStringList&) { return true; }
+    virtual bool optimizeFile(const QString&) { return true; }
 
-    virtual bool setOptions(int optLevel) { return true; }
+    virtual bool setOptions(int) { return true; }
 };
 
 class OptiPngOptimizer : public PngOptimizer {

@@ -7,6 +7,8 @@
 struct ScalingVariant{
     QString name;
     float   scale;
+    int     maxTextureSize;
+    bool    pow2;
 };
 
 class SpritePackerProjectFile
@@ -32,12 +34,6 @@ public:
 
     void setSpriteBorder(int spriteBorder) { _spriteBorder = spriteBorder; }
     int spriteBorder() const { return _spriteBorder; }
-
-    void setMaxTextureSize(int maxTextureSize) { _maxTextureSize = maxTextureSize; }
-    int maxTextureSize() const { return _maxTextureSize; }
-
-    void setPow2(bool pow2) { _pow2 = pow2; }
-    bool pow2() const { return _pow2; }
 
     void setImageFormat(const QString& imageFormat) { _imageFormat = imageFormat; }
     const QString& imageFormat() const { return _imageFormat; }
@@ -80,8 +76,6 @@ protected:
     float   _epsilon;
     int     _textureBorder;
     int     _spriteBorder;
-    int     _maxTextureSize;
-    bool    _pow2;
     QString _imageFormat;
     QString _pixelFormat;
     QString _optMode;
@@ -96,12 +90,6 @@ protected:
 
 private:
     static GenericObjectFactory<std::string, SpritePackerProjectFile> _factory;
-};
-
-class SpritePackerProjectFileOLD: public SpritePackerProjectFile {
-public:
-    virtual bool write(const QString&) { return false; }
-    virtual bool read(const QString& fileName);
 };
 
 class SpritePackerProjectFileTPS: public SpritePackerProjectFile {

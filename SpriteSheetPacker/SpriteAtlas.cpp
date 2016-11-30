@@ -104,6 +104,8 @@ bool SpriteAtlas::generate() {
     QTime timePerform;
     timePerform.start();
 
+    _outputData.clear();
+
     QStringList nameFilter;
     nameFilter << "*.png" << "*.jpg" << "*.jpeg" << "*.gif" << "*.bmp";
 
@@ -224,7 +226,25 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
             } else {
                 if ((w == _maxTextureSize) && (h == _maxTextureSize)) {
                     qDebug() << "Max size Limit!";
-                    return false;
+                    //typedef BinPack2D::Content<PackContent>::Vector::iterator binpack2d_iterator;
+                    QVector<PackContent> remainderContent;
+                    for (auto itor = remainder.Get().begin(); itor != remainder.Get().end(); itor++ ) {
+                        const BinPack2D::Content<PackContent> &content = *itor;
+
+                        const PackContent &packContent = content.content;
+                        remainderContent.push_back(packContent);
+
+                        qDebug() << packContent.name() << content.size.w << content.size.h;
+                    }
+                    qDebug() << "content:" << content.size();
+                    qDebug() << "remainderContent:" << remainderContent.size();
+
+                    outputContent = BinPack2D::ContentAccumulator<PackContent>();
+                    canvasArray.CollectContent(outputContent);
+
+                    packWithRect(remainderContent);
+
+                    break;
                 }
             }
             if (k) {
@@ -279,7 +299,25 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
             } else {
                 if ((w == _maxTextureSize) && (h == _maxTextureSize)) {
                     qDebug() << "Max size Limit!";
-                    return false;
+                    //typedef BinPack2D::Content<PackContent>::Vector::iterator binpack2d_iterator;
+                    QVector<PackContent> remainderContent;
+                    for (auto itor = remainder.Get().begin(); itor != remainder.Get().end(); itor++ ) {
+                        const BinPack2D::Content<PackContent> &content = *itor;
+
+                        const PackContent &packContent = content.content;
+                        remainderContent.push_back(packContent);
+
+                        qDebug() << packContent.name() << content.size.w << content.size.h;
+                    }
+                    qDebug() << "content:" << content.size();
+                    qDebug() << "remainderContent:" << remainderContent.size();
+
+                    outputContent = BinPack2D::ContentAccumulator<PackContent>();
+                    canvasArray.CollectContent(outputContent);
+
+                    packWithRect(remainderContent);
+
+                    break;
                 }
             }
             if (k) {
@@ -325,11 +363,12 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
 
     qDebug() << "Found optimize size:" << w << "x" << h;
 
+    OutputData outputData;
+
     // parse output.
-    _atlasImage = QImage(w, h, QImage::Format_RGBA8888);
-    _atlasImage.fill(QColor(0, 0, 0, 0));
-    QPainter painter(&_atlasImage);
-    _spriteFrames.clear();
+    outputData._atlasImage = QImage(w, h, QImage::Format_RGBA8888);
+    outputData._atlasImage.fill(QColor(0, 0, 0, 0));
+    QPainter painter(&outputData._atlasImage);
     for(auto itor = outputContent.Get().begin(); itor != outputContent.Get().end(); itor++ ) {
         const BinPack2D::Content<PackContent> &content = *itor;
 
@@ -371,20 +410,22 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
             painter.drawImage(QPoint(content.coord.x + _textureBorder, content.coord.y + _textureBorder), packContent.image(), packContent.rect());
         }
 
-        _spriteFrames[packContent.name()] = spriteFrame;
+        outputData._spriteFrames[packContent.name()] = spriteFrame;
 
         // add ident to sprite frames
         auto identicalIt = _identicalFrames.find(packContent.name());
         if (identicalIt != _identicalFrames.end()) {
             QStringList identicalList;
             for (auto ident: (*identicalIt)) {
-                _spriteFrames[ident] = spriteFrame;
+                outputData._spriteFrames[ident] = spriteFrame;
 
                 identicalList.push_back(ident);
             }
         }
     }
+
     painter.end();
+    _outputData.push_front(outputData);
 
     return true;
 }
@@ -414,11 +455,12 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
 
     auto outputContent = container.contentList();
 
-    _spriteFrames.clear();
-    _atlasImage = QImage(container.bounds().width() + _textureBorder * 2, container.bounds().height() + _textureBorder * 2, QImage::Format_RGBA8888);
-    _atlasImage.fill(QColor(0, 0, 0, 0));
+    OutputData outputData;
 
-    QPainter painter(&_atlasImage);
+    outputData._atlasImage = QImage(container.bounds().width() + _textureBorder * 2, container.bounds().height() + _textureBorder * 2, QImage::Format_RGBA8888);
+    outputData._atlasImage.fill(QColor(0, 0, 0, 0));
+
+    QPainter painter(&outputData._atlasImage);
     for(auto itor = outputContent.begin(); itor != outputContent.end(); itor++ ) {
         const PolyPack2D::Content<PackContent> &content = *itor;
 
@@ -444,18 +486,22 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
         painter.setClipPath(clipPath);
         painter.drawImage(QPoint(content.bounds().left + _textureBorder, content.bounds().top + _textureBorder), packContent.image(), packContent.rect());
 
-        _spriteFrames[packContent.name()] = spriteFrame;
+        outputData._spriteFrames[packContent.name()] = spriteFrame;
 
         // add ident to sprite frames
         auto identicalIt = _identicalFrames.find(packContent.name());
         if (identicalIt != _identicalFrames.end()) {
             QStringList identicalList;
             for (auto ident: (*identicalIt)) {
-                _spriteFrames[ident] = spriteFrame;
+                outputData._spriteFrames[ident] = spriteFrame;
 
                 identicalList.push_back(ident);
             }
-        }    }
+        }
+    }
+
+    painter.end();
+    _outputData.push_front(outputData);
 
     return true;
 }

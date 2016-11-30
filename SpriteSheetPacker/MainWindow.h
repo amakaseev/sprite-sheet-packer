@@ -72,8 +72,6 @@ private slots:
     void on_epsilonHorizontalSlider_valueChanged(int value);
     void on_textureBorderSpinBox_valueChanged(int value);
     void on_spriteBorderSpinBox_valueChanged(int value);
-    void on_maxTextureSizeComboBox_currentTextChanged(const QString &arg1);
-    void on_pow2ComboBox_currentIndexChanged(int value);
     void on_imageFormatComboBox_currentIndexChanged(int index);
     void on_pixelFormatComboBox_currentIndexChanged(int index);
     void on_dataFormatComboBox_currentIndexChanged(int value);
@@ -82,7 +80,7 @@ private slots:
     void on_optModeComboBox_currentTextChanged(const QString &text);
     void on_optLevelSlider_valueChanged(int value);
 
-    void scalingVariantWidgetValueChanged();
+    void scalingVariantWidgetValueChanged(bool);
 
 private:
     Ui::MainWindow*      ui;

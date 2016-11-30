@@ -13,8 +13,6 @@ SpritePackerProjectFile::SpritePackerProjectFile() {
     _epsilon = 5;
     _textureBorder = 0;
     _spriteBorder = 2;
-    _maxTextureSize = 8192;
-    _pow2 = false;
     _imageFormat = "PNG";
     _pixelFormat = "RGBA8888";
     _optMode = "None";
@@ -43,8 +41,6 @@ bool SpritePackerProjectFile::read(const QString &fileName) {
     if (json.contains("epsilon")) _epsilon = json["epsilon"].toDouble();
     if (json.contains("textureBorder")) _textureBorder = json["textureBorder"].toInt();
     if (json.contains("spriteBorder")) _spriteBorder = json["spriteBorder"].toInt();
-    if (json.contains("maxTextureSize")) _maxTextureSize = json["maxTextureSize"].toInt();
-    if (json.contains("pow2")) _pow2 = json["pow2"].toBool();
     if (json.contains("imageFormat")) _imageFormat = json["imageFormat"].toString();
     if (json.contains("pixelFormat")) _pixelFormat = json["pixelFormat"].toString();
     if (json.contains("optMode")) _optMode = json["optMode"].toString();
@@ -57,6 +53,9 @@ bool SpritePackerProjectFile::read(const QString &fileName) {
         ScalingVariant scalingVariant;
         scalingVariant.name = scalingVariantObject["name"].toString();
         scalingVariant.scale = scalingVariantObject["scale"].toDouble();
+        scalingVariant.maxTextureSize = scalingVariantObject.contains("maxTextureSize")? scalingVariantObject["maxTextureSize"].toInt() : 2048;
+        scalingVariant.pow2 = scalingVariantObject.contains("pow2")? scalingVariantObject["pow2"].toBool() : false;
+
         _scalingVariants.push_back(scalingVariant);
     }
 
@@ -83,8 +82,6 @@ bool SpritePackerProjectFile::write(const QString &fileName) {
     json["epsilon"] = _epsilon;
     json["textureBorder"] = _textureBorder;
     json["spriteBorder"] = _spriteBorder;
-    json["maxTextureSize"] = _maxTextureSize;
-    json["pow2"] = _pow2;
     json["imageFormat"] = _imageFormat;
     json["pixelFormat"] = _pixelFormat;
     json["optMode"] = _optMode;
@@ -95,6 +92,8 @@ bool SpritePackerProjectFile::write(const QString &fileName) {
         QJsonObject scalingVariantObject;
         scalingVariantObject["name"] = scalingVariant.name;
         scalingVariantObject["scale"] = scalingVariant.scale;
+        scalingVariantObject["maxTextureSize"] = scalingVariant.maxTextureSize;
+        scalingVariantObject["pow2"] = scalingVariant.pow2;
         scalingVariants.append(scalingVariantObject);
     }
     json["scalingVariants"] = scalingVariants;
@@ -114,69 +113,6 @@ bool SpritePackerProjectFile::write(const QString &fileName) {
     return true;
 }
 
-bool SpritePackerProjectFileOLD::read(const QString &fileName) {
-    QDir dir(QFileInfo(fileName).absolutePath());
-    QFile file(fileName);
-    file.open(QIODevice::ReadOnly);
-    QVariant plist = PListParser::parsePList(&file);
-
-    if (!plist.isValid()) {
-        return false;
-    }
-
-    QVariantMap plistDict = plist.toMap();
-
-    // load property
-    QVariantMap propertyMap = plistDict["property"].toMap();
-
-    // PACKING
-    QVariantMap packingMap = propertyMap["packing"].toMap();
-    _trimThreshold = packingMap["threshold"].toInt();
-    _textureBorder = packingMap["textureBorder"].toInt();
-    _spriteBorder = packingMap["spriteBorder"].toInt();
-
-    // OUTPUT
-    QVariantMap outputMap = propertyMap["output"].toMap();
-    switch (outputMap["dataFormat"].toInt()) {
-    case 0: _dataFormat = "cocos2d"; break;
-    case 1: _dataFormat = "json"; break;
-    default: _dataFormat = "cocos2d"; break;
-    }
-    _destPath = QDir(dir.absoluteFilePath(outputMap["destPath"].toString())).canonicalPath();
-    _spriteSheetName = outputMap["spriteSheetName"].toString();
-
-    _scalingVariants.clear();
-    QVariantMap hdrMap = outputMap["HDR"].toMap();
-    if (hdrMap["enable"].toBool()) {
-        ScalingVariant scalingVariant;
-        scalingVariant.scale = hdrMap["scale"].toInt() / 100.f;
-        scalingVariant.name = hdrMap["folder"].toString();
-        _scalingVariants.push_back(scalingVariant);
-    }
-    QVariantMap hdMap = outputMap["HD"].toMap();
-    if (hdMap["enable"].toBool()) {
-        ScalingVariant scalingVariant;
-        scalingVariant.scale = hdMap["scale"].toInt() / 100.f;
-        scalingVariant.name = hdMap["folder"].toString();
-        _scalingVariants.push_back(scalingVariant);
-    }
-    QVariantMap sdMap = outputMap["SD"].toMap();
-    if (sdMap["enable"].toBool()) {
-        ScalingVariant scalingVariant;
-        scalingVariant.scale = sdMap["scale"].toInt() / 100.f;
-        scalingVariant.name = sdMap["folder"].toString();
-        _scalingVariants.push_back(scalingVariant);
-    }
-
-    _srcList.clear();
-    QVariantList spritesList = plistDict["sprites"].toList();
-    foreach (QVariant spriteFile, spritesList) {
-        _srcList.append(dir.absoluteFilePath(spriteFile.toString()));
-    }
-
-    return true;
-}
-
 bool SpritePackerProjectFileTPS::read(const QString &fileName) {
     QDir dir(QFileInfo(fileName).absolutePath());
     QFile file(fileName);
@@ -187,32 +123,39 @@ bool SpritePackerProjectFileTPS::read(const QString &fileName) {
         return false;
     }
 
+    float globalScale = 1;
+
     QVariantMap tpsMap = tps.toMap();
 
     if (tpsMap.find("globalSpriteSettings") != tpsMap.end()) {
         QVariantMap globalSpriteSettings = tpsMap["globalSpriteSettings"].toMap();
         _trimThreshold = globalSpriteSettings["trimThreshold"].toInt();
+
+        if (globalSpriteSettings.find("scale") != tpsMap.end()) {
+            globalScale = globalSpriteSettings["scale"].toFloat();
+        }
     }
+
     if (tpsMap.find("borderPadding") != tpsMap.end()) {
         _textureBorder = tpsMap["borderPadding"].toInt();
     }
     if (tpsMap.find("shapePadding") != tpsMap.end()) {
         _spriteBorder = tpsMap["shapePadding"].toInt();
     }
+
+
+    int maxTextureSize = 2048;
     if (tpsMap.find("maxTextureSize") != tpsMap.end()) {
-        _maxTextureSize = qMax(tpsMap["maxTextureSize"].toMap()["width"].toInt(), tpsMap["maxTextureSize"].toMap()["height"].toInt());
+        maxTextureSize = qMax(tpsMap["maxTextureSize"].toMap()["width"].toInt(), tpsMap["maxTextureSize"].toMap()["height"].toInt());
     }
 
-    if (tpsMap.find("globalSpriteSettings") != tpsMap.end()) {
-        QVariantMap globalSpriteSettings = tpsMap["globalSpriteSettings"].toMap();
-        _trimThreshold = globalSpriteSettings["trimThreshold"].toInt();
-    }
+    bool pow2 = false;
     if (tpsMap.find("algorithmSettings") != tpsMap.end()) {
         QVariantMap algorithmSettings = tpsMap["algorithmSettings"].toMap();
         if (algorithmSettings["sizeConstraints"].toString() == "POT") {
-            _pow2 = true;
+            pow2 = true;
         } else {
-            _pow2 = false;
+            pow2 = false;
         }
     }
 
@@ -239,7 +182,16 @@ bool SpritePackerProjectFileTPS::read(const QString &fileName) {
             QVariantMap autoSDSetting = autoSDSettingVariant.toMap();
             ScalingVariant scalingVariant;
             scalingVariant.name = autoSDSetting["extension"].toString();
-            scalingVariant.scale = autoSDSetting["scale"].toFloat();
+            scalingVariant.scale = autoSDSetting["scale"].toFloat() * globalScale;
+
+            scalingVariant.maxTextureSize = qMax(autoSDSetting["maxTextureSize"].toMap()["width"].toInt(),
+                                                 autoSDSetting["maxTextureSize"].toMap()["height"].toInt());
+
+            if (scalingVariant.maxTextureSize <= 0) {
+                scalingVariant.maxTextureSize = maxTextureSize;
+            }
+
+            scalingVariant.pow2 = pow2;
             _scalingVariants.push_back(scalingVariant);
         }
     }

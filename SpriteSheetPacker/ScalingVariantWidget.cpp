@@ -1,7 +1,7 @@
 #include "ScalingVariantWidget.h"
 #include "ui_ScalingVariantWidget.h"
 
-ScalingVariantWidget::ScalingVariantWidget(QWidget *parent, const QString& name, float scale) :
+ScalingVariantWidget::ScalingVariantWidget(QWidget *parent, const QString& name, float scale, int maxTextureSize, bool pow2) :
     QWidget(parent),
     ui(new Ui::ScalingVariantWidget)
 {
@@ -9,6 +9,8 @@ ScalingVariantWidget::ScalingVariantWidget(QWidget *parent, const QString& name,
 
     ui->nameLineEdit->setText(name);
     ui->scaleComboBox->setCurrentText(QString::number(scale));
+    ui->maxTextureSizeComboBox->setCurrentText(QString::number(maxTextureSize));
+    ui->pow2CheckBox->setChecked(pow2);
 }
 
 ScalingVariantWidget::~ScalingVariantWidget() {
@@ -19,12 +21,6 @@ void ScalingVariantWidget::setRemoveEnabled(bool enable) {
     ui->removePushButton->setVisible(enable);
 }
 
-bool ScalingVariantWidget::isValideScale() {
-    bool ok;
-    ui->scaleComboBox->currentText().toFloat(&ok);
-    return ok;
-}
-
 QString ScalingVariantWidget::name() {
     return ui->nameLineEdit->text();
 }
@@ -33,23 +29,62 @@ float ScalingVariantWidget::scale() {
     return ui->scaleComboBox->currentText().toFloat();
 }
 
+int ScalingVariantWidget::maxTextureSize() {
+    return ui->maxTextureSizeComboBox->currentText().toInt();
+}
+
+bool ScalingVariantWidget::pow2() {
+    return ui->pow2CheckBox->isChecked();
+}
+
+void ScalingVariantWidget::setPow2(bool enable) {
+    ui->pow2CheckBox->setChecked(enable);
+}
+
+void ScalingVariantWidget::setEnabledPow2(bool enable) {
+    ui->pow2CheckBox->setEnabled(enable);
+}
+
 void ScalingVariantWidget::on_removePushButton_clicked() {
     emit remove();
 }
 
-void ScalingVariantWidget::on_scaleComboBox_editTextChanged(const QString &arg1) {
+void ScalingVariantWidget::on_scaleComboBox_editTextChanged(const QString &) {
     QPalette comboboxPalette = ui->scaleComboBox->palette();
-    if (!isValideScale()) {
+
+    bool isValideScale;
+    ui->scaleComboBox->currentText().toFloat(&isValideScale);
+
+    if (!isValideScale) {
+        comboboxPalette.setColor(QPalette::Text, Qt::red);
+    } else {
+        comboboxPalette.setColor(QPalette::Text, Qt::black);
+        emit valueChanged(true);
+    }
+    ui->scaleComboBox->setPalette(comboboxPalette);
+}
+
+void ScalingVariantWidget::on_nameLineEdit_textChanged(const QString &) {
+    emit valueChanged(false);
+}
+
+void ScalingVariantWidget::on_maxTextureSizeComboBox_currentTextChanged(const QString &text) {
+    bool isValidSize;
+    if (text.toInt(&isValidSize) > 8192) {
+        isValidSize = false;
+    }
+
+    QPalette comboboxPalette = ui->maxTextureSizeComboBox->palette();
+    if (!isValidSize) {
         comboboxPalette.setColor(QPalette::Text, Qt::red);
     } else {
         comboboxPalette.setColor(QPalette::Text, Qt::black);
     }
-    ui->scaleComboBox->setPalette(comboboxPalette);
+    ui->maxTextureSizeComboBox->setPalette(comboboxPalette);
 
-    emit valueChanged();
+    emit valueChanged(true);
 }
 
-void ScalingVariantWidget::on_nameLineEdit_textChanged(const QString &arg1) {
-    emit valueChanged();
+void ScalingVariantWidget::on_pow2CheckBox_toggled(bool) {
+    emit valueChanged(true);
 }
-

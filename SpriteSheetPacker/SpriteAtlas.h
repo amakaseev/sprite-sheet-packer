@@ -44,14 +44,21 @@ private:
 class SpriteAtlas
 {
 public:
+    struct OutputData {
+        QImage _atlasImage;
+        QMap<QString, SpriteFrameInfo> _spriteFrames;
+    };
+
+public:
     SpriteAtlas(const QStringList& sourceList = QStringList(), int textureBorder = 0, int spriteBorder = 1, int trim = 1, bool pow2 = false, int maxSize = 8192, float scale = 1);
 
     void setAlgorithm(const QString& algorithm) { _algorithm = algorithm; }
     void enablePolygonMode(bool enable, float epsilon = 2.f);
     bool generate();
 
-    const QImage& image() const { return _atlasImage; }
-    const QMap<QString, SpriteFrameInfo>& spriteFrames() const { return _spriteFrames; }
+    const QVector<OutputData>& outputData() const { return _outputData; }
+    const QImage& image() const { return _outputData.front()._atlasImage; }
+    const QMap<QString, SpriteFrameInfo>& spriteFrames() const { return _outputData.front()._spriteFrames; }
     const QMap<QString, QVector<QString>>& identicalFrames() const { return _identicalFrames; }
 
 protected:
@@ -74,8 +81,7 @@ private:
     } _polygonMode;
 
     // output data
-    QImage _atlasImage;
-    QMap<QString, SpriteFrameInfo> _spriteFrames;
+    QVector<OutputData> _outputData;
     QMap<QString, QVector<QString>> _identicalFrames;
 };
 
