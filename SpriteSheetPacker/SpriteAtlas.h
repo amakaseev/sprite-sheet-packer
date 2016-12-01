@@ -56,6 +56,8 @@ public:
     void enablePolygonMode(bool enable, float epsilon = 2.f);
     bool generate();
 
+    float scale() const { return _scale; }
+
     const QVector<OutputData>& outputData() const { return _outputData; }
     const QImage& image() const { return _outputData.front()._atlasImage; }
     const QMap<QString, SpriteFrameInfo>& spriteFrames() const { return _outputData.front()._spriteFrames; }

@@ -24,7 +24,7 @@ protected:
     void refreshOpenRecentMenu();
     void createRefreshButton();
 
-    void refreshAtlas(SpriteAtlas* atlas = NULL);
+    void refreshAtlas(bool generate = true);
 
     void openSpritePackerProject(const QString& fileName);
     void saveSpritePackerProject(const QString& fileName);
@@ -48,13 +48,6 @@ private slots:
     void on_actionAbout_triggered();
     void on_actionPreferences_triggered();
 
-    // zoom control
-    void on_toolButtonZoomOut_clicked();
-    void on_toolButtonZoomIn_clicked();
-    void on_toolButtonZoom1x1_clicked();
-    void on_toolButtonZoomFit_clicked();
-    void on_zoomSlider_valueChanged(int value);
-
     void on_destFolderToolButton_clicked();
     void on_dataFormatSetupToolButton_clicked();
     void on_addScalingVariantPushButton_clicked();
@@ -63,8 +56,6 @@ private slots:
     void removeScalingVariant();
 
     void propertiesValueChanged();
-
-    void on_displayOutlinesCheckBox_clicked(bool checked);
 
     void on_algorithmComboBox_currentTextChanged(const QString& text);
     void on_trimModeComboBox_currentIndexChanged(int value);
@@ -83,16 +74,14 @@ private slots:
     void scalingVariantWidgetValueChanged(bool);
 
 private:
-    Ui::MainWindow*      ui;
-    QGraphicsScene*     _scene;
-    SpritesTreeWidget*  _spritesTreeWidget;
-    QString             _currentProjectFileName;
-    QToolButton*        _openButton;
-    QGraphicsItemGroup* _outlinesGroup;
-    SpriteAtlas         _spriteAtlas;
-    bool                _blockUISignals;
-    bool                _projectDirty;
-    bool                _atlasDirty;
+    Ui::MainWindow*         ui;
+    SpritesTreeWidget*      _spritesTreeWidget;
+    QString                 _currentProjectFileName;
+    QToolButton*            _openButton;
+    QVector<SpriteAtlas>    _spriteAtlas;
+    bool                    _blockUISignals;
+    bool                    _projectDirty;
+    bool                    _atlasDirty;
 };
 
 #endif // MAINWINDOW_H

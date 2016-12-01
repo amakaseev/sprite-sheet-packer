@@ -53,7 +53,9 @@ void ScalingVariantWidget::on_scaleComboBox_editTextChanged(const QString &) {
     QPalette comboboxPalette = ui->scaleComboBox->palette();
 
     bool isValideScale;
-    ui->scaleComboBox->currentText().toFloat(&isValideScale);
+    if (ui->scaleComboBox->currentText().toFloat(&isValideScale) <= 0) {
+        isValideScale = false;
+    }
 
     if (!isValideScale) {
         comboboxPalette.setColor(QPalette::Text, Qt::red);
@@ -79,10 +81,9 @@ void ScalingVariantWidget::on_maxTextureSizeComboBox_currentTextChanged(const QS
         comboboxPalette.setColor(QPalette::Text, Qt::red);
     } else {
         comboboxPalette.setColor(QPalette::Text, Qt::black);
+        emit valueChanged(true);
     }
     ui->maxTextureSizeComboBox->setPalette(comboboxPalette);
-
-    emit valueChanged(true);
 }
 
 void ScalingVariantWidget::on_pow2CheckBox_toggled(bool) {
