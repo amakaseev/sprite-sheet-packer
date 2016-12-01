@@ -3,6 +3,7 @@
 
 #include <QtWidgets>
 #include "SpriteAtlas.h"
+#include "ImageFormat.h"
 
 namespace Ui {
 class SpriteAtlasPreview;
@@ -15,8 +16,8 @@ class SpriteAtlasPreview : public QWidget
 public:
     explicit SpriteAtlasPreview(QWidget *parent = 0);
     ~SpriteAtlasPreview();
-\
-    void setAtlas(const SpriteAtlas& atlas);
+
+    void setAtlas(const SpriteAtlas& atlas, PixelFormat pixelFormat, bool premultiplied);
 
 public slots:
     void on_toolButtonZoomOut_clicked();

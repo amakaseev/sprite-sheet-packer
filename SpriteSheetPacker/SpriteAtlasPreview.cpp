@@ -22,32 +22,26 @@ SpriteAtlasPreview::~SpriteAtlasPreview()
     delete ui;
 }
 
-void SpriteAtlasPreview::setAtlas(const SpriteAtlas& atlas) {
-    if (_outlinesGroup)
-        _scene->destroyItemGroup(_outlinesGroup);
+void SpriteAtlasPreview::setAtlas(const SpriteAtlas& atlas, PixelFormat pixelFormat, bool premultiplied) {
 
     if (_scene) {
-        delete _scene;
-    }
+        if (_outlinesGroup)
+            _scene->destroyItemGroup(_outlinesGroup);
 
-    _scene = new QGraphicsScene(this);
-    _scene->setBackgroundBrush(QBrush(Qt::darkGray));
-    ui->graphicsView->setScene(_scene);
+        _scene->clear();
+    }
 
     QList<QGraphicsItem*> outlineItems;
     QString infoString;
+    float atlasPositionX = 0;
     for (auto it = atlas.outputData().begin(); it != atlas.outputData().end(); ++it) {
         auto outputData = (*it);
         auto atlasImage = outputData._atlasImage;
         auto spriteFrames = outputData._spriteFrames;
 
-        QGraphicsPixmapItem* atlasPixmapItem = new QGraphicsPixmapItem(QPixmap::fromImage(atlasImage));
-        if (it == atlas.outputData().begin()) {
-            atlasPixmapItem->setPos(_scene->sceneRect().width(), 0);
-        } else {
-            atlasPixmapItem->setPos(_scene->sceneRect().width() + 100, 0);
-        }
-        _scene->addItem(atlasPixmapItem);
+        QGraphicsPixmapItem* atlasPixmapItem = _scene->addPixmap(QPixmap::fromImage(convertImage(atlasImage, pixelFormat, premultiplied)));
+        atlasPixmapItem->setPos(atlasPositionX, 0);
+        atlasPositionX += atlasPixmapItem->boundingRect().width() + 100;
 
         auto rect = _scene->addRect(atlasPixmapItem->sceneBoundingRect(), QPen(Qt::darkRed), QBrush(QPixmap("://res/background_tran.png")));
         rect->setZValue(-1);
@@ -76,10 +70,10 @@ void SpriteAtlasPreview::setAtlas(const SpriteAtlas& atlas) {
             QPoint delta = spriteFrame.frame.topLeft();
 
 //            if (ui->algorithmComboBox->currentText() == "Rect") {
-//                auto rectItem = _scene->addRect(spriteFrame.frame, QPen(Qt::white), QBrush(brushColor));
-//                rectItem->setPos(atlasPixmapItem->pos());
-//                rectItem->setToolTip(it.key());
-//                outlineItems.push_back(rectItem);
+                auto rectItem = _scene->addRect(spriteFrame.frame, QPen(Qt::white), QBrush(brushColor));
+                rectItem->setPos(atlasPixmapItem->pos());
+                rectItem->setToolTip(it.key());
+                outlineItems.push_back(rectItem);
 //            }
 
             if (spriteFrame.triangles.indices.size()) {
@@ -130,6 +124,8 @@ void SpriteAtlasPreview::setAtlas(const SpriteAtlas& atlas) {
 
     _outlinesGroup = _scene->createItemGroup(outlineItems);
     _outlinesGroup->setVisible(ui->displayOutlinesCheckBox->isChecked());
+
+    _scene->setSceneRect(_scene->itemsBoundingRect());
 }
 
 void SpriteAtlasPreview::on_toolButtonZoomOut_clicked() {

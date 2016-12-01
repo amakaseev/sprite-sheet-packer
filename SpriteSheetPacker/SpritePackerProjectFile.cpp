@@ -13,8 +13,9 @@ SpritePackerProjectFile::SpritePackerProjectFile() {
     _epsilon = 5;
     _textureBorder = 0;
     _spriteBorder = 2;
-    _imageFormat = "PNG";
-    _pixelFormat = "RGBA8888";
+    _imageFormat = kPNG,
+    _pixelFormat = kARGB8888;
+    _premultiplied = true;
     _optMode = "None";
     _optLevel = 1;
 }
@@ -41,8 +42,9 @@ bool SpritePackerProjectFile::read(const QString &fileName) {
     if (json.contains("epsilon")) _epsilon = json["epsilon"].toDouble();
     if (json.contains("textureBorder")) _textureBorder = json["textureBorder"].toInt();
     if (json.contains("spriteBorder")) _spriteBorder = json["spriteBorder"].toInt();
-    if (json.contains("imageFormat")) _imageFormat = json["imageFormat"].toString();
-    if (json.contains("pixelFormat")) _pixelFormat = json["pixelFormat"].toString();
+    if (json.contains("imageFormat")) _imageFormat = imageFormatFromString(json["imageFormat"].toString());
+    if (json.contains("pixelFormat")) _pixelFormat = pixelFormatFromString(json["pixelFormat"].toString());
+    if (json.contains("premultiplied")) _premultiplied = json["premultiplied"].toBool();
     if (json.contains("optMode")) _optMode = json["optMode"].toString();
     if (json.contains("optLevel")) _optLevel = json["optLevel"].toInt();
 
@@ -82,8 +84,9 @@ bool SpritePackerProjectFile::write(const QString &fileName) {
     json["epsilon"] = _epsilon;
     json["textureBorder"] = _textureBorder;
     json["spriteBorder"] = _spriteBorder;
-    json["imageFormat"] = _imageFormat;
-    json["pixelFormat"] = _pixelFormat;
+    json["imageFormat"] = imageFormatToString(_imageFormat);
+    json["pixelFormat"] = pixelFormatToString(_pixelFormat);
+    json["premultiplied"] = _premultiplied;
     json["optMode"] = _optMode;
     json["optLevel"] = _optLevel;
 
@@ -143,6 +146,28 @@ bool SpritePackerProjectFileTPS::read(const QString &fileName) {
         _spriteBorder = tpsMap["shapePadding"].toInt();
     }
 
+    if (tpsMap.find("outputFormat") != tpsMap.end()) {
+        QString outputFormat = tpsMap["outputFormat"].toString();
+        if (outputFormat == "RGBA8888") {
+            _pixelFormat = kARGB8888;
+        } else if (outputFormat == "RGBA4444") {
+            _pixelFormat = kARGB4444;
+        } else if (outputFormat == "RGBA5551") {
+            _pixelFormat = kARGB4444;
+        } else if (outputFormat == "RGBA5555") {
+            _pixelFormat = kARGB8565;
+        } else if (outputFormat == "BGRA8888") {
+            _pixelFormat = kARGB8888;
+        } else if (outputFormat == "RGB8888") {
+            _pixelFormat = kRGB888;
+        } else if (outputFormat == "RGB565") {
+            _pixelFormat = kRGB565;
+        } else if (outputFormat == "ALPHA") {
+            _pixelFormat = kALPHA;
+        } else if (outputFormat == "ALPHA_INTENSITY") {
+            _pixelFormat = kALPHA;
+        }
+    }
 
     int maxTextureSize = 2048;
     if (tpsMap.find("maxTextureSize") != tpsMap.end()) {

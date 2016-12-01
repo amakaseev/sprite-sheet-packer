@@ -2,6 +2,7 @@
 #define SPRITEPACKERPROJECTFILE_H
 
 #include <QtCore>
+#include "ImageFormat.h"
 #include "GenericObjectFactory.h"
 
 struct ScalingVariant{
@@ -35,11 +36,14 @@ public:
     void setSpriteBorder(int spriteBorder) { _spriteBorder = spriteBorder; }
     int spriteBorder() const { return _spriteBorder; }
 
-    void setImageFormat(const QString& imageFormat) { _imageFormat = imageFormat; }
-    const QString& imageFormat() const { return _imageFormat; }
+    void setImageFormat(ImageFormat imageFormat) { _imageFormat = imageFormat; }
+    ImageFormat imageFormat() const { return _imageFormat; }
 
-    void setPixelFormat(const QString& pixelFormat) { _pixelFormat = pixelFormat; }
-    const QString pixelFormat() const { return _pixelFormat; }
+    void setPixelFormat(PixelFormat pixelFormat) { _pixelFormat = pixelFormat; }
+    PixelFormat pixelFormat() const { return _pixelFormat; }
+
+    void setPremultiplied(bool premultiplied) { _premultiplied = premultiplied; }
+    bool premultiplied() const { return _premultiplied; }
 
     void setOptMode(const QString& optMode) { _optMode = optMode; }
     const QString& optMode() const { return _optMode; }
@@ -70,20 +74,21 @@ public:
     }
 
 protected:
-    QString _algorithm;
-    QString _trimMode;
-    int     _trimThreshold;
-    float   _epsilon;
-    int     _textureBorder;
-    int     _spriteBorder;
-    QString _imageFormat;
-    QString _pixelFormat;
-    QString _optMode;
-    int     _optLevel;
+    QString     _algorithm;
+    QString     _trimMode;
+    int         _trimThreshold;
+    float       _epsilon;
+    int         _textureBorder;
+    int         _spriteBorder;
+    ImageFormat _imageFormat;
+    PixelFormat _pixelFormat;
+    bool        _premultiplied;
+    QString     _optMode;
+    int         _optLevel;
 
     QVector<ScalingVariant> _scalingVariants;
-    QString _dataFormat;
 
+    QString     _dataFormat;
     QString     _destPath;
     QString     _spriteSheetName;
     QStringList _srcList;

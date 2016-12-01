@@ -14,48 +14,6 @@
 
 #define MAX_RECENT 10
 
-static inline QString toString(ImageFormat imageFormat) {
-    switch (imageFormat) {
-        case kPNG: return "PNG";
-        case kPKM: return "PKM";
-        case kPVR: return "PVR";
-        case kPVR_CCZ: return "PVR_CCZ";
-        default: return "PNG";
-    }
-}
-
-static inline ImageFormat imageFormatFromString(const QString& imageFormat) {
-    if (imageFormat == "PNG") return kPNG;
-    if (imageFormat == "PKM") return kPKM;
-    if (imageFormat == "PVR") return kPVR;
-    if (imageFormat == "PVR_CCZ") return kPVR_CCZ;
-    return kPNG;
-}
-
-static inline QString toString(PixelFormat pixelFormat) {
-    switch (pixelFormat) {
-        case kRGB888: return "RGB888";
-        case kRGBA8888: return "RGBA8888";
-        case kETC1: return "ETC1";
-        case kPVRTC2: return "PVRTC2";
-        case kPVRTC2A: return "PVRTC2A";
-        case kPVRTC4: return "PVRTC4";
-        case kPVRTC4A: return "PVRTC4A";
-        default: return "RGBA8888";
-    }
-}
-
-static inline PixelFormat pixelFormatFromString(const QString& pixelFormat) {
-    if (pixelFormat == "RGB888") return kRGB888;
-    if (pixelFormat == "RGBA8888") return kRGBA8888;
-    if (pixelFormat == "ETC1") return kETC1;
-    if (pixelFormat == "PVRTC2") return kPVRTC2;
-    if (pixelFormat == "PVRTC2A") return kPVRTC2A;
-    if (pixelFormat == "PVRTC4") return kPVRTC4;
-    if (pixelFormat == "PVRTC4A") return kPVRTC4A;
-    return kRGBA8888;
-}
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -78,14 +36,18 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->spritesDockWidgetLayout->addWidget(_spritesTreeWidget);
 
     // init image and pixel formats
-    ui->pixelFormatComboBox->addItem(toString(kRGB888));
-    ui->pixelFormatComboBox->addItem(toString(kRGBA8888));
-    ui->pixelFormatComboBox->addItem(toString(kETC1));
-    ui->pixelFormatComboBox->addItem(toString(kPVRTC2));
-    ui->pixelFormatComboBox->addItem(toString(kPVRTC2A));
-    ui->pixelFormatComboBox->addItem(toString(kPVRTC4));
-    ui->pixelFormatComboBox->addItem(toString(kPVRTC4A));
-    ui->pixelFormatComboBox->setCurrentIndex(kRGBA8888);
+    ui->pixelFormatComboBox->addItem(pixelFormatToString(kARGB8888));
+    ui->pixelFormatComboBox->addItem(pixelFormatToString(kARGB8565));
+    ui->pixelFormatComboBox->addItem(pixelFormatToString(kARGB4444));
+    ui->pixelFormatComboBox->addItem(pixelFormatToString(kRGB888));
+    ui->pixelFormatComboBox->addItem(pixelFormatToString(kRGB565));
+    ui->pixelFormatComboBox->addItem(pixelFormatToString(kALPHA));
+    ui->pixelFormatComboBox->addItem(pixelFormatToString(kETC1));
+    ui->pixelFormatComboBox->addItem(pixelFormatToString(kPVRTC2));
+    ui->pixelFormatComboBox->addItem(pixelFormatToString(kPVRTC2A));
+    ui->pixelFormatComboBox->addItem(pixelFormatToString(kPVRTC4));
+    ui->pixelFormatComboBox->addItem(pixelFormatToString(kPVRTC4A));
+    ui->pixelFormatComboBox->setCurrentIndex(kARGB8888);
     ui->imageFormatComboBox->insertItem(kPNG, "PNG (.png)");
     ui->imageFormatComboBox->insertItem(kPKM, "PKM with ETC1 (.pkm)");
     ui->imageFormatComboBox->insertItem(kPVR, "PVR (.pvr)");
@@ -257,10 +219,17 @@ void MainWindow::refreshAtlas(bool generate) {
         }
     }
 
+    refreshPreview();
+
+    _atlasDirty = false;
+}
+
+void MainWindow::refreshPreview() {
     // removing if needed
     while(ui->atlasPreviewTabWidget->count() > _spriteAtlas.size()) {
         ui->atlasPreviewTabWidget->removeTab(ui->atlasPreviewTabWidget->count() - 1);
     }
+
     // adding if needed
     while(ui->atlasPreviewTabWidget->count() < _spriteAtlas.size()) {
         ui->atlasPreviewTabWidget->addTab(new SpriteAtlasPreview(this), "tab");
@@ -278,11 +247,11 @@ void MainWindow::refreshAtlas(bool generate) {
             }
 
             ui->atlasPreviewTabWidget->setTabText(i, title);
-            spriteAtlasPreview->setAtlas(atlas);
+            spriteAtlasPreview->setAtlas(atlas,
+                                         pixelFormatFromString(ui->pixelFormatComboBox->currentText()),
+                                         ui->premultipliedCheckBox->isChecked());
         }
     }
-
-    _atlasDirty = false;
 }
 
 void MainWindow::openSpritePackerProject(const QString& fileName) {
@@ -309,8 +278,9 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     ui->dataFormatComboBox->setCurrentText(projectFile->dataFormat());
     ui->destPathLineEdit->setText(projectFile->destPath());
     ui->spriteSheetLineEdit->setText(projectFile->spriteSheetName());
-    ui->imageFormatComboBox->setCurrentIndex(imageFormatFromString(projectFile->imageFormat()));
-    ui->pixelFormatComboBox->setCurrentIndex(pixelFormatFromString(projectFile->pixelFormat()));
+    ui->imageFormatComboBox->setCurrentText(imageFormatToString(projectFile->imageFormat()));
+    ui->pixelFormatComboBox->setCurrentText(pixelFormatToString(projectFile->pixelFormat()));
+    ui->premultipliedCheckBox->setChecked(projectFile->premultiplied());
     ui->optModeComboBox->setCurrentText(projectFile->optMode());
     ui->optLevelSlider->setValue(projectFile->optLevel());
 
@@ -380,8 +350,9 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
     projectFile->setDataFormat(ui->dataFormatComboBox->currentText());
     projectFile->setDestPath(ui->destPathLineEdit->text());
     projectFile->setSpriteSheetName(ui->spriteSheetLineEdit->text());
-    projectFile->setImageFormat(toString((ImageFormat)ui->imageFormatComboBox->currentIndex()));
-    projectFile->setPixelFormat(toString((PixelFormat)ui->pixelFormatComboBox->currentIndex()));
+    projectFile->setImageFormat(imageFormatFromString(ui->imageFormatComboBox->currentText()));
+    projectFile->setPixelFormat(pixelFormatFromString(ui->pixelFormatComboBox->currentText()));
+    projectFile->setPremultiplied(ui->premultipliedCheckBox->isChecked());
     projectFile->setOptMode(ui->optModeComboBox->currentText());
     projectFile->setOptLevel(ui->optLevelSlider->value());
 
@@ -592,8 +563,9 @@ void MainWindow::on_actionPublish_triggered() {
     }
 
     PublishSpriteSheet* publisher = new PublishSpriteSheet();
-    publisher->setImageFormat((ImageFormat)ui->imageFormatComboBox->currentIndex());
-    publisher->setPixelFormat((PixelFormat)ui->pixelFormatComboBox->currentIndex());
+    publisher->setImageFormat(imageFormatFromString(ui->imageFormatComboBox->currentText()));
+    publisher->setPixelFormat(pixelFormatFromString(ui->pixelFormatComboBox->currentText()));
+    publisher->setPremultiplied(ui->premultipliedCheckBox->isChecked());
 
     PublishStatusDialog publishStatusDialog(this);
     publishStatusDialog.open();
@@ -842,19 +814,27 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
     if (imageFormat == kPNG) {
         ui->imageFormatStackedWidget->setVisible(true);
         ui->imageFormatStackedWidget->setCurrentIndex(0);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8888, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8565, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB4444, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB888, true);
-        setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGBA8888, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB565, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kALPHA, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC1, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4A, false);
-        if (ui->pixelFormatComboBox->currentIndex() > kRGBA8888) {
-            ui->pixelFormatComboBox->setCurrentIndex(kRGBA8888);
+        if (ui->pixelFormatComboBox->currentIndex() > kARGB8888) {
+            ui->pixelFormatComboBox->setCurrentIndex(kARGB8888);
         }
     } else if (imageFormat == kPKM) {
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8888, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8565, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB4444, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB888, false);
-        setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGBA8888, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB565, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kALPHA, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC1, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, false);
@@ -863,8 +843,12 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
         ui->pixelFormatComboBox->setCurrentIndex(kETC1);
     } else if ((imageFormat == kPVR)||(imageFormat == kPVR_CCZ)) {
         ui->imageFormatStackedWidget->setVisible(false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8888, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8565, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB4444, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB888, false);
-        setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGBA8888, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB565, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kALPHA, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC1, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, true);
@@ -900,7 +884,23 @@ void MainWindow::on_pixelFormatComboBox_currentIndexChanged(int index) {
             }
         }
     }
+
+    QVector<PixelFormat> formatsWithAlpha = {kARGB8888, kARGB8565, kARGB4444, kPVRTC2A, kPVRTC4A};
+    if (formatsWithAlpha.indexOf(pixelFormat) != -1) {
+        ui->premultipliedCheckBox->show();
+    } else {
+        ui->premultipliedCheckBox->hide();
+    }
+
+    if (pixelFormat == kARGB8888) {
+        ui->premultipliedCheckBox->setEnabled(true);
+    } else {
+        ui->premultipliedCheckBox->setChecked(true);
+        ui->premultipliedCheckBox->setEnabled(false);
+    }
+
     setProjectDirty();
+    refreshPreview();
 }
 
 void MainWindow::on_dataFormatComboBox_currentIndexChanged(int) {
@@ -912,6 +912,10 @@ void MainWindow::on_destPathLineEdit_textChanged(const QString&) {
 }
 
 void MainWindow::on_spriteSheetLineEdit_textChanged(const QString&) {
+    setProjectDirty();
+}
+
+void MainWindow::on_premultipliedCheckBox_toggled(bool checked) {
     setProjectDirty();
 }
 

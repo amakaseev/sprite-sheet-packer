@@ -72,7 +72,8 @@ void JSConsole::log(QString msg) {
 
 PublishSpriteSheet::PublishSpriteSheet() {
     _imageFormat = kPNG;
-    _pixelFormat = kRGBA8888;
+    _pixelFormat = kARGB8888;
+    _premultiplied = true;
 }
 
 void PublishSpriteSheet::addSpriteSheet(const SpriteAtlas &atlas, const QString &fileName) {
@@ -98,12 +99,8 @@ bool PublishSpriteSheet::publish(const QString& format, const QString& optMode, 
         // save image
         qDebug() << "Save image:" << filePath + imagePrefix(_imageFormat);
         if (_imageFormat == kPNG) {
-            if (_pixelFormat == kRGB888) {
-                QImage image = atlas.image().convertToFormat(QImage::Format_RGB888);
-                image.save(filePath + imagePrefix(_imageFormat), 0, 0);
-            } else {
-                atlas.image().save(filePath + imagePrefix(_imageFormat), 0, 0);
-            }
+            QImage image = convertImage(atlas.image(), _pixelFormat, _premultiplied);
+            image.save(filePath + imagePrefix(_imageFormat));
         } else if ((_imageFormat == kPKM) || (_imageFormat == kPVR) || (_imageFormat == kPVR_CCZ)) {
             CPVRTextureHeader pvrHeader(PVRStandard8PixelType.PixelTypeID, atlas.image().width(), atlas.image().height());
 

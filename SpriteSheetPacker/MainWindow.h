@@ -25,6 +25,7 @@ protected:
     void createRefreshButton();
 
     void refreshAtlas(bool generate = true);
+    void refreshPreview();
 
     void openSpritePackerProject(const QString& fileName);
     void saveSpritePackerProject(const QString& fileName);
@@ -70,6 +71,7 @@ private slots:
     void on_spriteSheetLineEdit_textChanged(const QString& text);
     void on_optModeComboBox_currentTextChanged(const QString &text);
     void on_optLevelSlider_valueChanged(int value);
+    void on_premultipliedCheckBox_toggled(bool checked);
 
     void scalingVariantWidgetValueChanged(bool);
 

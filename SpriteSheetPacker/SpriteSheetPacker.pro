@@ -41,7 +41,8 @@ HEADERS += MainWindow.h \
     AboutDialog.h \
     SpritesTreeWidget.h \
     PolygonImage.h \
-    SpriteAtlasPreview.h
+    SpriteAtlasPreview.h \
+    ImageFormat.h
 
 #algorithm
 INCLUDEPATH += algorithm
