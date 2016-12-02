@@ -22,11 +22,11 @@ Default is Rect", "mode", "Rect"},
         {"sprite-border", "Sprite border is the space between sprites. Value adds transparent pixels between sprites to avoid artifacts from neighbor sprites. The transparent pixels are not added to the sprites, default is 2.", "int", "2"},
         {"powerOf2", "Forces the texture to have power of 2 size (32, 64, 128...). Default is disable."},
         {"max-size", "Sets the maximum size for the texture, default is 8192.", "size", "8192"},
-        {"opt-mode", "Optimizes the png's file size.\n\
+        {"png-opt-mode", "Optimizes the png's file size.\n\
 None - No optimization at all(fastest).\n\
 Lossless - Uses optipng to optimize the filesize. The reduction is mostly small but doesn't harm image quality.\n\
 Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70%, but the image quality gets a bit worse.", "int", "0"},
-        {"opt-level", "Optimizes the image's file size. Only useful in combination with opt-mode Lossless. Allowed values: 1 to 7 (Using a high value might take some time to optimize.", "int", "0"},
+        {"png-opt-level", "Optimizes the image's file size. Only useful in combination with opt-mode Lossless. Allowed values: 1 to 7 (Using a high value might take some time to optimize.", "int", "0"},
         {"scale", "Scales all images before creating the sheet. E.g. use 0.5 for half size, default is 1 (Scale has no effect when source is a project file).", "float", "1"},
     });
 
@@ -85,8 +85,8 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
     int maxSize = 8192;
     float imageScale = 1;
     QString format = "cocos2d";
-    QString optMode = "None";
-    int optLevel = 0;
+    QString pngOptMode = "None";
+    int pngOptLevel = 0;
 
     if (projectFile) {
         if (!projectFile->read(source.filePath())) {
@@ -97,8 +97,8 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
             epsilon = projectFile->epsilon();
             textureBorder = projectFile->textureBorder();
             spriteBorder = projectFile->spriteBorder();
-            optMode = projectFile->optMode();
-            optLevel = projectFile->optLevel();
+            pngOptMode = projectFile->pngOptMode();
+            pngOptLevel = projectFile->pngOptLevel();
 
             if (!destinationSet) {
                 destination.setFile(projectFile->destPath());
@@ -145,12 +145,12 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
     }
 
      if (parser.isSet("opt-mode")) {
-         optMode = parser.value("opt-mode");
+         pngOptMode = parser.value("png-opt-mode");
      }
 
     if (parser.isSet("opt-level")) {
-        optLevel = parser.value("opt-level").toInt();
-        optLevel = qBound(1, optLevel, 7);
+        pngOptLevel = parser.value("png-opt-level").toInt();
+        pngOptLevel = qBound(1, pngOptLevel, 7);
     }
 
     qDebug() << "trimMode:" << trimMode;
@@ -161,8 +161,8 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
     qDebug() << "pow2:" << pow2;
     qDebug() << "maxSize:" << maxSize;
     qDebug() << "scale:" << imageScale;
-    qDebug() << "opt-mode:" << optMode;
-    qDebug() << "opt-level:" << optLevel;
+    qDebug() << "png-opt-mode:" << pngOptMode;
+    qDebug() << "png-opt-level:" << pngOptLevel;
 
     // load formats
     QSettings settings;
@@ -241,7 +241,9 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
         publisher.addSpriteSheet(atlas, destination.filePath() + source.fileName());
     }
 
-    if (!publisher.publish(format, optMode, optLevel, false)) {
+    publisher.setPngQuality(pngOptMode, pngOptLevel);
+
+    if (!publisher.publish(format, false)) {
         qCritical() << "ERROR: publish atlas!";
         return -1;
     }

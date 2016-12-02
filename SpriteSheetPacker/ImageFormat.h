@@ -6,13 +6,15 @@
 
 enum ImageFormat {
     kPNG = 0,
+    kJPG,
+    kJPG_PNG,
     kPKM,
     kPVR,
     kPVR_CCZ
 };
 
 enum PixelFormat {
-    kARGB8888,
+    kARGB8888 = 0,
     kARGB8565,
     kARGB4444,
     kRGB888,
@@ -27,19 +29,23 @@ enum PixelFormat {
 
 inline QString imageFormatToString(ImageFormat imageFormat) {
     switch (imageFormat) {
-        case kPNG: return "PNG";
-        case kPKM: return "PKM";
-        case kPVR: return "PVR";
-        case kPVR_CCZ: return "PVR_CCZ";
-        default: return "PNG";
+        case kPNG: return "*.png";
+        case kJPG: return "*.jpg";
+        case kJPG_PNG: return "(*.jpg) + (*.png)";
+        case kPKM: return "*.pkm";
+        case kPVR: return "*.pvr";
+        case kPVR_CCZ: return "*.pvr.ccz";
+        default: return "*.png";
     }
 }
 
 inline ImageFormat imageFormatFromString(const QString& imageFormat) {
-    if (imageFormat == "PNG") return kPNG;
-    if (imageFormat == "PKM") return kPKM;
-    if (imageFormat == "PVR") return kPVR;
-    if (imageFormat == "PVR_CCZ") return kPVR_CCZ;
+    if (imageFormat == "*.png") return kPNG;
+    if (imageFormat == "*.jpg") return kJPG;
+    if (imageFormat == "(*.jpg) + (*.png)") return kJPG_PNG;
+    if (imageFormat == "*.pkm") return kPKM;
+    if (imageFormat == "*.pvr") return kPVR;
+    if (imageFormat == "*.pvr.ccz") return kPVR_CCZ;
     return kPNG;
 }
 

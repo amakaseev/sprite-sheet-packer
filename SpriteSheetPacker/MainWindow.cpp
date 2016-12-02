@@ -47,12 +47,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->pixelFormatComboBox->addItem(pixelFormatToString(kPVRTC2A));
     ui->pixelFormatComboBox->addItem(pixelFormatToString(kPVRTC4));
     ui->pixelFormatComboBox->addItem(pixelFormatToString(kPVRTC4A));
-    ui->pixelFormatComboBox->setCurrentIndex(kARGB8888);
-    ui->imageFormatComboBox->insertItem(kPNG, "PNG (.png)");
-    ui->imageFormatComboBox->insertItem(kPKM, "PKM with ETC1 (.pkm)");
-    ui->imageFormatComboBox->insertItem(kPVR, "PVR (.pvr)");
-    ui->imageFormatComboBox->insertItem(kPVR_CCZ, "PVR+zlib (.pvr.ccz)");
-    ui->imageFormatComboBox->setCurrentIndex(kPNG);
+    ui->pixelFormatComboBox->setCurrentIndex(0);
+    ui->imageFormatComboBox->addItem(imageFormatToString(kPNG));
+    ui->imageFormatComboBox->addItem(imageFormatToString(kJPG));
+    ui->imageFormatComboBox->addItem(imageFormatToString(kJPG_PNG));
+    ui->imageFormatComboBox->addItem(imageFormatToString(kPKM));
+    ui->imageFormatComboBox->addItem(imageFormatToString(kPVR));
+    ui->imageFormatComboBox->addItem(imageFormatToString(kPVR_CCZ));
+    ui->imageFormatComboBox->setCurrentIndex(0);
 
     // configure default values
     ui->trimSpinBox->setValue(1);
@@ -69,9 +71,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_openButton, SIGNAL(pressed()), this, SLOT(on_actionOpen_triggered()));
     ui->mainToolBar->insertWidget(ui->actionSave, _openButton);
 
-    ui->optLevelSlider->setVisible(false);
-    ui->optLevelText->setVisible(false);
-    ui->optLevelLabel->setVisible(false);
+    ui->pngOptLevelSlider->setVisible(false);
+    ui->pngOptLevelText->setVisible(false);
+    ui->pngOptLevelLabel->setVisible(false);
 
     // layout preferences action on right side in toolbar
     QWidget* empty = new QWidget();
@@ -281,8 +283,9 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     ui->imageFormatComboBox->setCurrentText(imageFormatToString(projectFile->imageFormat()));
     ui->pixelFormatComboBox->setCurrentText(pixelFormatToString(projectFile->pixelFormat()));
     ui->premultipliedCheckBox->setChecked(projectFile->premultiplied());
-    ui->optModeComboBox->setCurrentText(projectFile->optMode());
-    ui->optLevelSlider->setValue(projectFile->optLevel());
+    ui->pngOptModeComboBox->setCurrentText(projectFile->pngOptMode());
+    ui->pngOptLevelSlider->setValue(projectFile->pngOptLevel());
+    ui->jpgQualitySlider->setValue(projectFile->jpgQuality());
 
     while(ui->scalingVariantsGroupBox->layout()->count() > 0){
         QLayoutItem *item = ui->scalingVariantsGroupBox->layout()->takeAt(0);
@@ -353,8 +356,9 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
     projectFile->setImageFormat(imageFormatFromString(ui->imageFormatComboBox->currentText()));
     projectFile->setPixelFormat(pixelFormatFromString(ui->pixelFormatComboBox->currentText()));
     projectFile->setPremultiplied(ui->premultipliedCheckBox->isChecked());
-    projectFile->setOptMode(ui->optModeComboBox->currentText());
-    projectFile->setOptLevel(ui->optLevelSlider->value());
+    projectFile->setPngOptMode(ui->pngOptModeComboBox->currentText());
+    projectFile->setPngOptLevel(ui->pngOptLevelSlider->value());
+    projectFile->setJpgQuality(ui->jpgQualitySlider->value());
 
     QVector<ScalingVariant> scalingVariants;
     for (int i=0; i<ui->scalingVariantsGroupBox->layout()->count(); ++i) {
@@ -566,6 +570,8 @@ void MainWindow::on_actionPublish_triggered() {
     publisher->setImageFormat(imageFormatFromString(ui->imageFormatComboBox->currentText()));
     publisher->setPixelFormat(pixelFormatFromString(ui->pixelFormatComboBox->currentText()));
     publisher->setPremultiplied(ui->premultipliedCheckBox->isChecked());
+    publisher->setPngQuality(ui->pngOptModeComboBox->currentText(), ui->pngOptLevelSlider->value());
+    publisher->setJpgQuality(ui->jpgQualitySlider->value());
 
     PublishStatusDialog publishStatusDialog(this);
     publishStatusDialog.open();
@@ -636,13 +642,15 @@ void MainWindow::on_actionPublish_triggered() {
         refreshAtlas(false);
     }
 
-    publisher->publish(ui->dataFormatComboBox->currentText(), ui->optModeComboBox->currentText(), ui->optLevelSlider->value());
+    publishStatusDialog.log("Publish data and images...", Qt::darkGreen);
+    publisher->publish(ui->dataFormatComboBox->currentText());
 
-    if (ui->optModeComboBox->currentText() == "None") {
+    if (ui->pngOptModeComboBox->currentText() == "None") {
         delete publisher;
     } else {
+        publishStatusDialog.log("PNG Optimization: optimize if needed.");
         // TODO: you need to wait previous image optimization if they are the same
-        QObject::connect(publisher, &PublishSpriteSheet::onCompleted, [this, publisher] () {
+        QObject::connect(publisher, &PublishSpriteSheet::onCompletedOptimizePNG, [this, publisher] () {
             // TODO: it would be good to show here for information about the optimization
             QMessageBox::information(this, "PNG Optimization", "PNG Optimization: complete.");
             delete publisher;
@@ -749,18 +757,12 @@ void MainWindow::propertiesValueChanged() {
     }
 }
 
-void MainWindow::on_optModeComboBox_currentTextChanged(const QString &text) {
-    bool visible = text == "Lossless";
+void MainWindow::on_pngOptModeComboBox_currentTextChanged(const QString &text) {
+    bool visible = (text == "Lossless");
 
-    ui->optLevelSlider->setVisible(visible);
-    ui->optLevelText->setVisible(visible);
-    ui->optLevelLabel->setVisible(visible);
-
-    setProjectDirty();
-}
-
-void MainWindow::on_optLevelSlider_valueChanged(int value) {
-    ui->optLevelText->setText(QString::number(value));
+    ui->pngOptLevelSlider->setVisible(visible);
+    ui->pngOptLevelText->setVisible(visible);
+    ui->pngOptLevelLabel->setVisible(visible);
 
     setProjectDirty();
 }
@@ -810,10 +812,24 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
             }
         }
     };
+    auto isEnabledComboBoxItem = [](QComboBox* comboBox, int row) {
+        QStandardItemModel* model = qobject_cast<QStandardItemModel*>(comboBox->model());
+        if (model) {
+            QModelIndex index = model->index(row, comboBox->modelColumn());//, comboBox->rootModelIndex());
+            QStandardItem* item = model->itemFromIndex(index);
+            if (item) {
+                return item->isEnabled();
+            }
+        }
+        return false;
+    };
+
+    QTabBar* imageTabBar = ui->imageFormatSettingsTabWidget->tabBar();
     ImageFormat imageFormat = (ImageFormat)index;
     if (imageFormat == kPNG) {
-        ui->imageFormatStackedWidget->setVisible(true);
-        ui->imageFormatStackedWidget->setCurrentIndex(0);
+        imageTabBar->setTabEnabled(0, true);
+        imageTabBar->setTabEnabled(1, false);
+        imageTabBar->setCurrentIndex(0);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8888, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8565, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB4444, true);
@@ -825,10 +841,30 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4A, false);
-        if (ui->pixelFormatComboBox->currentIndex() > kARGB8888) {
+        if (!isEnabledComboBoxItem(ui->pixelFormatComboBox, ui->pixelFormatComboBox->currentIndex())) {
             ui->pixelFormatComboBox->setCurrentIndex(kARGB8888);
         }
+    } else if (imageFormat == kJPG) {
+        imageTabBar->setTabEnabled(0, false);
+        imageTabBar->setTabEnabled(1, true);
+        imageTabBar->setCurrentIndex(1);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8888, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8565, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB4444, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB888, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB565, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kALPHA, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC1, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4A, false);
+        if (!isEnabledComboBoxItem(ui->pixelFormatComboBox, ui->pixelFormatComboBox->currentIndex())) {
+            ui->pixelFormatComboBox->setCurrentIndex(kRGB888);
+        }
     } else if (imageFormat == kPKM) {
+        imageTabBar->setTabEnabled(0, false);
+        imageTabBar->setTabEnabled(1, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8888, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8565, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB4444, false);
@@ -842,7 +878,8 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4A, false);
         ui->pixelFormatComboBox->setCurrentIndex(kETC1);
     } else if ((imageFormat == kPVR)||(imageFormat == kPVR_CCZ)) {
-        ui->imageFormatStackedWidget->setVisible(false);
+        imageTabBar->setTabEnabled(0, false);
+        imageTabBar->setTabEnabled(1, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8888, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8565, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB4444, false);
@@ -854,7 +891,7 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4A, true);
-        if (ui->pixelFormatComboBox->currentIndex() < kPVRTC2) {
+        if (!isEnabledComboBoxItem(ui->pixelFormatComboBox, ui->pixelFormatComboBox->currentIndex())) {
             ui->pixelFormatComboBox->setCurrentIndex(kPVRTC4);
         }
     }
@@ -915,7 +952,7 @@ void MainWindow::on_spriteSheetLineEdit_textChanged(const QString&) {
     setProjectDirty();
 }
 
-void MainWindow::on_premultipliedCheckBox_toggled(bool checked) {
+void MainWindow::on_premultipliedCheckBox_toggled(bool) {
     setProjectDirty();
 }
 

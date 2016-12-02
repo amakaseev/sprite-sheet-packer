@@ -16,8 +16,9 @@ SpritePackerProjectFile::SpritePackerProjectFile() {
     _imageFormat = kPNG,
     _pixelFormat = kARGB8888;
     _premultiplied = true;
-    _optMode = "None";
-    _optLevel = 1;
+    _pngOptMode = "None";
+    _pngOptLevel = 7;
+    _jpgQuality = 80;
 }
 
 SpritePackerProjectFile::~SpritePackerProjectFile() {
@@ -45,8 +46,9 @@ bool SpritePackerProjectFile::read(const QString &fileName) {
     if (json.contains("imageFormat")) _imageFormat = imageFormatFromString(json["imageFormat"].toString());
     if (json.contains("pixelFormat")) _pixelFormat = pixelFormatFromString(json["pixelFormat"].toString());
     if (json.contains("premultiplied")) _premultiplied = json["premultiplied"].toBool();
-    if (json.contains("optMode")) _optMode = json["optMode"].toString();
-    if (json.contains("optLevel")) _optLevel = json["optLevel"].toInt();
+    if (json.contains("pngOptMode")) _pngOptMode = json["pngOptMode"].toString();
+    if (json.contains("pngOptLevel")) _pngOptLevel = json["pngOptLevel"].toInt();
+    if (json.contains("jpgQuality")) _jpgQuality = json["jpgQuality"].toInt();
 
     _scalingVariants.clear();
     QJsonArray scalingVariants = json["scalingVariants"].toArray();
@@ -87,8 +89,9 @@ bool SpritePackerProjectFile::write(const QString &fileName) {
     json["imageFormat"] = imageFormatToString(_imageFormat);
     json["pixelFormat"] = pixelFormatToString(_pixelFormat);
     json["premultiplied"] = _premultiplied;
-    json["optMode"] = _optMode;
-    json["optLevel"] = _optLevel;
+    json["pngOptMode"] = _pngOptMode;
+    json["pngOptLevel"] = _pngOptLevel;
+    json["jpgQuality"] = _jpgQuality;
 
     QJsonArray scalingVariants;
     for (auto scalingVariant: _scalingVariants) {
@@ -184,9 +187,13 @@ bool SpritePackerProjectFileTPS::read(const QString &fileName) {
         }
     }
 
-    if (tpsMap.find("pngOptimizationLevel") != tpsMap.end()) {
-         _optLevel = qBound(1, tpsMap["pngOptimizationLevel"].toInt(), 7);
-         _optMode = "Lossless";
+//    if (tpsMap.find("pngOptimizationLevel") != tpsMap.end()) {
+//         _pngOptLevel = qBound(1, tpsMap["pngOptimizationLevel"].toInt(), 7);
+//         _pngOptMode = "Lossless";
+//    }
+
+    if (tpsMap.find("jpgQuality") != tpsMap.end()) {
+         _jpgQuality = qBound(0, tpsMap["jpgQuality"].toInt(), 100);
     }
 
     if (tpsMap.find("dataFileNames") != tpsMap.end()) {

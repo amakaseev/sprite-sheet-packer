@@ -69,8 +69,7 @@ private slots:
     void on_dataFormatComboBox_currentIndexChanged(int value);
     void on_destPathLineEdit_textChanged(const QString& text);
     void on_spriteSheetLineEdit_textChanged(const QString& text);
-    void on_optModeComboBox_currentTextChanged(const QString &text);
-    void on_optLevelSlider_valueChanged(int value);
+    void on_pngOptModeComboBox_currentTextChanged(const QString &text);
     void on_premultipliedCheckBox_toggled(bool checked);
 
     void scalingVariantWidgetValueChanged(bool);

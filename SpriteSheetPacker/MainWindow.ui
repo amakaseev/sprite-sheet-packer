@@ -141,7 +141,7 @@
           <x>0</x>
           <y>0</y>
           <width>314</width>
-          <height>839</height>
+          <height>843</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -517,19 +517,31 @@
              </layout>
             </item>
             <item>
-             <widget class="QStackedWidget" name="imageFormatStackedWidget">
-              <property name="frameShape">
-               <enum>QFrame::StyledPanel</enum>
-              </property>
+             <widget class="QTabWidget" name="imageFormatSettingsTabWidget">
               <property name="currentIndex">
                <number>0</number>
               </property>
-              <widget class="QWidget" name="page">
-               <layout class="QVBoxLayout" name="verticalLayout_2">
+              <widget class="QWidget" name="png">
+               <attribute name="title">
+                <string>PNG</string>
+               </attribute>
+               <layout class="QVBoxLayout" name="verticalLayout_9">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
                 <item>
                  <layout class="QHBoxLayout" name="horizontalLayout_15">
                   <item>
-                   <widget class="QLabel" name="label_12">
+                   <widget class="QLabel" name="pngOptModeLabel">
                     <property name="text">
                      <string>PNG Optimization:</string>
                     </property>
@@ -539,7 +551,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QComboBox" name="optModeComboBox">
+                   <widget class="QComboBox" name="pngOptModeComboBox">
                     <property name="toolTip">
                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;PNG Optimization&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Optimizes the png's file size.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;None&lt;/span&gt;&lt;/p&gt;&lt;p&gt;No optimization at all(fastest).&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Lossless&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=color:#323333;&quot;&gt;Uses optipng to optimize the filesize. The reduction is mostly small but doesn't harm image quality.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Lossy&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=color:#323333;&quot;&gt;Uses pngquant to optimize the filesize. The reduction is mostly about 70%, but the image quality gets a bit worse.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
@@ -565,14 +577,14 @@
                 <item>
                  <layout class="QHBoxLayout" name="horizontalLayout_12">
                   <item>
-                   <widget class="QLabel" name="optLevelLabel">
+                   <widget class="QLabel" name="pngOptLevelLabel">
                     <property name="text">
                      <string>PNG Opt Level:</string>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QSlider" name="optLevelSlider">
+                   <widget class="QSlider" name="pngOptLevelSlider">
                     <property name="toolTip">
                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;PNG Optimization level&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Sets the optimization value for the losless png optimizer. A value of 2 is most of the time sufficent.&lt;p&gt;1 = least possible optimization&lt;/p&gt;&lt;p&gt;2-7 apply better optimization(higher values take longer)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
@@ -585,19 +597,110 @@
                     <property name="pageStep">
                      <number>1</number>
                     </property>
+                    <property name="value">
+                     <number>7</number>
+                    </property>
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLabel" name="optLevelText">
+                   <widget class="QLabel" name="pngOptLevelText">
                     <property name="text">
-                     <string>1</string>
+                     <string>7</string>
                     </property>
                    </widget>
                   </item>
                  </layout>
+                </item>
+                <item>
+                 <spacer name="verticalSpacer_4">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>20</width>
+                    <height>40</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QWidget" name="jpg">
+               <attribute name="title">
+                <string>JPG</string>
+               </attribute>
+               <layout class="QVBoxLayout" name="verticalLayout_11">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_16">
+                  <item>
+                   <widget class="QLabel" name="jpgQualityLabel">
+                    <property name="text">
+                     <string>JPG quality:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QSlider" name="jpgQualitySlider">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;PNG Optimization level&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Sets the optimization value for the losless png optimizer. A value of 2 is most of the time sufficent.&lt;p&gt;1 = least possible optimization&lt;/p&gt;&lt;p&gt;2-7 apply better optimization(higher values take longer)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="minimum">
+                     <number>0</number>
+                    </property>
+                    <property name="maximum">
+                     <number>100</number>
+                    </property>
+                    <property name="singleStep">
+                     <number>10</number>
+                    </property>
+                    <property name="pageStep">
+                     <number>1</number>
+                    </property>
+                    <property name="value">
+                     <number>80</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="jpgQualityText">
+                    <property name="text">
+                     <string>80</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <spacer name="verticalSpacer_3">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>20</width>
+                    <height>40</height>
+                   </size>
+                  </property>
+                 </spacer>
                 </item>
                </layout>
               </widget>
@@ -882,5 +985,38 @@
  <resources>
   <include location="resources.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>jpgQualitySlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>jpgQualityText</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>236</x>
+     <y>662</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>284</x>
+     <y>660</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pngOptLevelSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>pngOptLevelText</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>231</x>
+     <y>696</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>284</x>
+     <y>698</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

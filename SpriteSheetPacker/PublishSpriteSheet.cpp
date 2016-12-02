@@ -14,6 +14,7 @@ QMap<QString, QString> PublishSpriteSheet::_formats;
 QString imagePrefix(ImageFormat imageFormat) {
     switch (imageFormat) {
         case kPNG: return ".png";
+        case kJPG: return ".jpg";
         case kPKM: return ".pvr";
         case kPVR: return ".pvr";
         case kPVR_CCZ: return ".pvr.ccz";
@@ -74,6 +75,7 @@ PublishSpriteSheet::PublishSpriteSheet() {
     _imageFormat = kPNG;
     _pixelFormat = kARGB8888;
     _premultiplied = true;
+    _jpgQuality = 80;
 }
 
 void PublishSpriteSheet::addSpriteSheet(const SpriteAtlas &atlas, const QString &fileName) {
@@ -81,7 +83,7 @@ void PublishSpriteSheet::addSpriteSheet(const SpriteAtlas &atlas, const QString 
     _fileNames.append(fileName);
 }
 
-bool PublishSpriteSheet::publish(const QString& format, const QString& optMode, int optLevel, bool errorMessage) {
+bool PublishSpriteSheet::publish(const QString& format, bool errorMessage) {
 
     if (_spriteAtlases.size() != _fileNames.size()) {
         return false;
@@ -98,9 +100,22 @@ bool PublishSpriteSheet::publish(const QString& format, const QString& optMode, 
 
         // save image
         qDebug() << "Save image:" << filePath + imagePrefix(_imageFormat);
-        if (_imageFormat == kPNG) {
+        if ((_imageFormat == kPNG) || (_imageFormat == kJPG)) {
             QImage image = convertImage(atlas.image(), _pixelFormat, _premultiplied);
-            image.save(filePath + imagePrefix(_imageFormat));
+//            image.save(filePath + imagePrefix(_imageFormat), Q_NULLPTR, 0);
+            if (_imageFormat == kPNG) {
+                QImageWriter writer(filePath + imagePrefix(_imageFormat), "png");
+                writer.setOptimizedWrite(true);
+                writer.setCompression(100);
+                writer.setQuality(0);
+                writer.write(image);
+            } else if (_imageFormat == kJPG) {
+                QImageWriter writer(filePath + imagePrefix(_imageFormat), "jpg");
+                writer.setOptimizedWrite(true);
+                writer.setCompression(100);
+                writer.setQuality(_jpgQuality);
+                writer.write(image);
+            }
         } else if ((_imageFormat == kPKM) || (_imageFormat == kPVR) || (_imageFormat == kPVR_CCZ)) {
             CPVRTextureHeader pvrHeader(PVRStandard8PixelType.PixelTypeID, atlas.image().width(), atlas.image().height());
 
@@ -123,10 +138,10 @@ bool PublishSpriteSheet::publish(const QString& format, const QString& optMode, 
         }
     }
 
-    if ((_imageFormat == kPNG) && (optMode != "None")) {
+    if ((_imageFormat == kPNG) && (_pngQuality.optMode != "None")) {
         qDebug() << "Begin optimize image...";
         // we use values 1-7 so that it is more user friendly, because 0 also means optimization.
-        optimizePNGInThread(_fileNames, optMode, optLevel - 1);
+        optimizePNGInThread(_fileNames, _pngQuality.optMode, _pngQuality.optLevel - 1);
     }
 
     _spriteAtlases.clear();
@@ -255,7 +270,7 @@ bool PublishSpriteSheet::optimizePNG(const QString& fileName, const QString& opt
 }
 
 void PublishSpriteSheet::optimizePNGInThread(QStringList fileNames, const QString& optMode, int optLevel) {
-    QObject::connect(&_watcher, SIGNAL(finished()), this, SIGNAL(onCompleted()));
+    QObject::connect(&_watcher, SIGNAL(finished()), this, SIGNAL(onCompletedOptimizePNG()));
 
     QFuture<bool> resultFuture;
 

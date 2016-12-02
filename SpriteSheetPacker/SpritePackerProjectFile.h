@@ -45,11 +45,14 @@ public:
     void setPremultiplied(bool premultiplied) { _premultiplied = premultiplied; }
     bool premultiplied() const { return _premultiplied; }
 
-    void setOptMode(const QString& optMode) { _optMode = optMode; }
-    const QString& optMode() const { return _optMode; }
+    void setPngOptMode(const QString& optMode) { _pngOptMode = optMode; }
+    const QString& pngOptMode() const { return _pngOptMode; }
 
-    void setOptLevel(int optLevel) { _optLevel = optLevel; }
-    int optLevel() const { return _optLevel; }
+    void setPngOptLevel(int optLevel) { _pngOptLevel = optLevel; }
+    int pngOptLevel() const { return _pngOptLevel; }
+
+    void setJpgQuality(int quality) { _jpgQuality = quality; }
+    int jpgQuality() const { return _jpgQuality; }
 
     void setScalingVariants(const QVector<ScalingVariant>& scalingVariants) { _scalingVariants = scalingVariants; }
     const QVector<ScalingVariant>& scalingVariants() const { return _scalingVariants; }
@@ -83,8 +86,10 @@ protected:
     ImageFormat _imageFormat;
     PixelFormat _pixelFormat;
     bool        _premultiplied;
-    QString     _optMode;
-    int         _optLevel;
+
+    QString     _pngOptMode;
+    int         _pngOptLevel;
+    int         _jpgQuality;
 
     QVector<ScalingVariant> _scalingVariants;
 
