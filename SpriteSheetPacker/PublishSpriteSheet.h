@@ -37,7 +37,6 @@ public:
     bool prependSmartFolderName() const { return _prependSmartFolderName; }
 
     bool publish(const QString& format, bool errorMessage = true);
-    bool generateDataFile(const QString& filePath, const QString& format, const SpriteAtlas &atlas, bool errorMessage = true);
 
     static void addFormat(const QString& format, const QString& scriptFileName) { _formats[format] = scriptFileName; }
     static QMap<QString, QString>& formats() { return _formats; }
@@ -46,6 +45,7 @@ signals:
     void onCompletedOptimizePNG();
 
 protected:
+    bool generateDataFile(const QString& filePath, const QString& format, const QMap<QString, SpriteFrameInfo>& spriteFrames, const QImage& atlasImage, bool errorMessage = true);
     bool optimizePNG(const QString& fileName, const QString& optMode, int optLevel);
     void optimizePNGInThread(QStringList fileNames, const QString& optMode, int optLevel);
 

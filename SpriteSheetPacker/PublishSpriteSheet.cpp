@@ -89,60 +89,76 @@ bool PublishSpriteSheet::publish(const QString& format, bool errorMessage) {
         return false;
     }
 
+    QStringList outputFilePaths;
     for (int i = 0; i < _spriteAtlases.size(); i++) {
         const SpriteAtlas& atlas = _spriteAtlases.at(i);
         const QString& filePath = _fileNames.at(i);
 
-        // generate the data file and the image
-        if (!generateDataFile(filePath, format, atlas, errorMessage)) {
-            return false;
-        }
+        for (int n=0; n<atlas.outputData().size(); ++n) {
+            const auto& outputData = atlas.outputData().at(n);
 
-        // save image
-        qDebug() << "Save image:" << filePath + imagePrefix(_imageFormat);
-        if ((_imageFormat == kPNG) || (_imageFormat == kJPG) || (_imageFormat == kJPG_PNG)) {
-            QImage image = convertImage(atlas.image(), _pixelFormat, _premultiplied);
-//            image.save(filePath + imagePrefix(_imageFormat), Q_NULLPTR, 0);
-            if (_imageFormat == kPNG) {
-                QImageWriter writer(filePath + imagePrefix(kPNG), "png");
-                writer.setOptimizedWrite(true);
-                writer.setCompression(100);
-                writer.setQuality(0);
-                writer.write(image);
-            } else if ((_imageFormat == kJPG) || (_imageFormat == kJPG_PNG)) {
-                QImageWriter writer(filePath + imagePrefix(kJPG), "jpg");
-                writer.setOptimizedWrite(true);
-                writer.setCompression(100);
-                writer.setQuality(_jpgQuality);
-                writer.write(image);
+            QString outputFilePath = filePath;
+            if (outputFilePath.contains("{n}")) {
+                outputFilePath.replace("{n}", QString::number(n));
+            } else if (outputFilePath.contains("{n1}")) {
+                outputFilePath.replace("{n1}", QString::number(n + 1));
+            } else {
+                outputFilePath = outputFilePath + "_" + QString::number(n);
+            }
 
-                if (_imageFormat == kJPG_PNG) {
-                    QImage maskImage = convertImage(atlas.image(), kALPHA, _premultiplied);
-                    QImageWriter writer(filePath + imagePrefix(kPNG), "png");
+            // save this name for optimize png
+            outputFilePaths.push_back(outputFilePath);
+
+            // generate the data file and the image
+            if (!generateDataFile(outputFilePath, format, outputData._spriteFrames, outputData._atlasImage, errorMessage)) {
+                return false;
+            }
+
+            // save image
+            qDebug() << "Save image:" << outputFilePath + imagePrefix(_imageFormat);
+            if ((_imageFormat == kPNG) || (_imageFormat == kJPG) || (_imageFormat == kJPG_PNG)) {
+                QImage image = convertImage(outputData._atlasImage, _pixelFormat, _premultiplied);
+                if (_imageFormat == kPNG) {
+                    QImageWriter writer(outputFilePath + imagePrefix(kPNG), "png");
                     writer.setOptimizedWrite(true);
                     writer.setCompression(100);
                     writer.setQuality(0);
-                    writer.write(maskImage);
-                }
-            }
-        } else if ((_imageFormat == kPKM) || (_imageFormat == kPVR) || (_imageFormat == kPVR_CCZ)) {
-            CPVRTextureHeader pvrHeader(PVRStandard8PixelType.PixelTypeID, atlas.image().width(), atlas.image().height());
+                    writer.write(image);
+                } else if ((_imageFormat == kJPG) || (_imageFormat == kJPG_PNG)) {
+                    QImageWriter writer(outputFilePath + imagePrefix(kJPG), "jpg");
+                    writer.setOptimizedWrite(true);
+                    writer.setCompression(100);
+                    writer.setQuality(_jpgQuality);
+                    writer.write(image);
 
-            // create the texture
-            CPVRTexture pvrTexture(pvrHeader, atlas.image().bits());
-            switch (_pixelFormat) {
-                case kETC1: Transcode(pvrTexture, ePVRTPF_ETC1, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
-                case kPVRTC2: Transcode(pvrTexture, ePVRTPF_PVRTCI_2bpp_RGB, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
-                case kPVRTC2A: Transcode(pvrTexture, ePVRTPF_PVRTCI_2bpp_RGBA, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
-                case kPVRTC4: Transcode(pvrTexture, ePVRTPF_PVRTCI_4bpp_RGB, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
-                case kPVRTC4A: Transcode(pvrTexture, ePVRTPF_PVRTCI_4bpp_RGBA, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
-                default: Transcode(pvrTexture, ePVRTPF_ETC1, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
-            }
-            // save the file
-            if (_imageFormat == kPVR_CCZ) {
-                //TODO: use qCompress
-            } else {
-                pvrTexture.saveFile((filePath + imagePrefix(_imageFormat)).toStdString().c_str());
+                    if (_imageFormat == kJPG_PNG) {
+                        QImage maskImage = convertImage(outputData._atlasImage, kALPHA, _premultiplied);
+                        QImageWriter writer(outputFilePath + imagePrefix(kPNG), "png");
+                        writer.setOptimizedWrite(true);
+                        writer.setCompression(100);
+                        writer.setQuality(0);
+                        writer.write(maskImage);
+                    }
+                }
+            } else if ((_imageFormat == kPKM) || (_imageFormat == kPVR) || (_imageFormat == kPVR_CCZ)) {
+                CPVRTextureHeader pvrHeader(PVRStandard8PixelType.PixelTypeID, outputData._atlasImage.width(), outputData._atlasImage.height());
+
+                // create the texture
+                CPVRTexture pvrTexture(pvrHeader, outputData._atlasImage.bits());
+                switch (_pixelFormat) {
+                    case kETC1: Transcode(pvrTexture, ePVRTPF_ETC1, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+                    case kPVRTC2: Transcode(pvrTexture, ePVRTPF_PVRTCI_2bpp_RGB, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+                    case kPVRTC2A: Transcode(pvrTexture, ePVRTPF_PVRTCI_2bpp_RGBA, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+                    case kPVRTC4: Transcode(pvrTexture, ePVRTPF_PVRTCI_4bpp_RGB, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+                    case kPVRTC4A: Transcode(pvrTexture, ePVRTPF_PVRTCI_4bpp_RGBA, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+                    default: Transcode(pvrTexture, ePVRTPF_ETC1, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+                }
+                // save the file
+                if (_imageFormat == kPVR_CCZ) {
+                    //TODO: use qCompress
+                } else {
+                    pvrTexture.saveFile((outputFilePath + imagePrefix(_imageFormat)).toStdString().c_str());
+                }
             }
         }
     }
@@ -150,7 +166,7 @@ bool PublishSpriteSheet::publish(const QString& format, bool errorMessage) {
     if ((_imageFormat == kPNG) && (_pngQuality.optMode != "None")) {
         qDebug() << "Begin optimize image...";
         // we use values 1-7 so that it is more user friendly, because 0 also means optimization.
-        optimizePNGInThread(_fileNames, _pngQuality.optMode, _pngQuality.optLevel - 1);
+        optimizePNGInThread(outputFilePaths, _pngQuality.optMode, _pngQuality.optLevel - 1);
     }
 
     _spriteAtlases.clear();
@@ -159,7 +175,7 @@ bool PublishSpriteSheet::publish(const QString& format, bool errorMessage) {
     return true;
 }
 
-bool PublishSpriteSheet::generateDataFile(const QString& filePath, const QString& format, const SpriteAtlas &spriteAtlas, bool errorMessage) {
+bool PublishSpriteSheet::generateDataFile(const QString& filePath, const QString& format,  const QMap<QString, SpriteFrameInfo>& spriteFrames, const QImage& atlasImage, bool errorMessage) {
     QJSEngine engine;
 
     auto it_format = _formats.find(format);
@@ -210,8 +226,8 @@ bool PublishSpriteSheet::generateDataFile(const QString& filePath, const QString
 
         // collect sprite frames
         QJSValue spriteFramesValue = engine.newObject();
-        auto it_f = spriteAtlas.spriteFrames().cbegin();
-        for (; it_f != spriteAtlas.spriteFrames().cend(); ++it_f) {
+        auto it_f = spriteFrames.cbegin();
+        for (; it_f != spriteFrames.cend(); ++it_f) {
             QJSValue spriteFrameValue = engine.newObject();
             spriteFrameValue.setProperty("frame", jsValue(engine, it_f.value().frame));
             spriteFrameValue.setProperty("offset", jsValue(engine, it_f.value().offset));
@@ -233,7 +249,7 @@ bool PublishSpriteSheet::generateDataFile(const QString& filePath, const QString
         }
         args << QJSValue(spriteFramesValue);
 
-        args << jsValue(engine, spriteAtlas.image().size());
+        args << jsValue(engine, atlasImage.size());
 
         // run export
         QJSValue exportSpriteSheet = engine.globalObject().property("exportSpriteSheet");
