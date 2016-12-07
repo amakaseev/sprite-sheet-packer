@@ -1,3 +1,15 @@
+v1.0.5
+======
+* Added support multi-pack
+	1. {n} - multipack index, starting with 0
+	2. {n1} - multipack index, starting with 1
+* Added sprite atlas preview widget and show all scaling variants
+* Added pixel formats: ARGB8565, ARGB4444, RGB565, ALPHA
+* Added save to jpg file and refactor settings quality
+* Added pixijs data format
+* Added jpg(rgb)+png(alpha) format
+* Added TrimSpriteNames and PrependSmartFolderName
+
 v1.0.3
 ======
 * Add save dialog on exit if project is dirty

@@ -224,6 +224,8 @@ void MainWindow::refreshAtlas(bool generate) {
     refreshPreview();
 
     _atlasDirty = false;
+
+    validatedSpriteSheetLineEdit();
 }
 
 void MainWindow::refreshPreview() {
@@ -974,6 +976,7 @@ void MainWindow::on_destPathLineEdit_textChanged(const QString&) {
 }
 
 void MainWindow::on_spriteSheetLineEdit_textChanged(const QString&) {
+    validatedSpriteSheetLineEdit();
     setProjectDirty();
 }
 
@@ -986,4 +989,31 @@ void MainWindow::scalingVariantWidgetValueChanged(bool refresh) {
         propertiesValueChanged();
     }
     setProjectDirty();
+}
+
+void MainWindow::validatedSpriteSheetLineEdit() {
+    QPalette linePalette = ui->spriteSheetLineEdit->palette();
+
+    bool isValide = true;
+
+    if (!((ui->spriteSheetLineEdit->text().contains("{n}")) || (ui->spriteSheetLineEdit->text().contains("{n1}")))) {
+        for (const auto& atlas: _spriteAtlas) {
+            if (atlas.outputData().size() > 1) {
+                isValide = false;
+                break;
+            }
+        }
+    }
+
+    if ((_spriteAtlas.size() > 1) && (!ui->spriteSheetLineEdit->text().contains("{v}"))) {
+        isValide = false;
+    }
+
+    if (!isValide) {
+        linePalette.setColor(QPalette::Text, Qt::red);
+    } else {
+        linePalette.setColor(QPalette::Text, Qt::black);
+    }
+
+    ui->spriteSheetLineEdit->setPalette(linePalette);
 }

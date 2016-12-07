@@ -74,6 +74,9 @@ private slots:
 
     void scalingVariantWidgetValueChanged(bool);
 
+protected:
+    void validatedSpriteSheetLineEdit();
+
 private:
     Ui::MainWindow*         ui;
     SpritesTreeWidget*      _spritesTreeWidget;
