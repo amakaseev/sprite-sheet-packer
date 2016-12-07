@@ -69,6 +69,9 @@ public:
     void setSrcList(const QStringList& srcList) { _srcList = srcList; }
     const QStringList& srcList() const { return _srcList; }
 
+    void setTrimSpriteNames(bool trimSpriteNames) { _trimSpriteNames = trimSpriteNames; }
+    bool trimSpriteNames() const { return _trimSpriteNames; }
+
     void setPrependSmartFolderName(bool prependSmartFolderName) { _prependSmartFolderName = prependSmartFolderName; }
     bool prependSmartFolderName() const { return _prependSmartFolderName; }
 
@@ -101,6 +104,7 @@ protected:
     QString     _spriteSheetName;
     QStringList _srcList;
 
+    bool        _trimSpriteNames;
     bool        _prependSmartFolderName;
 
 private:

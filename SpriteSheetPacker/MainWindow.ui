@@ -857,9 +857,19 @@
    <widget class="QWidget" name="spritesDockWidgetContents">
     <layout class="QVBoxLayout" name="spritesDockWidgetLayout">
      <item>
+      <widget class="QCheckBox" name="trimSpriteNamesCheckBox">
+       <property name="text">
+        <string>Trim sprite names</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QCheckBox" name="prependSmartFolderNameCheckBox">
        <property name="text">
-        <string>Prepend Smart Folder Name</string>
+        <string>Prepend smart folder name</string>
        </property>
        <property name="checked">
         <bool>true</bool>

@@ -287,7 +287,8 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     ui->pngOptLevelSlider->setValue(projectFile->pngOptLevel());
     ui->jpgQualitySlider->setValue(projectFile->jpgQuality());
 
-   ui->prependSmartFolderNameCheckBox->setChecked(projectFile->prependSmartFolderName());
+    ui->trimSpriteNamesCheckBox->setChecked(projectFile->trimSpriteNames());
+    ui->prependSmartFolderNameCheckBox->setChecked(projectFile->prependSmartFolderName());
 
     while(ui->scalingVariantsGroupBox->layout()->count() > 0){
         QLayoutItem *item = ui->scalingVariantsGroupBox->layout()->takeAt(0);
@@ -361,6 +362,7 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
     projectFile->setPngOptMode(ui->pngOptModeComboBox->currentText());
     projectFile->setPngOptLevel(ui->pngOptLevelSlider->value());
     projectFile->setJpgQuality(ui->jpgQualitySlider->value());
+    projectFile->setTrimSpriteNames(ui->trimSpriteNamesCheckBox->isChecked());
     projectFile->setPrependSmartFolderName(ui->prependSmartFolderNameCheckBox->isChecked());
 
     QVector<ScalingVariant> scalingVariants;
@@ -574,7 +576,8 @@ void MainWindow::on_actionPublish_triggered() {
     publisher->setPixelFormat(pixelFormatFromString(ui->pixelFormatComboBox->currentText()));
     publisher->setPremultiplied(ui->premultipliedCheckBox->isChecked());
     publisher->setPngQuality(ui->pngOptModeComboBox->currentText(), ui->pngOptLevelSlider->value());
-    publisher->setJpgQuality(ui->jpgQualitySlider->value());
+    publisher->setJpgQuality(ui->jpgQualitySlider->value());    
+    publisher->setTrimSpriteNames(ui->trimSpriteNamesCheckBox->isChecked());
     publisher->setPrependSmartFolderName(ui->prependSmartFolderNameCheckBox->isChecked());
 
     PublishStatusDialog publishStatusDialog(this);

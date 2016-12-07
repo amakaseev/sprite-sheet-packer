@@ -32,9 +32,8 @@ public:
     void setPremultiplied(bool premultiplied) { _premultiplied = premultiplied; }
     void setPngQuality(const QString& optMode, int optLevel) { _pngQuality.optMode = optMode; _pngQuality.optLevel = optLevel; }
     void setJpgQuality(int quality) { _jpgQuality = quality; }
-
+    void setTrimSpriteNames(bool trimSpriteNames) { _trimSpriteNames = trimSpriteNames; }
     void setPrependSmartFolderName(bool prependSmartFolderName) { _prependSmartFolderName = prependSmartFolderName; }
-    bool prependSmartFolderName() const { return _prependSmartFolderName; }
 
     bool publish(const QString& format, bool errorMessage = true);
 
@@ -67,6 +66,7 @@ protected:
 
     int         _jpgQuality;
 
+    bool        _trimSpriteNames;
     bool        _prependSmartFolderName;
 
     static QMap<QString, QString> _formats;

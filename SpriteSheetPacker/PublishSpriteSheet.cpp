@@ -76,6 +76,9 @@ PublishSpriteSheet::PublishSpriteSheet() {
     _pixelFormat = kARGB8888;
     _premultiplied = true;
     _jpgQuality = 80;
+
+    _trimSpriteNames = true;
+    _prependSmartFolderName = true;
 }
 
 void PublishSpriteSheet::addSpriteSheet(const SpriteAtlas &atlas, const QString &fileName) {
@@ -102,7 +105,7 @@ bool PublishSpriteSheet::publish(const QString& format, bool errorMessage) {
                 outputFilePath.replace("{n}", QString::number(n));
             } else if (outputFilePath.contains("{n1}")) {
                 outputFilePath.replace("{n1}", QString::number(n + 1));
-            } else {
+            } else if (atlas.outputData().size() > 1) {
                 outputFilePath = outputFilePath + "_" + QString::number(n);
             }
 
@@ -237,13 +240,15 @@ bool PublishSpriteSheet::generateDataFile(const QString& filePath, const QString
             spriteFrameValue.setProperty("triangles", jsValue(engine, it_f.value().triangles));
 
             QString name = it_f.key();
+            // remove root folder if needed
             if (!_prependSmartFolderName) {
                 auto idx = name.indexOf('/');
                 if (idx != -1) {
-                    qDebug() << name;
                     name = name.right(name.length() - idx - 1);
-                    qDebug() << name;
                 }
+            }            
+            if (_trimSpriteNames) {
+                name = QFileInfo(name).path() + QDir::separator() + QFileInfo(name).baseName();
             }
             spriteFramesValue.setProperty(name, spriteFrameValue);
         }

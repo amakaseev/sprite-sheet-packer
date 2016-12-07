@@ -21,6 +21,7 @@ SpritePackerProjectFile::SpritePackerProjectFile() {
     _pngOptLevel = 7;
     _jpgQuality = 80;
 
+    _trimSpriteNames = true;
     _prependSmartFolderName = true;
 }
 
@@ -76,6 +77,7 @@ bool SpritePackerProjectFile::read(const QString &fileName) {
         _srcList.push_back(dir.absoluteFilePath(src.toString()));
     }
 
+    if (json.contains("trimSpriteNames")) _trimSpriteNames = json["trimSpriteNames"].toBool();
     if (json.contains("prependSmartFolderName")) _prependSmartFolderName = json["prependSmartFolderName"].toBool();
 
     return true;
@@ -116,6 +118,7 @@ bool SpritePackerProjectFile::write(const QString &fileName) {
         srcRelative.push_back(dir.relativeFilePath(src));
     }
     json["srcList"] = QJsonArray::fromStringList(srcRelative);
+    json["trimSpriteNames"] = _trimSpriteNames;
     json["prependSmartFolderName"] = _prependSmartFolderName;
 
     QFile file(fileName);
@@ -141,6 +144,10 @@ bool SpritePackerProjectFileTPS::read(const QString &fileName) {
 
     if (PublishSpriteSheet::formats().find(tpsMap["dataFormat"].toString()) != PublishSpriteSheet::formats().end()) {
         _dataFormat = tpsMap["dataFormat"].toString();
+    }
+
+    if (tpsMap.find("trimSpriteNames") != tpsMap.end()) {
+        _trimSpriteNames = tpsMap["trimSpriteNames"].toBool();
     }
 
     if (tpsMap.find("prependSmartFolderName") != tpsMap.end()) {
