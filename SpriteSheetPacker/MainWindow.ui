@@ -470,7 +470,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Algorithm&lt;/span&gt;&lt;/p&gt;&lt;p&gt;There are currently 2 algorithms&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;MaxRects&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Currently the best packing algorithm. Tries to use the last texture space by applying different heuristics when placing the sprites.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Basic&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Simple layout by filling sprites from left to right until the maximum width of the texture is reached. Good for fixed-size sprites.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Image format&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Choose the image format your framework supports. Depending on your choice this enables additional features.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
@@ -778,7 +778,7 @@
               <item>
                <widget class="QLineEdit" name="spriteSheetLineEdit">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Sprite sheet name&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Name for sprite sheet support {v} for insert scale variant name.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Sprite sheet name&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Name for sprite sheet.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Placeholders:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;{v} - scale variant name&lt;/p&gt;&lt;p&gt;{n} - multipack index, starting with 0&lt;/p&gt;&lt;p&gt;{n1} - multipack index, starting with 1&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string/>
@@ -858,6 +858,9 @@
     <layout class="QVBoxLayout" name="spritesDockWidgetLayout">
      <item>
       <widget class="QCheckBox" name="trimSpriteNamesCheckBox">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Trim sprite names&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Remove image file extensions from the sprite names - e.g. .png, .jpg, ...&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="text">
         <string>Trim sprite names</string>
        </property>
@@ -868,6 +871,9 @@
      </item>
      <item>
       <widget class="QCheckBox" name="prependSmartFolderNameCheckBox">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Prepend smart folder name&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Prepends the smart folder's name as part of the sprite name.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="text">
         <string>Prepend smart folder name</string>
        </property>
