@@ -287,6 +287,8 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     ui->pngOptLevelSlider->setValue(projectFile->pngOptLevel());
     ui->jpgQualitySlider->setValue(projectFile->jpgQuality());
 
+   ui->prependSmartFolderNameCheckBox->setChecked(projectFile->prependSmartFolderName());
+
     while(ui->scalingVariantsGroupBox->layout()->count() > 0){
         QLayoutItem *item = ui->scalingVariantsGroupBox->layout()->takeAt(0);
         delete item->widget();
@@ -359,6 +361,7 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
     projectFile->setPngOptMode(ui->pngOptModeComboBox->currentText());
     projectFile->setPngOptLevel(ui->pngOptLevelSlider->value());
     projectFile->setJpgQuality(ui->jpgQualitySlider->value());
+    projectFile->setPrependSmartFolderName(ui->prependSmartFolderNameCheckBox->isChecked());
 
     QVector<ScalingVariant> scalingVariants;
     for (int i=0; i<ui->scalingVariantsGroupBox->layout()->count(); ++i) {
@@ -572,6 +575,7 @@ void MainWindow::on_actionPublish_triggered() {
     publisher->setPremultiplied(ui->premultipliedCheckBox->isChecked());
     publisher->setPngQuality(ui->pngOptModeComboBox->currentText(), ui->pngOptLevelSlider->value());
     publisher->setJpgQuality(ui->jpgQualitySlider->value());
+    publisher->setPrependSmartFolderName(ui->prependSmartFolderNameCheckBox->isChecked());
 
     PublishStatusDialog publishStatusDialog(this);
     publishStatusDialog.open();
@@ -854,6 +858,24 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB888, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB565, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kALPHA, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC1, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4A, false);
+        if (!isEnabledComboBoxItem(ui->pixelFormatComboBox, ui->pixelFormatComboBox->currentIndex())) {
+            ui->pixelFormatComboBox->setCurrentIndex(kRGB888);
+        }
+    } else if (imageFormat == kJPG_PNG) {
+        imageTabBar->setTabEnabled(0, false);
+        imageTabBar->setTabEnabled(1, true);
+        imageTabBar->setCurrentIndex(1);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8888, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8565, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB4444, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB888, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB565, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kALPHA, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC1, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, false);

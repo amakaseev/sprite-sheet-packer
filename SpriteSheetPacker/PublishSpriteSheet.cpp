@@ -100,21 +100,30 @@ bool PublishSpriteSheet::publish(const QString& format, bool errorMessage) {
 
         // save image
         qDebug() << "Save image:" << filePath + imagePrefix(_imageFormat);
-        if ((_imageFormat == kPNG) || (_imageFormat == kJPG)) {
+        if ((_imageFormat == kPNG) || (_imageFormat == kJPG) || (_imageFormat == kJPG_PNG)) {
             QImage image = convertImage(atlas.image(), _pixelFormat, _premultiplied);
 //            image.save(filePath + imagePrefix(_imageFormat), Q_NULLPTR, 0);
             if (_imageFormat == kPNG) {
-                QImageWriter writer(filePath + imagePrefix(_imageFormat), "png");
+                QImageWriter writer(filePath + imagePrefix(kPNG), "png");
                 writer.setOptimizedWrite(true);
                 writer.setCompression(100);
                 writer.setQuality(0);
                 writer.write(image);
-            } else if (_imageFormat == kJPG) {
-                QImageWriter writer(filePath + imagePrefix(_imageFormat), "jpg");
+            } else if ((_imageFormat == kJPG) || (_imageFormat == kJPG_PNG)) {
+                QImageWriter writer(filePath + imagePrefix(kJPG), "jpg");
                 writer.setOptimizedWrite(true);
                 writer.setCompression(100);
                 writer.setQuality(_jpgQuality);
                 writer.write(image);
+
+                if (_imageFormat == kJPG_PNG) {
+                    QImage maskImage = convertImage(atlas.image(), kALPHA, _premultiplied);
+                    QImageWriter writer(filePath + imagePrefix(kPNG), "png");
+                    writer.setOptimizedWrite(true);
+                    writer.setCompression(100);
+                    writer.setQuality(0);
+                    writer.write(maskImage);
+                }
             }
         } else if ((_imageFormat == kPKM) || (_imageFormat == kPVR) || (_imageFormat == kPVR_CCZ)) {
             CPVRTextureHeader pvrHeader(PVRStandard8PixelType.PixelTypeID, atlas.image().width(), atlas.image().height());
@@ -190,7 +199,14 @@ bool PublishSpriteSheet::generateDataFile(const QString& filePath, const QString
     if (engine.globalObject().hasOwnProperty("exportSpriteSheet")) {
         QJSValueList args;
         args << QJSValue(filePath);
-        args << QJSValue(filePath + imagePrefix(_imageFormat));
+        if (_imageFormat == kJPG_PNG) {
+            QJSValue imageFilePathsValue = engine.newObject();
+            imageFilePathsValue.setProperty("rgb", QJSValue(filePath + imagePrefix(kJPG)));
+            imageFilePathsValue.setProperty("mask", QJSValue(filePath + imagePrefix(kPNG)));
+            args << imageFilePathsValue;
+        } else {
+            args << QJSValue(filePath + imagePrefix(_imageFormat));
+        }
 
         // collect sprite frames
         QJSValue spriteFramesValue = engine.newObject();
@@ -204,7 +220,16 @@ bool PublishSpriteSheet::generateDataFile(const QString& filePath, const QString
             spriteFrameValue.setProperty("sourceSize", jsValue(engine, it_f.value().sourceSize));
             spriteFrameValue.setProperty("triangles", jsValue(engine, it_f.value().triangles));
 
-            spriteFramesValue.setProperty(it_f.key(), spriteFrameValue);
+            QString name = it_f.key();
+            if (!_prependSmartFolderName) {
+                auto idx = name.indexOf('/');
+                if (idx != -1) {
+                    qDebug() << name;
+                    name = name.right(name.length() - idx - 1);
+                    qDebug() << name;
+                }
+            }
+            spriteFramesValue.setProperty(name, spriteFrameValue);
         }
         args << QJSValue(spriteFramesValue);
 

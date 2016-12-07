@@ -1,4 +1,5 @@
 #include "SpritePackerProjectFile.h"
+#include "PublishSpriteSheet.h"
 
 #include "TPSParser.h"
 #include "PListParser.h"
@@ -19,6 +20,8 @@ SpritePackerProjectFile::SpritePackerProjectFile() {
     _pngOptMode = "None";
     _pngOptLevel = 7;
     _jpgQuality = 80;
+
+    _prependSmartFolderName = true;
 }
 
 SpritePackerProjectFile::~SpritePackerProjectFile() {
@@ -73,6 +76,8 @@ bool SpritePackerProjectFile::read(const QString &fileName) {
         _srcList.push_back(dir.absoluteFilePath(src.toString()));
     }
 
+    if (json.contains("prependSmartFolderName")) _prependSmartFolderName = json["prependSmartFolderName"].toBool();
+
     return true;
 }
 
@@ -111,6 +116,7 @@ bool SpritePackerProjectFile::write(const QString &fileName) {
         srcRelative.push_back(dir.relativeFilePath(src));
     }
     json["srcList"] = QJsonArray::fromStringList(srcRelative);
+    json["prependSmartFolderName"] = _prependSmartFolderName;
 
     QFile file(fileName);
     file.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -132,6 +138,14 @@ bool SpritePackerProjectFileTPS::read(const QString &fileName) {
     float globalScale = 1;
 
     QVariantMap tpsMap = tps.toMap();
+
+    if (PublishSpriteSheet::formats().find(tpsMap["dataFormat"].toString()) != PublishSpriteSheet::formats().end()) {
+        _dataFormat = tpsMap["dataFormat"].toString();
+    }
+
+    if (tpsMap.find("prependSmartFolderName") != tpsMap.end()) {
+        _prependSmartFolderName = tpsMap["prependSmartFolderName"].toBool();
+    }
 
     if (tpsMap.find("globalSpriteSettings") != tpsMap.end()) {
         QVariantMap globalSpriteSettings = tpsMap["globalSpriteSettings"].toMap();

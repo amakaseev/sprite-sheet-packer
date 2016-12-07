@@ -33,6 +33,9 @@ public:
     void setPngQuality(const QString& optMode, int optLevel) { _pngQuality.optMode = optMode; _pngQuality.optLevel = optLevel; }
     void setJpgQuality(int quality) { _jpgQuality = quality; }
 
+    void setPrependSmartFolderName(bool prependSmartFolderName) { _prependSmartFolderName = prependSmartFolderName; }
+    bool prependSmartFolderName() const { return _prependSmartFolderName; }
+
     bool publish(const QString& format, bool errorMessage = true);
     bool generateDataFile(const QString& filePath, const QString& format, const SpriteAtlas &atlas, bool errorMessage = true);
 
@@ -63,6 +66,8 @@ protected:
     } _pngQuality;
 
     int         _jpgQuality;
+
+    bool        _prependSmartFolderName;
 
     static QMap<QString, QString> _formats;
 };

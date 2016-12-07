@@ -855,7 +855,18 @@
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="spritesDockWidgetContents">
-    <layout class="QVBoxLayout" name="spritesDockWidgetLayout"/>
+    <layout class="QVBoxLayout" name="spritesDockWidgetLayout">
+     <item>
+      <widget class="QCheckBox" name="prependSmartFolderNameCheckBox">
+       <property name="text">
+        <string>Prepend Smart Folder Name</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <action name="actionNew">

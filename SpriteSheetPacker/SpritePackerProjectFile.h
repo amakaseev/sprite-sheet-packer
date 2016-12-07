@@ -69,6 +69,9 @@ public:
     void setSrcList(const QStringList& srcList) { _srcList = srcList; }
     const QStringList& srcList() const { return _srcList; }
 
+    void setPrependSmartFolderName(bool prependSmartFolderName) { _prependSmartFolderName = prependSmartFolderName; }
+    bool prependSmartFolderName() const { return _prependSmartFolderName; }
+
     virtual bool write(const QString& fileName);
     virtual bool read(const QString& fileName);
 
@@ -97,6 +100,8 @@ protected:
     QString     _destPath;
     QString     _spriteSheetName;
     QStringList _srcList;
+
+    bool        _prependSmartFolderName;
 
 private:
     static GenericObjectFactory<std::string, SpritePackerProjectFile> _factory;
