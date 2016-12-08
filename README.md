@@ -21,8 +21,13 @@ Uses [Qt - Digia Plc](http://qt-project.org), LGPL license.
 See the [Documentation](http://amakaseev.github.io/sprite-sheet-packer) for use.
 
 
+## Release builds
+Download [pre-build](https://github.com/amakaseev/sprite-sheet-packer/releases)
+
+
 ## License
 See the [LICENSE](LICENSE.md) file for license rights and limitations (MIT).
+
 
 ## Changelog
 [CHANGELOG](CHANGELOG.md) file for all change logs.
@@ -30,3 +35,4 @@ See the [LICENSE](LICENSE.md) file for license rights and limitations (MIT).
 
 ## Developers
 See the [AUTHORS](AUTHORS.md) file.
+
