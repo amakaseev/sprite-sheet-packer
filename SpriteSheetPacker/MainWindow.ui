@@ -99,6 +99,7 @@
    <addaction name="separator"/>
    <addaction name="actionPublish"/>
    <addaction name="separator"/>
+   <addaction name="actionAnimationPreview"/>
    <addaction name="actionPreferences"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -1005,6 +1006,15 @@
    </property>
    <property name="iconVisibleInMenu">
     <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionAnimationPreview">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/icon_animation.png</normaloff>:/res/icon_animation.png</iconset>
+   </property>
+   <property name="text">
+    <string>Animation Preview</string>
    </property>
   </action>
  </widget>

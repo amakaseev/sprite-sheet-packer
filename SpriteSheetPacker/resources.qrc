@@ -23,5 +23,6 @@
         <file>res/spinner.gif</file>
         <file>res/icon_ok.png</file>
         <file>res/icon_warning.png</file>
+        <file>res/icon_animation.png</file>
     </qresource>
 </RCC>

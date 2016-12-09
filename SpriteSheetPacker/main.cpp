@@ -14,6 +14,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationVersion("1.0.3");
 
     SpritePackerProjectFile::factory().set<SpritePackerProjectFile>("json");
+    SpritePackerProjectFile::factory().set<SpritePackerProjectFile>("ssp");
     SpritePackerProjectFile::factory().set<SpritePackerProjectFileTPS>("tps");
 
     if (argc > 1) {

@@ -500,7 +500,7 @@ void MainWindow::on_actionOpen_triggered() {
     QString selectedFilter;
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open project file."),
                                                     dir,
-                                                    tr("Supported formats (*.json *.sp *.tps)"));
+                                                    tr("Supported formats (*.json *.ssp *.tps)"));
     qDebug() << selectedFilter;
     if (!fileName.isEmpty()) {
         settings.setValue("spritePackerFileName", fileName);
@@ -527,7 +527,7 @@ void MainWindow::on_actionSaveAs_triggered() {
     }
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save sprite packer project file."),
                                                     dir,
-                                                    tr("Sprite sheet packer (*.json)"));
+                                                    tr("Sprite sheet packer (*.ssp)"));
     if (!fileName.isEmpty()) {
         settings.setValue("spritePackerFileName", fileName);
         saveSpritePackerProject(fileName);
