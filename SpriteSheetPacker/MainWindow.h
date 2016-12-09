@@ -3,6 +3,7 @@
 
 #include <QtWidgets>
 #include "SpriteAtlas.h"
+#include "StatusBarWidget.h"
 #include "SpritesTreeWidget.h"
 #include "PublishStatusDialog.h"
 #include "SpritePackerProjectFile.h"
@@ -49,14 +50,11 @@ private slots:
     void on_actionAbout_triggered();
     void on_actionPreferences_triggered();
 
+    void spritesTreeWidgetItemSelectionChanged();
+
     void on_destFolderToolButton_clicked();
     void on_dataFormatSetupToolButton_clicked();
     void on_addScalingVariantPushButton_clicked();
-
-    void spritesTreeWidgetItemSelectionChanged();
-    void removeScalingVariant();
-
-    void propertiesValueChanged();
 
     void on_algorithmComboBox_currentTextChanged(const QString& text);
     void on_trimModeComboBox_currentIndexChanged(int value);
@@ -72,13 +70,21 @@ private slots:
     void on_pngOptModeComboBox_currentTextChanged(const QString &text);
     void on_premultipliedCheckBox_toggled(bool checked);
 
-    void scalingVariantWidgetValueChanged(bool);
+    void onScalingVariantWidgetValueChanged(bool);
+
+    void onRemoveScalingVariant();
+
+    void onRefreshAtlasStarted();
+    void onRefreshAtlasCompleted();
+    void onRefreshAtlasProgressTextChanged(const QString&);
 
 protected:
+    void propertiesValueChanged();
     void validatedSpriteSheetLineEdit();
 
 private:
     Ui::MainWindow*         ui;
+    StatusBarWidget*        _statusBarWidget;
     SpritesTreeWidget*      _spritesTreeWidget;
     QString                 _currentProjectFileName;
     QToolButton*            _openButton;
@@ -86,6 +92,11 @@ private:
     bool                    _blockUISignals;
     bool                    _projectDirty;
     bool                    _atlasDirty;
+    bool                    _needFitAfterRefresh;
+
+    QFuture<bool>           _future;
+    QFutureWatcher<bool>    _watcher;
+    QMutex                  _mutex;
 };
 
 #endif // MAINWINDOW_H

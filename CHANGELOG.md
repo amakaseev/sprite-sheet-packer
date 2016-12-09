@@ -1,3 +1,7 @@
+v1.0.6
+======
+* Generate atlas in thread
+
 v1.0.5
 ======
 * Added support multi-pack

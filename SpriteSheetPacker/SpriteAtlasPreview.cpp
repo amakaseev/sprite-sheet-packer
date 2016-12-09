@@ -69,12 +69,12 @@ void SpriteAtlasPreview::setAtlas(const SpriteAtlas& atlas, PixelFormat pixelFor
             auto spriteFrame = it.value();
             QPoint delta = spriteFrame.frame.topLeft();
 
-//            if (ui->algorithmComboBox->currentText() == "Rect") {
+            if (atlas.algorithm() == "Rect") {
                 auto rectItem = _scene->addRect(spriteFrame.frame, QPen(Qt::white), QBrush(brushColor));
                 rectItem->setPos(atlasPixmapItem->pos());
                 rectItem->setToolTip(it.key());
                 outlineItems.push_back(rectItem);
-//            }
+            }
 
             if (spriteFrame.triangles.indices.size()) {
                 for (int i=0; i<spriteFrame.triangles.indices.size(); i+=3) {
@@ -126,6 +126,7 @@ void SpriteAtlasPreview::setAtlas(const SpriteAtlas& atlas, PixelFormat pixelFor
     _outlinesGroup->setVisible(ui->displayOutlinesCheckBox->isChecked());
 
     _scene->setSceneRect(_scene->itemsBoundingRect());
+    ui->graphicsView->update();
 }
 
 void SpriteAtlasPreview::on_toolButtonZoomOut_clicked() {

@@ -100,11 +100,14 @@ void SpriteAtlas::enablePolygonMode(bool enable, float epsilon) {
 //     generateThread->start();
 //}
 
-bool SpriteAtlas::generate() {
+bool SpriteAtlas::generate(SpriteAtlasGenerateProgress* progress) {
     QTime timePerform;
     timePerform.start();
 
     _outputData.clear();
+
+    if (progress)
+        progress->setProgressText(QString("Optimizing sptites..."));
 
     QStringList nameFilter;
     nameFilter << "*.png" << "*.jpg" << "*.jpeg" << "*.gif" << "*.bmp";
@@ -130,9 +133,10 @@ bool SpriteAtlas::generate() {
     // init images and rects
     _identicalFrames.clear();
 
+    int progressIndex = 1;
     QVector<PackContent> inputContent;
     auto it_f = fileList.begin();
-    for(; it_f != fileList.end(); ++it_f) {
+    for(; it_f != fileList.end(); ++it_f, ++progressIndex) {
         QImage image((*it_f).first);
         if (image.isNull()) continue;
         if (_scale != 1) {
@@ -174,9 +178,9 @@ bool SpriteAtlas::generate() {
 
     bool result = false;
     if ((_algorithm == "Polygon") && (_polygonMode.enable)) {
-        result = packWithPolygon(inputContent);
+        result = packWithPolygon(inputContent, progress);
     } else {
-        result = packWithRect(inputContent);
+        result = packWithRect(inputContent, progress);
     }
 
     int elapsed = timePerform.elapsed();
@@ -185,7 +189,10 @@ bool SpriteAtlas::generate() {
     return result;
 }
 
-bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
+bool SpriteAtlas::packWithRect(const QVector<PackContent>& content, SpriteAtlasGenerateProgress* progress) {
+    if (progress)
+        progress->setProgressText("Optimizing atlas...");
+
     int volume = 0;
     BinPack2D::ContentAccumulator<PackContent> inputContent;
     for (auto packContent: content) {
@@ -242,7 +249,7 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
                     outputContent = BinPack2D::ContentAccumulator<PackContent>();
                     canvasArray.CollectContent(outputContent);
 
-                    packWithRect(remainderContent);
+                    packWithRect(remainderContent, progress);
 
                     break;
                 }
@@ -315,7 +322,7 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
                     outputContent = BinPack2D::ContentAccumulator<PackContent>();
                     canvasArray.CollectContent(outputContent);
 
-                    packWithRect(remainderContent);
+                    packWithRect(remainderContent, progress);
 
                     break;
                 }
@@ -362,6 +369,8 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
     }
 
     qDebug() << "Found optimize size:" << w << "x" << h;
+    if (progress)
+        progress->setProgressText(QString("Found optimize size: %1x%2").arg(w).arg(h));
 
     OutputData outputData;
 
@@ -430,7 +439,10 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
     return true;
 }
 
-bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
+bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content, SpriteAtlasGenerateProgress* progress) {
+    if (progress)
+        progress->setProgressText("Build pack contents...");
+
     // initialize content
     PolyPack2D::ContentList<PackContent> inputContent;
     for (auto packContent: content) {

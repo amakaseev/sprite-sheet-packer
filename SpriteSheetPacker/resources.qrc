@@ -20,5 +20,8 @@
         <file>res/iPhone.png</file>
         <file>res/icon.png</file>
         <file>res/identical.png</file>
+        <file>res/spinner.gif</file>
+        <file>res/icon_ok.png</file>
+        <file>res/icon_warning.png</file>
     </qresource>
 </RCC>

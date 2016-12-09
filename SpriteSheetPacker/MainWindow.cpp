@@ -80,6 +80,10 @@ MainWindow::MainWindow(QWidget *parent) :
     empty->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     ui->mainToolBar->insertWidget(ui->actionPreferences ,empty);
 
+    _statusBarWidget = new StatusBarWidget(this);
+    _statusBarWidget->showMessage("Ready.", QPixmap("://res/icon_ok.png"));
+    ui->statusBar->addPermanentWidget(_statusBarWidget);
+
     createRefreshButton();
     setAcceptDrops(true);
 
@@ -90,10 +94,10 @@ MainWindow::MainWindow(QWidget *parent) :
     _projectDirty = false;
     _atlasDirty = false;
 
+    QObject::connect(&_watcher, SIGNAL(started()), this, SLOT(onRefreshAtlasStarted()));
+    QObject::connect(&_watcher, SIGNAL(finished()), this, SLOT(onRefreshAtlasCompleted()));
+
     QSettings settings;
-    
-//    ui->displayOutlinesCheckBox->setChecked(settings.value("MainWindow/displayOutlines").toBool());
-    
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
     restoreState(settings.value("MainWindow/state").toByteArray());
 }
@@ -190,42 +194,63 @@ void MainWindow::createRefreshButton() {
 
 void MainWindow::refreshAtlas(bool generate) {
     if (generate) {
-        _spriteAtlas.clear();
-        for (int i=0; i<ui->scalingVariantsGroupBox->layout()->count(); ++i) {
-            ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(ui->scalingVariantsGroupBox->layout()->itemAt(i)->widget());
-            if (scalingVariantWidget) {
-                float scale = scalingVariantWidget->scale();
-                int maxTextureSize = scalingVariantWidget->maxTextureSize();
-                bool pow2 = scalingVariantWidget->pow2();
 
-                SpriteAtlas atlas = SpriteAtlas(_spritesTreeWidget->contentList(),
-                                                ui->textureBorderSpinBox->value(),
-                                                ui->spriteBorderSpinBox->value(),
-                                                ui->trimSpinBox->value(),
-                                                pow2,
-                                                maxTextureSize,
-                                                scale);
+//        if (_future.isRunning()) {
+//            _future.cancel();
+//            _future.waitForFinished();
+//        }
 
-                atlas.setAlgorithm(ui->algorithmComboBox->currentText());
+        _future = QtConcurrent::run([this](){
+            _mutex.lock();
+            _spriteAtlas.clear();
+            for (int i=0; i<ui->scalingVariantsGroupBox->layout()->count(); ++i) {
+                ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(ui->scalingVariantsGroupBox->layout()->itemAt(i)->widget());
+                if (scalingVariantWidget) {
+                    float scale = scalingVariantWidget->scale();
+                    int maxTextureSize = scalingVariantWidget->maxTextureSize();
+                    bool pow2 = scalingVariantWidget->pow2();
 
-                if (ui->trimModeComboBox->currentText() == "Polygon") {
-                    atlas.enablePolygonMode(true, ui->epsilonHorizontalSlider->value() / 10.f);
-                }
+                    SpriteAtlas atlas = SpriteAtlas(_spritesTreeWidget->contentList(),
+                                                    ui->textureBorderSpinBox->value(),
+                                                    ui->spriteBorderSpinBox->value(),
+                                                    ui->trimSpinBox->value(),
+                                                    pow2,
+                                                    maxTextureSize,
+                                                    scale);
 
-                if (!atlas.generate()) {
-                    QMessageBox::critical(this, "Generate error of scalingVariant:" + scalingVariantWidget->name(), "Max texture size limit is small!");
-                } else {
-                    _spriteAtlas.push_back(atlas);
+                    atlas.setAlgorithm(ui->algorithmComboBox->currentText());
+
+                    if (ui->trimModeComboBox->currentText() == "Polygon") {
+                        atlas.enablePolygonMode(true, ui->epsilonHorizontalSlider->value() / 10.f);
+                    }
+
+                    SpriteAtlasGenerateProgress* progress = new SpriteAtlasGenerateProgress();
+                    QObject::connect(progress, SIGNAL(progressTextChanged(const QString&)), this, SLOT(onRefreshAtlasProgressTextChanged(const QString&)));
+
+//                    QObject::connect(&_watcher, &QFutureWatcher<bool>::canceled, [progress]() {
+//                        qDebug() << "cancel";
+//                        delete progress;
+//                    });
+
+                    if (!atlas.generate(progress)) {
+                        QMessageBox::critical(this, "Generate error of scalingVariant:" + scalingVariantWidget->name(), "Max texture size limit is small!");
+                        delete progress;
+                        _mutex.unlock();
+                        return false;
+                    } else {
+                        _spriteAtlas.push_back(atlas);
+                    }
+                    delete progress;
                 }
             }
-        }
+            _atlasDirty = false;
+            _mutex.unlock();
+            return true;
+        });
+        _watcher.setFuture(_future);
+    } else {
+        onRefreshAtlasCompleted();
     }
-
-    refreshPreview();
-
-    _atlasDirty = false;
-
-    validatedSpriteSheetLineEdit();
 }
 
 void MainWindow::refreshPreview() {
@@ -303,8 +328,8 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
                                                                               scalingVariant.scale,
                                                                               scalingVariant.maxTextureSize,
                                                                               scalingVariant.pow2);
-        connect(scalingVariantWidget, SIGNAL(remove()), this, SLOT(removeScalingVariant()));
-        connect(scalingVariantWidget, SIGNAL(valueChanged(bool)), this, SLOT(scalingVariantWidgetValueChanged(bool)));
+        connect(scalingVariantWidget, SIGNAL(remove()), this, SLOT(onRemoveScalingVariant()));
+        connect(scalingVariantWidget, SIGNAL(valueChanged(bool)), this, SLOT(onScalingVariantWidgetValueChanged(bool)));
         ui->scalingVariantsGroupBox->layout()->addWidget(scalingVariantWidget);
 
         if (ui->scalingVariantsGroupBox->layout()->count() == 1) {
@@ -316,14 +341,8 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     _spritesTreeWidget->addContent(projectFile->srcList());
 
     _blockUISignals = false;
+    _needFitAfterRefresh = true;
     refreshAtlas();
-
-    // fit scene before open project
-    SpriteAtlasPreview* spriteAtlasPreview = qobject_cast<SpriteAtlasPreview*>(ui->atlasPreviewTabWidget->currentWidget());
-    if (spriteAtlasPreview) {
-        spriteAtlasPreview->on_toolButtonZoomFit_clicked();
-    }
-
 
     _currentProjectFileName = fileName;
     setWindowTitle(_currentProjectFileName + " - SpriteSheet Packer");
@@ -727,8 +746,8 @@ void MainWindow::on_addScalingVariantPushButton_clicked() {
     }
 
     ScalingVariantWidget* scalingVariantWidget = new ScalingVariantWidget(this, defaultScaling[index].first.c_str(), defaultScaling[index].second);
-    connect(scalingVariantWidget, SIGNAL(remove()), this, SLOT(removeScalingVariant()));
-    connect(scalingVariantWidget, SIGNAL(valueChanged(bool)), this, SLOT(scalingVariantWidgetValueChanged(bool)));
+    connect(scalingVariantWidget, SIGNAL(remove()), this, SLOT(onRemoveScalingVariant()));
+    connect(scalingVariantWidget, SIGNAL(valueChanged(bool)), this, SLOT(onScalingVariantWidgetValueChanged(bool)));
     ui->scalingVariantsGroupBox->layout()->addWidget(scalingVariantWidget);
 
     if (ui->scalingVariantsGroupBox->layout()->count() == 1) {
@@ -739,30 +758,6 @@ void MainWindow::on_addScalingVariantPushButton_clicked() {
     } else{
         propertiesValueChanged();
         setProjectDirty();
-    }
-}
-
-void MainWindow::removeScalingVariant() {
-    qDebug() << "remove" << sender();
-    ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(sender());
-    if (scalingVariantWidget) {
-        disconnect(scalingVariantWidget, SIGNAL(valueChanged(bool)), this, SLOT(scalingVariantWidgetValueChanged(bool)));
-        ui->scalingVariantsGroupBox->layout()->removeWidget(scalingVariantWidget);
-        delete scalingVariantWidget;
-    }
-
-    propertiesValueChanged();
-    setProjectDirty();
-}
-
-void MainWindow::propertiesValueChanged() {
-    if (_blockUISignals) return;
-    QSettings settings;
-
-    if (settings.value("MainWindow/automaticPreview", true).toBool()) {
-        refreshAtlas();
-    } else {
-        _atlasDirty = true;
     }
 }
 
@@ -984,11 +979,65 @@ void MainWindow::on_premultipliedCheckBox_toggled(bool) {
     setProjectDirty();
 }
 
-void MainWindow::scalingVariantWidgetValueChanged(bool refresh) {
+void MainWindow::onScalingVariantWidgetValueChanged(bool refresh) {
     if (refresh) {
         propertiesValueChanged();
     }
     setProjectDirty();
+}
+
+void MainWindow::onRemoveScalingVariant() {
+    qDebug() << "remove" << sender();
+    ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(sender());
+    if (scalingVariantWidget) {
+        disconnect(scalingVariantWidget, SIGNAL(valueChanged(bool)), this, SLOT(onScalingVariantWidgetValueChanged(bool)));
+        ui->scalingVariantsGroupBox->layout()->removeWidget(scalingVariantWidget);
+        delete scalingVariantWidget;
+    }
+
+    propertiesValueChanged();
+    setProjectDirty();
+}
+
+void MainWindow::onRefreshAtlasStarted() {
+    qDebug() << "onRefreshAtlasStarted";
+    _statusBarWidget->showSpinner("Generate atlas...");
+}
+
+void MainWindow::onRefreshAtlasCompleted() {
+    qDebug() << "onRefreshAtlasCompleted";
+    _statusBarWidget->hideSpinner();
+    _statusBarWidget->showMessage("Finished.", QPixmap("://res/icon_ok.png"));
+
+    refreshPreview();
+    validatedSpriteSheetLineEdit();
+
+    if (_needFitAfterRefresh) {
+        // fit scene before open project
+        for (auto i=0; i<ui->atlasPreviewTabWidget->count(); ++i) {
+            SpriteAtlasPreview* spriteAtlasPreview = qobject_cast<SpriteAtlasPreview*>(ui->atlasPreviewTabWidget->widget(i));
+            if (spriteAtlasPreview) {
+                spriteAtlasPreview->on_toolButtonZoomFit_clicked();
+            }
+        }
+        _needFitAfterRefresh = false;
+    }
+}
+
+void MainWindow::onRefreshAtlasProgressTextChanged(const QString& message) {
+    _statusBarWidget->showSpinner(message);
+}
+
+
+void MainWindow::propertiesValueChanged() {
+    if (_blockUISignals) return;
+    QSettings settings;
+
+    if (settings.value("MainWindow/automaticPreview", true).toBool()) {
+        refreshAtlas();
+    } else {
+        _atlasDirty = true;
+    }
 }
 
 void MainWindow::validatedSpriteSheetLineEdit() {

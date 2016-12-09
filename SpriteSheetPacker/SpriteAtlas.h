@@ -41,6 +41,21 @@ private:
     Polygons  _polygons;
 };
 
+class SpriteAtlasGenerateProgress: public QObject
+{
+    Q_OBJECT
+public:
+    explicit SpriteAtlasGenerateProgress() { }
+    ~SpriteAtlasGenerateProgress() {}
+
+    void setProgressText(const QString& message) {
+        emit progressTextChanged(message);
+    }
+
+signals:
+    void progressTextChanged(const QString&);
+};
+
 class SpriteAtlas
 {
 public:
@@ -50,20 +65,28 @@ public:
     };
 
 public:
-    SpriteAtlas(const QStringList& sourceList = QStringList(), int textureBorder = 0, int spriteBorder = 1, int trim = 1, bool pow2 = false, int maxSize = 8192, float scale = 1);
+    SpriteAtlas(const QStringList& sourceList = QStringList(),
+                int textureBorder = 0,
+                int spriteBorder = 1,
+                int trim = 1,
+                bool pow2 = false,
+                int maxSize = 8192,
+                float scale = 1);
 
     void setAlgorithm(const QString& algorithm) { _algorithm = algorithm; }
     void enablePolygonMode(bool enable, float epsilon = 2.f);
-    bool generate();
 
+    bool generate(SpriteAtlasGenerateProgress* progress = nullptr);
+
+    QString algorithm() const { return _algorithm; }
     float scale() const { return _scale; }
 
     const QVector<OutputData>& outputData() const { return _outputData; }
     const QMap<QString, QVector<QString>>& identicalFrames() const { return _identicalFrames; }
 
 protected:
-    bool packWithRect(const QVector<PackContent>& content);
-    bool packWithPolygon(const QVector<PackContent>& content);
+    bool packWithRect(const QVector<PackContent>& content, SpriteAtlasGenerateProgress* progress);
+    bool packWithPolygon(const QVector<PackContent>& content, SpriteAtlasGenerateProgress* progress);
 
 private:
     QStringList _sourceList;
