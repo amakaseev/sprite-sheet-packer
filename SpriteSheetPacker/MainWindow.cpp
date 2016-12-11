@@ -786,9 +786,16 @@ void MainWindow::on_spriteBorderSpinBox_valueChanged(int) {
     setProjectDirty();
 }
 
-void MainWindow::on_epsilonHorizontalSlider_valueChanged(int) {
-    propertiesValueChanged();
-    setProjectDirty();
+void MainWindow::on_epsilonHorizontalSlider_sliderMoved(int) {
+    _epsilonValueChanged = true;
+}
+
+void MainWindow::on_epsilonHorizontalSlider_sliderReleased() {
+    if (_epsilonValueChanged) {
+        propertiesValueChanged();
+        setProjectDirty();
+        _epsilonValueChanged = false;
+    }
 }
 
 void MainWindow::on_algorithmComboBox_currentTextChanged(const QString& text) {
