@@ -28,7 +28,8 @@ SOURCES += main.cpp\
     command-line.cpp \
     PolygonImage.cpp \
     SpriteAtlasPreview.cpp \
-    StatusBarWidget.cpp
+    StatusBarWidget.cpp \
+    AnimationPreviewDialog.cpp
 
 HEADERS += MainWindow.h \
     ImageRotate.h \
@@ -44,7 +45,8 @@ HEADERS += MainWindow.h \
     PolygonImage.h \
     SpriteAtlasPreview.h \
     ImageFormat.h \
-    StatusBarWidget.h
+    StatusBarWidget.h \
+    AnimationPreviewDialog.h
 
 #algorithm
 INCLUDEPATH += algorithm
@@ -64,7 +66,8 @@ FORMS += MainWindow.ui \
     PublishStatusDialog.ui \
     AboutDialog.ui \
     SpriteAtlasPreview.ui \
-    StatusBarWidgetatusbarwidget.ui
+    StatusBarWidgetatusbarwidget.ui \
+    AnimationPreviewDialog.ui
 
 RESOURCES += resources.qrc
 

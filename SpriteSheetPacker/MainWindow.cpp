@@ -7,6 +7,7 @@
 #include "AboutDialog.h"
 #include "PreferencesDialog.h"
 #include "PublishStatusDialog.h"
+#include "AnimationPreviewDialog.h"
 #include "ui_MainWindow.h"
 
 #include "PListParser.h"
@@ -705,6 +706,20 @@ void MainWindow::on_actionPreferences_triggered() {
     if (preferencesDialog.exec()) {
         refreshFormats();
     }
+}
+
+void MainWindow::on_actionAnimationPreview_triggered() {
+    if (AnimationPreviewDialog::instance()) {
+        auto dlg = AnimationPreviewDialog::instance();
+        dlg->close();
+        delete dlg;
+        return;
+    }
+
+    auto dlg = new AnimationPreviewDialog(_spritesTreeWidget, this);
+    dlg->show();
+
+    connect(_spritesTreeWidget, SIGNAL(itemSelectionChanged()), dlg, SLOT(spritesSelectionChanged()));
 }
 
 void MainWindow::spritesTreeWidgetItemSelectionChanged() {

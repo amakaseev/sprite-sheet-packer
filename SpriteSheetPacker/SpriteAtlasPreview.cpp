@@ -11,7 +11,7 @@ SpriteAtlasPreview::SpriteAtlasPreview(QWidget *parent) :
     ui->setupUi(this);
 
     _scene = new QGraphicsScene(this);
-    _scene->setBackgroundBrush(QBrush(Qt::darkGray));
+    _scene->setBackgroundBrush(QBrush(QPixmap("://res/patterns_tweed.png")));
     ui->graphicsView->setScene(_scene);
     ui->graphicsView->setAcceptDrops(false);
     _outlinesGroup = NULL;

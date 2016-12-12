@@ -24,5 +24,13 @@
         <file>res/icon_ok.png</file>
         <file>res/icon_warning.png</file>
         <file>res/icon_animation.png</file>
+        <file>res/patterns_tweed.png</file>
+        <file>res/playback/control_end_blue.png</file>
+        <file>res/playback/control_fastforward_blue.png</file>
+        <file>res/playback/control_pause_blue.png</file>
+        <file>res/playback/control_play_blue.png</file>
+        <file>res/playback/control_rewind_blue.png</file>
+        <file>res/playback/control_start_blue.png</file>
+        <file>res/playback/control_repeat_blue.png</file>
     </qresource>
 </RCC>

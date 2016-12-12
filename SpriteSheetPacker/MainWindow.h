@@ -49,6 +49,7 @@ private slots:
     void on_actionPublish_triggered();
     void on_actionAbout_triggered();
     void on_actionPreferences_triggered();
+    void on_actionAnimationPreview_triggered();
 
     void spritesTreeWidgetItemSelectionChanged();
 

@@ -1,6 +1,7 @@
 v1.0.6
 ======
 * Generate atlas in thread
+* Added animation preview
 
 v1.0.5
 ======
