@@ -59,7 +59,8 @@ private slots:
     void on_algorithmComboBox_currentTextChanged(const QString& text);
     void on_trimModeComboBox_currentIndexChanged(int value);
     void on_trimSpinBox_valueChanged(int value);
-    void on_epsilonHorizontalSlider_valueChanged(int value);
+    void on_epsilonHorizontalSlider_sliderMoved(int value);
+    void on_epsilonHorizontalSlider_sliderReleased();
     void on_textureBorderSpinBox_valueChanged(int value);
     void on_spriteBorderSpinBox_valueChanged(int value);
     void on_imageFormatComboBox_currentIndexChanged(int index);
@@ -93,6 +94,7 @@ private:
     bool                    _projectDirty;
     bool                    _atlasDirty;
     bool                    _needFitAfterRefresh;
+    bool                    _epsilonValueChanged;
 
     QFuture<bool>           _future;
     QFutureWatcher<bool>    _watcher;
