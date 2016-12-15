@@ -1,9 +1,9 @@
-v1.0.6
+1.0.6
 ======
 * Generate atlas in thread
 * Added animation preview
 
-v1.0.5
+1.0.5
 ======
 * Added support multi-pack
 	1. {n} - multipack index, starting with 0
@@ -15,7 +15,7 @@ v1.0.5
 * Added jpg(rgb)+png(alpha) format
 * Added TrimSpriteNames and PrependSmartFolderName
 
-v1.0.3
+1.0.3
 ======
 * Add save dialog on exit if project is dirty
 * Implement polygon packing algorithm
@@ -31,16 +31,16 @@ v1.0.3
 * Added automatically refreshed preview
 * Generate spritesheet from commandline using existing project file
 
-v1.0.2
+1.0.2
 ======
 * Implement drag and drop files and folders intro spritesheet from finder
 * Open TexturePacker project format
 
-v1.0.1
+1.0.1
 ======
 * Add command line
 
-v1.0.0
+1.0.0
 ======
 * Add MIT License
 * Add About dialog
