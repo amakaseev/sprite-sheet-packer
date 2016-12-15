@@ -58,6 +58,7 @@
     <addaction name="actionPublish"/>
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
+    <addaction name="actionCheckForUpdates"/>
     <addaction name="actionAbout"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
@@ -1015,6 +1016,11 @@
    </property>
    <property name="text">
     <string>Animation Preview</string>
+   </property>
+  </action>
+  <action name="actionCheckForUpdates">
+   <property name="text">
+    <string>Check for updates ...</string>
    </property>
   </action>
  </widget>

@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT += core widgets xml qml concurrent
+QT += core widgets xml qml concurrent network
+QT += webenginewidgets
 
 TARGET = SpriteSheetPacker
 TEMPLATE = app
@@ -29,7 +30,8 @@ SOURCES += main.cpp\
     PolygonImage.cpp \
     SpriteAtlasPreview.cpp \
     StatusBarWidget.cpp \
-    AnimationPreviewDialog.cpp
+    AnimationPreviewDialog.cpp \
+    UpdaterDialog.cpp
 
 HEADERS += MainWindow.h \
     ImageRotate.h \
@@ -46,7 +48,8 @@ HEADERS += MainWindow.h \
     SpriteAtlasPreview.h \
     ImageFormat.h \
     StatusBarWidget.h \
-    AnimationPreviewDialog.h
+    AnimationPreviewDialog.h \
+    UpdaterDialog.h
 
 #algorithm
 INCLUDEPATH += algorithm
@@ -67,7 +70,8 @@ FORMS += MainWindow.ui \
     AboutDialog.ui \
     SpriteAtlasPreview.ui \
     StatusBarWidgetatusbarwidget.ui \
-    AnimationPreviewDialog.ui
+    AnimationPreviewDialog.ui \
+    UpdaterDialog.ui
 
 RESOURCES += resources.qrc
 

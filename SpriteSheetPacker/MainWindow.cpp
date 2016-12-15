@@ -1,4 +1,5 @@
 #include <QtXml>
+#include <QNetworkReply>
 
 #include "MainWindow.h"
 #include "SpriteAtlasPreview.h"
@@ -8,6 +9,7 @@
 #include "PreferencesDialog.h"
 #include "PublishStatusDialog.h"
 #include "AnimationPreviewDialog.h"
+#include "UpdaterDialog.h"
 #include "ui_MainWindow.h"
 
 #include "PListParser.h"
@@ -101,6 +103,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QSettings settings;
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
     restoreState(settings.value("MainWindow/state").toByteArray());
+
+    refreshAtlas();
+    on_actionCheckForUpdates_triggered();
 }
 
 MainWindow::~MainWindow() {
@@ -696,16 +701,39 @@ void MainWindow::on_actionPublish_triggered() {
     }
 }
 
-void MainWindow::on_actionAbout_triggered() {
-    AboutDialog aboutDialog(this);
-    aboutDialog.exec();
-}
-
 void MainWindow::on_actionPreferences_triggered() {
     PreferencesDialog preferencesDialog(this);
     if (preferencesDialog.exec()) {
         refreshFormats();
     }
+}
+
+void MainWindow::on_actionCheckForUpdates_triggered() {
+    connect(&_networkManager, &QNetworkAccessManager::finished, [this](QNetworkReply* reply) {
+        QUrl url = reply->url();
+        if (reply->error()) {
+            qDebug() << QString("Download of [%1] failed: %2").arg(url.toEncoded().constData()).arg(qPrintable(reply->errorString()));
+        } else {
+            qDebug() << QString("Download of [%1] succeeded").arg(url.toEncoded().constData());
+            QString changelog = reply->readAll();
+            QString version = changelog.split("\n", QString::SkipEmptyParts).at(0);
+            qDebug() << "version:" << version;
+
+            if (!version.isEmpty() && (version != QCoreApplication::applicationVersion())) {
+                UpdaterDialog* dlg = new UpdaterDialog(changelog, this);
+                dlg->exec();
+            }
+        }
+        reply->deleteLater();
+    });
+
+    QUrl url = QUrl::fromEncoded("https://raw.githubusercontent.com/amakaseev/sprite-sheet-packer/master/CHANGELOG.md");
+    _networkManager.get(QNetworkRequest(url));
+}
+
+void MainWindow::on_actionAbout_triggered() {
+    AboutDialog aboutDialog(this);
+    aboutDialog.exec();
 }
 
 void MainWindow::on_actionAnimationPreview_triggered() {

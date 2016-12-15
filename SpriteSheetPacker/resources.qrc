@@ -32,5 +32,9 @@
         <file>res/playback/control_rewind_blue.png</file>
         <file>res/playback/control_start_blue.png</file>
         <file>res/playback/control_repeat_blue.png</file>
+        <file>res/markdown/index.html</file>
+        <file>res/markdown/markdown.css</file>
+        <file>res/markdown/marked.min.js</file>
+        <file>res/markdown/qwebchannel.js</file>
     </qresource>
 </RCC>

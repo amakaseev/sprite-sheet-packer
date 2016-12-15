@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QtWidgets>
+#include <QNetworkAccessManager>
+
 #include "SpriteAtlas.h"
 #include "StatusBarWidget.h"
 #include "SpritesTreeWidget.h"
@@ -47,8 +49,9 @@ private slots:
     void on_actionAddFolder_triggered();
     void on_actionRemove_triggered();
     void on_actionPublish_triggered();
-    void on_actionAbout_triggered();
     void on_actionPreferences_triggered();
+    void on_actionCheckForUpdates_triggered();
+    void on_actionAbout_triggered();
     void on_actionAnimationPreview_triggered();
 
     void spritesTreeWidgetItemSelectionChanged();
@@ -86,6 +89,7 @@ protected:
 
 private:
     Ui::MainWindow*         ui;
+    QNetworkAccessManager   _networkManager;
     StatusBarWidget*        _statusBarWidget;
     SpritesTreeWidget*      _spritesTreeWidget;
     QString                 _currentProjectFileName;
