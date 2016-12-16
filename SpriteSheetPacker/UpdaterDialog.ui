@@ -11,9 +11,37 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>SpriteSheet Packer Updater</string>
+   <string>Update SpriteSheet Packer</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="font">
+      <font>
+       <pointsize>16</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>A new version of SpriteSheet Packer is available</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_2">
+     <property name="font">
+      <font>
+       <pointsize>13</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Release Notes:</string>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QWebEngineView" name="preview" native="true">
      <property name="sizePolicy">
@@ -34,9 +62,26 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="downloadProgressLabel">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="pushButton_2">
        <property name="text">
         <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="installPushButton">
+       <property name="text">
+        <string>Install</string>
+       </property>
+       <property name="default">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

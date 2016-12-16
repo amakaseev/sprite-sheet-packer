@@ -2,6 +2,8 @@
 ======
 * Generate atlas in thread
 * Added animation preview
+* Added updater
+* Created installer for MacOS
 
 1.0.5
 ======

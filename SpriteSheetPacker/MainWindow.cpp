@@ -720,7 +720,7 @@ void MainWindow::on_actionCheckForUpdates_triggered() {
             qDebug() << "version:" << version;
 
             if (!version.isEmpty() && (version != QCoreApplication::applicationVersion())) {
-                UpdaterDialog* dlg = new UpdaterDialog(changelog, this);
+                UpdaterDialog* dlg = new UpdaterDialog(version, changelog, this);
                 dlg->exec();
             }
         }

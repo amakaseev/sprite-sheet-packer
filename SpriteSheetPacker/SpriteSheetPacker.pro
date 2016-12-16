@@ -126,6 +126,6 @@ CONFIG(release,debug|release) {
     # release
     DEPLOY_TARGET = $$shell_quote($$shell_path($${OUT_PWD}/$${TARGET}$${TARGET_CUSTOM_EXT}))
 
-    macx: QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET} -dmg
+    macx: QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}
     win32: QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}
 }
