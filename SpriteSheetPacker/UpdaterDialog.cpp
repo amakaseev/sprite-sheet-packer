@@ -15,9 +15,9 @@ bool PreviewPage::acceptNavigationRequest(const QUrl &url,
     return false;
 }
 
-#ifdef Q_OS_OSX
+#ifdef defined(Q_OS_OSX)
     static QString updaterFileName = "SpriteSheetPacker-Installer.dmg";
-#elif Q_OS_WIN
+#elif defined(Q_OS_WIN)
     static QString updaterFileName = "SpriteSheetPacker-Installer.exe";
 #endif
 
@@ -109,12 +109,12 @@ void UpdaterDialog::on_downloadPushButton_clicked() {
 void UpdaterDialog::on_installPushButton_clicked() {
     qDebug() << "Install:" << _updateFilePath;
     QProcess *process = new QProcess(this);
-#ifdef Q_OS_OSX
+#ifdef defined(Q_OS_OSX)
     process->start(QString("hdiutil mount ") + _updateFilePath);
     process->waitForFinished();
     qDebug() << process->readAllStandardOutput();
     qApp->quit();
-#elif Q_OS_WIN
+#elif defined(Q_OS_WIN)
     process->start(_updateFilePath);
 #endif
 
