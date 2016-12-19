@@ -207,7 +207,7 @@ bool PublishSpriteSheet::generateDataFile(const QString& filePath, const QString
 
     // evaluate export plugin script
     qDebug() << "Run script...";
-    QJSValue result = engine.evaluate(contents, scriptFileName);
+    QJSValue result = engine.evaluate(contents);
     if (result.isError()) {
         QString errorString = "Uncaught exception at line " + result.property("lineNumber").toString() + " : " + result.toString();
         qDebug() << errorString;
