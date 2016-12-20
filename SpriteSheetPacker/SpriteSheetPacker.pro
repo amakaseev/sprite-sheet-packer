@@ -5,7 +5,6 @@
 #-------------------------------------------------
 
 QT += core widgets xml qml concurrent network
-QT += webenginewidgets
 
 TARGET = SpriteSheetPacker
 TEMPLATE = app

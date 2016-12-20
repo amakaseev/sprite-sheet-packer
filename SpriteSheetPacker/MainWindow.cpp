@@ -717,6 +717,10 @@ void MainWindow::on_actionCheckForUpdates_triggered() {
             qDebug() << QString("Download of [%1] succeeded").arg(url.toEncoded().constData());
             QString changelog = reply->readAll();
             QString version = changelog.split("\n", QString::SkipEmptyParts).at(0);
+            int index = version.lastIndexOf('#');
+            if (index != -1) {
+                version = version.right(index+1);
+            }
             qDebug() << "version:" << version;
 
             if (!version.isEmpty() && (version != QCoreApplication::applicationVersion())) {

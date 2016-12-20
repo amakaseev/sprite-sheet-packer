@@ -1,19 +1,8 @@
-#include <QWebChannel>
+#include <QJSEngine>
 #include <QNetworkReply>
 
 #include "UpdaterDialog.h"
 #include "ui_UpdaterDialog.h"
-
-bool PreviewPage::acceptNavigationRequest(const QUrl &url,
-                                          QWebEnginePage::NavigationType /*type*/,
-                                          bool /*isMainFrame*/)
-{
-    // Only allow qrc:/index.html.
-    if (url.scheme() == QString("qrc"))
-        return true;
-    QDesktopServices::openUrl(url);
-    return false;
-}
 
 #if defined(Q_OS_OSX)
     static QString updaterFileName = "SpriteSheetPacker-Installer.dmg";
@@ -29,19 +18,38 @@ UpdaterDialog::UpdaterDialog(const QString& lastVersion, const QString& changelo
 {
     ui->setupUi(this);
 
+    QJSEngine engine;
+    QFile scriptFile("://res/markdown/micromarkdown.js");
+    scriptFile.open(QIODevice::ReadOnly);
+    QTextStream stream(&scriptFile);
+    QString fileContent = stream.readAll();
+    scriptFile.close();
+
+    QJSValue result = engine.evaluate(fileContent);
+    if (result.isError()) {
+        QString errorString = "Uncaught exception at line " + result.property("lineNumber").toString() + " : " + result.toString();
+        qDebug() << errorString;
+    } else {
+        if (engine.globalObject().hasOwnProperty("convertMD")) {
+            QJSValueList args;
+            args << QJSValue(changelog);
+
+            // run convertMD
+            QJSValue convertMD = engine.globalObject().property("convertMD");
+            result = convertMD.call(args);
+
+            if (result.isError()) {
+                QString errorString = "Uncaught exception at line " + result.property("lineNumber").toString() + " : " + result.toString();
+                qDebug() << errorString;
+            } else {
+                ui->textBrowser->setHtml(result.toString());
+            }
+        }
+    }
+
+
     //setWindowTitle(QString("Current version is %1 update to %2").arg(QCoreApplication::applicationVersion()).arg(_lastVersion));
     ui->installPushButton->setVisible(false);
-
-    PreviewPage *page = new PreviewPage(this);
-    ui->preview->setPage(page);
-
-    QWebChannel *channel = new QWebChannel(this);
-    channel->registerObject(QStringLiteral("content"), &_content);
-    page->setWebChannel(channel);
-
-    ui->preview->setUrl(QUrl("qrc:/res/markdown/index.html"));
-
-    _content.setText(changelog);
 }
 
 UpdaterDialog::~UpdaterDialog()
@@ -117,5 +125,4 @@ void UpdaterDialog::on_installPushButton_clicked() {
 #elif defined(Q_OS_WIN)
     process->start(_updateFilePath);
 #endif
-
 }

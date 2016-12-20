@@ -2,31 +2,7 @@
 #define UPDATERDIALOG_H
 
 #include <QtWidgets>
-#include <QWebEngineView>
-#include <QWebEnginePage>
-
-class PreviewPage : public QWebEnginePage
-{
-    Q_OBJECT
-public:
-    explicit PreviewPage(QObject *parent = nullptr) : QWebEnginePage(parent) {}
-
-protected:
-    bool acceptNavigationRequest(const QUrl &url, NavigationType type, bool isMainFrame);
-};
-
-class Content: public QObject
-{
-    Q_OBJECT
-    Q_PROPERTY(QString text MEMBER _text)
-public:
-    explicit Content(QObject *parent = nullptr) : QObject(parent) {}
-
-    void setText(const QString &text) { _text = text; }
-
-private:
-    QString _text;
-};
+#include <QNetworkAccessManager>
 
 namespace Ui { class UpdaterDialog; }
 
@@ -46,7 +22,6 @@ private:
     Ui::UpdaterDialog*      ui;
     QNetworkAccessManager   _networkManager;
     QString                 _lastVersion;
-    Content                 _content;
     QString                 _updateFilePath;
 };
 
