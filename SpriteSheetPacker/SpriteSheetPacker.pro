@@ -103,28 +103,21 @@ win32 {
     DEPLOYMENT += exportFormats
 }
 
-isEmpty(TARGET_EXT) {
-    win32 {
-        TARGET_CUSTOM_EXT = .exe
-    }
-    macx {
-        TARGET_CUSTOM_EXT = .app
-    }
-} else {
-    TARGET_CUSTOM_EXT = $${TARGET_EXT}
-}
-
-win32 {
-    DEPLOY_COMMAND = windeployqt
-}
-macx {
-    DEPLOY_COMMAND = macdeployqt
-}
-
 CONFIG(release,debug|release) {
     # release
-    DEPLOY_TARGET = $$shell_quote($$shell_path($${OUT_PWD}/$${TARGET}$${TARGET_CUSTOM_EXT}))
+    win32 {
+        DESTDIR = $$PWD/../install/win/bin
+        DEPLOY_COMMAND = windeployqt
+        isEmpty(TARGET_EXT) TARGET_EXT = .exe
+    }
 
-    macx: QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}
-    win32: QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}
+    macx {
+        DESTDIR = $$PWD/../install/macos/bin
+        DEPLOY_COMMAND = macdeployqt
+        isEmpty(TARGET_EXT) TARGET_EXT = .app
+    }
+
+    DEPLOY_TARGET = $$shell_quote($$shell_path($${DESTDIR}/$${TARGET}$${TARGET_EXT}))
+
+    QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}
 }

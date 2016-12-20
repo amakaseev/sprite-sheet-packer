@@ -1,11 +1,11 @@
 {
   "title": "SpriteSheet Packer",
-  "icon": "SpriteSheetPacker/SpritePacker.icns",
+  "icon": "../../SpriteSheetPacker/SpritePacker.icns",
   "background": "Installer_back.png",
   "contents": [
     { "x": 899, "y": 0, "type": "position", "path": ".background" },
     { "x": 899, "y": 0, "type": "position", "path": ".VolumeIcon.icns" },
-    { "x": 130, "y": 275, "type": "file", "path": "../build-sprite-sheet-packer-Desktop_Qt_5_7_0_clang_64bit-Release/SpriteSheetPacker/SpriteSheetPacker.app" },
+    { "x": 130, "y": 275, "type": "file", "path": "bin/SpriteSheetPacker.app" },
     { "x": 680, "y": 275, "type": "link", "path": "/Applications" }
   ]
 }
