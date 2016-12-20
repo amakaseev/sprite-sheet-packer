@@ -719,7 +719,7 @@ void MainWindow::on_actionCheckForUpdates_triggered() {
             QString version = changelog.split("\n", QString::SkipEmptyParts).at(0);
             int index = version.lastIndexOf('#');
             if (index != -1) {
-                version = version.right(index+1);
+                version = version.right(version.size() - index - 1);
             }
             qDebug() << "version:" << version;
 
