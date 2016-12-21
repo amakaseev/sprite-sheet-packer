@@ -27,17 +27,6 @@ macx {
 win32 {
     DEFINES += _WINDLL_IMPORT
     LIBS += $$PWD/Windows_x86_64/PVRTexLib.lib
+
+    QMAKE_PRE_LINK += $${QMAKE_COPY} $$shell_quote($$shell_path($$PWD/Windows_x86_64/PVRTexLib.dll)) $$shell_quote($$shell_path($$DESTDIR/PVRTexLib.dll)) $$escape_expand(\\n\\t)
 }
-#TODO: test on windows platform
-#win32:contains(QMAKE_HOST.arch, x86_64) {
-#    LIBS += $$PWD/Windows_x86_64/PVRTexLib.lib
-#    export_dll.files = $$PWD/Windows_x86_64/PVRTexLib.dll
-#    export_dll.path = ./
-#    DEPLOYMENT += export_dll
-#}
-#win32:contains(QMAKE_HOST.arch, x86_32) {
-#    LIBS += $$PWD/Windows_x86_32/PVRTexLib.lib
-#    export_dll.files = $$PWD/Windows_x86_32/PVRTexLib.dll
-#    export_dll.path = ./
-#    DEPLOYMENT += export_dll
-#}

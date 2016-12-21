@@ -12,6 +12,14 @@ TEMPLATE = app
 CONFIG += c++11
 #QMAKE_CXXFLAGS +=-std=c++11 -stdlib=libc++
 
+CONFIG(release,debug|release) {
+    win32: DESTDIR = $$PWD/../install/win/bin
+    macx: DESTDIR = $$PWD/../install/macos/bin
+} else {
+    macx: DESTDIR = $$OUT_PWD
+    win32: DESTDIR = $$OUT_PWD/debug
+}
+
 INCLUDEPATH += 3rdparty
 
 SOURCES += main.cpp\
@@ -98,21 +106,22 @@ macx {
 
 win32 {
     RC_ICONS = SpritePacker.ico
-    exportFormats.files = $$files(defaultFormats/*.*)
-    exportFormats.path = defaultFormats
-    DEPLOYMENT += exportFormats
+
+    QMAKE_PRE_LINK += if not exist $$shell_quote($$shell_path($$DESTDIR/defaultFormats)) mkdir $$shell_quote($$shell_path($$DESTDIR/defaultFormats)) $$escape_expand(\\n\\t)
+    FILES = $$files(defaultFormats/*.*)
+    for(FILE, FILES) {
+        QMAKE_PRE_LINK += $${QMAKE_COPY} $$shell_quote($$shell_path($$PWD/$$FILE)) $$shell_quote($$shell_path($$DESTDIR/$$FILE)) $$escape_expand(\\n\\t)
+    }
 }
 
 CONFIG(release,debug|release) {
     # release
     win32 {
-        DESTDIR = $$PWD/../install/win/bin
         DEPLOY_COMMAND = windeployqt
         isEmpty(TARGET_EXT) TARGET_EXT = .exe
     }
 
     macx {
-        DESTDIR = $$PWD/../install/macos/bin
         DEPLOY_COMMAND = macdeployqt
         isEmpty(TARGET_EXT) TARGET_EXT = .app
     }

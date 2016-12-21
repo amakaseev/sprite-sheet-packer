@@ -2,3 +2,4 @@ build
 *.user
 *.app
 *.dmg
+install/win/bin/
