@@ -45,7 +45,7 @@ Name: "{commonprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\vcredist_x64.exe"; Parameters: "/q /norestart /q:a /c:""VCREDI~3.EXE /q:a /c:""""msiexec /i vcredist.msi /qn"""" """; Check: VCRedistNeedsInstall; WorkingDir: {app}; StatusMsg: Installing VC++ 2013 Redistributables...
+;Filename: "{app}\vcredist_x64.exe"; Parameters: "/q /norestart /q:a /c:""VCREDI~3.EXE /q:a /c:""""msiexec /i {app}\vcredist_x64.exe /qn"""" """; Check: VCRedistNeedsInstall; WorkingDir: {app}; StatusMsg: Installing VC++ 2015 Redistributables...
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 ; The VCRedistNeedsInstall function checks if a given version of VC++ is already installed
@@ -53,7 +53,7 @@ Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChang
 
 
 [Code]
-#IFDEF UNICODE              û
+#IFDEF UNICODE
   #DEFINE AW "W"
 #ELSE
   #DEFINE AW "A"
