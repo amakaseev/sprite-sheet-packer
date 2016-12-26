@@ -248,7 +248,7 @@ bool PublishSpriteSheet::generateDataFile(const QString& filePath, const QString
                 }
             }            
             if (_trimSpriteNames) {
-                name = QFileInfo(name).path() + QDir::separator() + QFileInfo(name).baseName();
+                name = QDir::fromNativeSeparators(QFileInfo(name).path() + QDir::separator() + QFileInfo(name).baseName());
             }
             spriteFramesValue.setProperty(name, spriteFrameValue);
         }
