@@ -3,6 +3,7 @@
 * Removed webenginewidgets
 * Added forceSquared option
 * Added ETC2 and ETC2A pixel format
+* Complete pvr.ccz compressed file format
 
 
 ##1.0.6

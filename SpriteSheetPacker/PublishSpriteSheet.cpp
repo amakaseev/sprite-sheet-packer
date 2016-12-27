@@ -118,7 +118,8 @@ bool PublishSpriteSheet::publish(const QString& format, bool errorMessage) {
             }
 
             // save image
-            qDebug() << "Save image:" << outputFilePath + imagePrefix(_imageFormat);
+            QString fileName = outputFilePath + imagePrefix(_imageFormat);
+            qDebug() << "Save image:" << fileName;
             if ((_imageFormat == kPNG) || (_imageFormat == kJPG) || (_imageFormat == kJPG_PNG)) {
                 QImage image = convertImage(outputData._atlasImage, _pixelFormat, _premultiplied);
                 if (_imageFormat == kPNG) {
@@ -163,12 +164,47 @@ bool PublishSpriteSheet::publish(const QString& format, bool errorMessage) {
                 qDebug() << "Transcode complete.";
                 // save the file
                 if (_imageFormat == kPVR_CCZ) {
-                    //TODO: use qCompress
-                    //QByteArray
-                    //pvrTexture.
-                    //pvrTexture.saveFile((outputFilePath + imagePrefix(_imageFormat)).toStdString().c_str());
+                    QString tempFileName = outputFilePath + "_temp.pvr";
+                    pvrTexture.saveFile(tempFileName.toStdString().c_str());
+
+                    // read and compress
+                    QFile file(tempFileName);
+                    file.open(QIODevice::ReadOnly);
+                    QByteArray compressedData = qCompress(file.readAll());
+                    file.close();
+                    QFile::remove(tempFileName);
+
+                    //  Strip the first six bytes (a 4-byte length put on by qCompress)
+                    compressedData.remove(0, 4);
+
+                    struct CCZHeader {
+                        unsigned char   sig[4];             /** Signature. Should be 'CCZ!' 4 bytes. */
+                        unsigned short  compression_type;   /** Should be 0. */
+                        unsigned short  version;            /** Should be 2 (although version type==1 is also supported). */
+                        unsigned int    reserved;           /** Reserved for users. */
+                        unsigned int    len;                /** Size of the uncompressed file. */
+                    };
+
+                    CCZHeader cczHeader;
+                    cczHeader.sig[0] = 'C';
+                    cczHeader.sig[1] = 'C';
+                    cczHeader.sig[2] = 'Z';
+                    cczHeader.sig[3] = '!';
+                    cczHeader.compression_type = qToBigEndian(0);
+                    cczHeader.version = qToBigEndian(2);
+                    cczHeader.reserved = 0;
+                    cczHeader.len = qToBigEndian(compressedData.length());
+                    int sizeBefore = compressedData.size();
+                    compressedData.insert(0, QByteArray((const char *)&cczHeader, sizeof(CCZHeader)));
+                    qDebug() << compressedData.size() - sizeBefore << ":" << sizeof(CCZHeader);
+
+                    // write compressed data
+                    file.setFileName(fileName);
+                    file.open(QIODevice::WriteOnly);
+                    file.write(compressedData);
+                    file.close();
                 } else {
-                    pvrTexture.saveFile((outputFilePath + imagePrefix(_imageFormat)).toStdString().c_str());
+                    pvrTexture.saveFile(fileName.toStdString().c_str());
                 }
                 qDebug() << "Write to file complete.";
             }
