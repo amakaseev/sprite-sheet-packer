@@ -77,6 +77,11 @@ namespace pvrtexture
 							bool				bPreMultiplied=false);
 
 		/*!***********************************************************************
+		@brief      	Deconstructor for CPVRTextureHeader.
+		*************************************************************************/
+		~CPVRTextureHeader();
+
+		/*!***********************************************************************
 		 @brief      	Will copy the contents and information of another header into this one.
 		 @param[in]		rhs     Header to copy.
 		 @return		This header.
