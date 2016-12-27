@@ -70,6 +70,7 @@ public:
                 int spriteBorder = 1,
                 int trim = 1,
                 bool pow2 = false,
+                bool forceSquared = false,
                 int maxSize = 8192,
                 float scale = 1);
 
@@ -95,6 +96,7 @@ private:
     int _textureBorder;
     int _spriteBorder;
     bool _pow2;
+    bool _forceSquared;
     int _maxTextureSize;
     float _scale;
     // polygon mode

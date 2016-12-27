@@ -46,6 +46,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->pixelFormatComboBox->addItem(pixelFormatToString(kRGB565));
     ui->pixelFormatComboBox->addItem(pixelFormatToString(kALPHA));
     ui->pixelFormatComboBox->addItem(pixelFormatToString(kETC1));
+    ui->pixelFormatComboBox->addItem(pixelFormatToString(kETC2));
+    ui->pixelFormatComboBox->addItem(pixelFormatToString(kETC2A));
     ui->pixelFormatComboBox->addItem(pixelFormatToString(kPVRTC2));
     ui->pixelFormatComboBox->addItem(pixelFormatToString(kPVRTC2A));
     ui->pixelFormatComboBox->addItem(pixelFormatToString(kPVRTC4));
@@ -215,12 +217,14 @@ void MainWindow::refreshAtlas(bool generate) {
                     float scale = scalingVariantWidget->scale();
                     int maxTextureSize = scalingVariantWidget->maxTextureSize();
                     bool pow2 = scalingVariantWidget->pow2();
+                    bool forceSquared = scalingVariantWidget->forceSquared();
 
                     SpriteAtlas atlas = SpriteAtlas(_spritesTreeWidget->contentList(),
                                                     ui->textureBorderSpinBox->value(),
                                                     ui->spriteBorderSpinBox->value(),
                                                     ui->trimSpinBox->value(),
                                                     pow2,
+                                                    forceSquared,
                                                     maxTextureSize,
                                                     scale);
 
@@ -333,7 +337,8 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
                                                                               scalingVariant.name,
                                                                               scalingVariant.scale,
                                                                               scalingVariant.maxTextureSize,
-                                                                              scalingVariant.pow2);
+                                                                              scalingVariant.pow2,
+                                                                              scalingVariant.forceSquared);
         connect(scalingVariantWidget, SIGNAL(remove()), this, SLOT(onRemoveScalingVariant()));
         connect(scalingVariantWidget, SIGNAL(valueChanged(bool)), this, SLOT(onScalingVariantWidgetValueChanged(bool)));
         ui->scalingVariantsGroupBox->layout()->addWidget(scalingVariantWidget);
@@ -401,6 +406,7 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
             scalingVariant.scale = scalingVariantWidget->scale();
             scalingVariant.maxTextureSize = scalingVariantWidget->maxTextureSize();
             scalingVariant.pow2 = scalingVariantWidget->pow2();
+            scalingVariant.forceSquared = scalingVariantWidget->forceSquared();
             scalingVariants.push_back(scalingVariant);
         }
     }
@@ -622,6 +628,7 @@ void MainWindow::on_actionPublish_triggered() {
             float scale = scalingVariantWidget->scale();
             int maxTextureSize = scalingVariantWidget->maxTextureSize();
             bool pow2 = scalingVariantWidget->pow2();
+            bool forceSquared = scalingVariantWidget->forceSquared();
 
             QString spriteSheetName = ui->spriteSheetLineEdit->text();
             if (spriteSheetName.contains("{v}")) {
@@ -654,6 +661,7 @@ void MainWindow::on_actionPublish_triggered() {
                                   ui->trimSpinBox->value(),
                                   pow2,
                                   maxTextureSize,
+                                  forceSquared,
                                   scale);
 
                 atlas.setAlgorithm(ui->algorithmComboBox->currentText());
@@ -895,6 +903,8 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB565, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kALPHA, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC1, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC2, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC2A, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4, false);
@@ -913,6 +923,8 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB565, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kALPHA, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC1, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC2, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC2A, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4, false);
@@ -931,6 +943,8 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB565, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kALPHA, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC1, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC2, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC2A, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4, false);
@@ -948,11 +962,15 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB565, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kALPHA, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC1, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC2, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC2A, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4A, false);
-        ui->pixelFormatComboBox->setCurrentIndex(kETC1);
+        if (!isEnabledComboBoxItem(ui->pixelFormatComboBox, ui->pixelFormatComboBox->currentIndex())) {
+            ui->pixelFormatComboBox->setCurrentIndex(kETC1);
+        }
     } else if ((imageFormat == kPVR)||(imageFormat == kPVR_CCZ)) {
         imageTabBar->setTabEnabled(0, false);
         imageTabBar->setTabEnabled(1, false);
@@ -962,13 +980,15 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB888, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB565, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kALPHA, false);
-        setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC1, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC1, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC2, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kETC2A, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4A, true);
         if (!isEnabledComboBoxItem(ui->pixelFormatComboBox, ui->pixelFormatComboBox->currentIndex())) {
-            ui->pixelFormatComboBox->setCurrentIndex(kPVRTC4);
+            ui->pixelFormatComboBox->setCurrentIndex(kPVRTC4A);
         }
     }
 

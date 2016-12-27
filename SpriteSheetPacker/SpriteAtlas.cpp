@@ -72,12 +72,13 @@ void PackContent::trim(int alpha) {
     }
 }
 
-SpriteAtlas::SpriteAtlas(const QStringList& sourceList, int textureBorder, int spriteBorder, int trim, bool pow2, int maxSize, float scale)
+SpriteAtlas::SpriteAtlas(const QStringList& sourceList, int textureBorder, int spriteBorder, int trim, bool pow2, bool forceSquared, int maxSize, float scale)
     : _sourceList(sourceList)
     , _trim(trim)
     , _textureBorder(textureBorder)
     , _spriteBorder(spriteBorder)
     , _pow2(pow2)
+    , _forceSquared(forceSquared)
     , _maxTextureSize(maxSize)
     , _scale(scale)
 {
@@ -216,6 +217,9 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content, SpriteAtlasG
     // find optimal size for atlas
     int w = qMin(_maxTextureSize, (int)sqrt(volume));
     int h = qMin(_maxTextureSize, (int)sqrt(volume));
+    if (_forceSquared) {
+        h = w;
+    }
     if (_pow2) {
         w = pow2(w);
         h = pow2(h);
@@ -254,22 +258,31 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content, SpriteAtlasG
                     break;
                 }
             }
-            if (k) {
+            if (k || _forceSquared) {
                 k = false;
                 w = qMin(w*2, _maxTextureSize);
             } else {
                 k = true;
                 h = qMin(h*2, _maxTextureSize);
             }
+            if (_forceSquared) {
+                h = w;
+            }
             qDebug() << "Resize for bigger:" << w << "x" << h;
         }
         while (w > 2) {
             w = w/2;
+            if (_forceSquared) {
+                h = w;
+            }
             BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
 
             bool success = canvasArray.Place(inputContent, remainder);
             if (!success) {
                 w = w*2;
+                if (_forceSquared) {
+                    h = w;
+                }
                 break;
             } else {
                 outputContent = BinPack2D::ContentAccumulator<PackContent>();
@@ -277,19 +290,21 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content, SpriteAtlasG
             }
             qDebug() << "Optimize width:" << w << "x" << h;
         }
-        while (h > 2) {
-            h = h/2;
-            BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
+        if (!_forceSquared) {
+            while (h > 2) {
+                h = h/2;
+                BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
 
-            bool success = canvasArray.Place(inputContent, remainder);
-            if (!success) {
-                h = h*2;
-                break;
-            } else {
-                outputContent = BinPack2D::ContentAccumulator<PackContent>();
-                canvasArray.CollectContent(outputContent);
+                bool success = canvasArray.Place(inputContent, remainder);
+                if (!success) {
+                    h = h*2;
+                    break;
+                } else {
+                    outputContent = BinPack2D::ContentAccumulator<PackContent>();
+                    canvasArray.CollectContent(outputContent);
+                }
+                qDebug() << "Optimize height:" << w << "x" << h;
             }
-            qDebug() << "Optimize height:" << w << "x" << h;
         }
     } else {
         qDebug() << "Volume size:" << w << "x" << h;
@@ -327,23 +342,33 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content, SpriteAtlasG
                     break;
                 }
             }
-            if (k) {
+            if (k || _forceSquared) {
                 k = false;
                 w = qMin(w + step, _maxTextureSize);
             } else {
                 k = true;
                 h = qMin(h + step, _maxTextureSize);;
             }
+            if (_forceSquared) {
+                h = w;
+            }
+
             qDebug() << "Resize for bigger:" << w << "x" << h << "step:" << step;
         }
         step = (w + h) / 20;
         while (w) {
             w -= step;
+            if (_forceSquared) {
+                h = w;
+            }
             BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
 
             bool success = canvasArray.Place(inputContent, remainder);
             if (!success) {
                 w += step;
+                if (_forceSquared) {
+                    h = w;
+                }
                 if (step > 1) step = qMax(step/2, 1); else break;
             } else {
                 outputContent = BinPack2D::ContentAccumulator<PackContent>();
@@ -351,20 +376,22 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content, SpriteAtlasG
             }
             qDebug() << "Optimize width:" << w << "x" << h << "step:" << step;
         }
-        step = (w + h) / 20;
-        while (h) {
-            h -= step;
-            BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
+        if (!_forceSquared) {
+            step = (w + h) / 20;
+            while (h) {
+                h -= step;
+                BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
 
-            bool success = canvasArray.Place(inputContent, remainder);
-            if (!success) {
-                h += step;
-                if (step > 1) step = qMax(step/2, 1); else break;
-            } else {
-                outputContent = BinPack2D::ContentAccumulator<PackContent>();
-                canvasArray.CollectContent(outputContent);
+                bool success = canvasArray.Place(inputContent, remainder);
+                if (!success) {
+                    h += step;
+                    if (step > 1) step = qMax(step/2, 1); else break;
+                } else {
+                    outputContent = BinPack2D::ContentAccumulator<PackContent>();
+                    canvasArray.CollectContent(outputContent);
+                }
+                qDebug() << "Optimize height:" << w << "x" << h << "step:" << step;
             }
-            qDebug() << "Optimize height:" << w << "x" << h << "step:" << step;
         }
     }
 

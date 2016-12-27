@@ -1,7 +1,7 @@
 #include "ScalingVariantWidget.h"
 #include "ui_ScalingVariantWidget.h"
 
-ScalingVariantWidget::ScalingVariantWidget(QWidget *parent, const QString& name, float scale, int maxTextureSize, bool pow2) :
+ScalingVariantWidget::ScalingVariantWidget(QWidget *parent, const QString& name, float scale, int maxTextureSize, bool pow2, bool forceSquared):
     QWidget(parent),
     ui(new Ui::ScalingVariantWidget)
 {
@@ -11,6 +11,7 @@ ScalingVariantWidget::ScalingVariantWidget(QWidget *parent, const QString& name,
     ui->scaleComboBox->setCurrentText(QString::number(scale));
     ui->maxTextureSizeComboBox->setCurrentText(QString::number(maxTextureSize));
     ui->pow2CheckBox->setChecked(pow2);
+    ui->forceSquaredCheckBox->setChecked(forceSquared);
 }
 
 ScalingVariantWidget::~ScalingVariantWidget() {
@@ -37,12 +38,20 @@ bool ScalingVariantWidget::pow2() {
     return ui->pow2CheckBox->isChecked();
 }
 
+bool ScalingVariantWidget::forceSquared() {
+    return ui->forceSquaredCheckBox->isChecked();
+}
+
 void ScalingVariantWidget::setPow2(bool enable) {
     ui->pow2CheckBox->setChecked(enable);
 }
 
 void ScalingVariantWidget::setEnabledPow2(bool enable) {
     ui->pow2CheckBox->setEnabled(enable);
+}
+
+void ScalingVariantWidget::setForceSquared(bool enable) {
+    ui->forceSquaredCheckBox->setChecked(enable);
 }
 
 void ScalingVariantWidget::on_removePushButton_clicked() {
@@ -88,4 +97,9 @@ void ScalingVariantWidget::on_maxTextureSizeComboBox_currentTextChanged(const QS
 
 void ScalingVariantWidget::on_pow2CheckBox_toggled(bool) {
     emit valueChanged(true);
+}
+
+void ScalingVariantWidget::on_forceSquaredCheckBox_toggled(bool checked)
+{
+    emit valueChanged(true);//forceSquaredCheckBox
 }

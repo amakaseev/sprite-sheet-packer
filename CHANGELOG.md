@@ -1,6 +1,9 @@
 ##1.0.7
 * Update pngquant
 * Removed webenginewidgets
+* Added forceSquared option
+* Added ETC2 and ETC2A pixel format
+
 
 ##1.0.6
 * Generate atlas in thread

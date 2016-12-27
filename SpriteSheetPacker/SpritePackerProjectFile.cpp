@@ -63,6 +63,7 @@ bool SpritePackerProjectFile::read(const QString &fileName) {
         scalingVariant.scale = scalingVariantObject["scale"].toDouble();
         scalingVariant.maxTextureSize = scalingVariantObject.contains("maxTextureSize")? scalingVariantObject["maxTextureSize"].toInt() : 2048;
         scalingVariant.pow2 = scalingVariantObject.contains("pow2")? scalingVariantObject["pow2"].toBool() : false;
+        scalingVariant.forceSquared = scalingVariantObject.contains("forceSquared")? scalingVariantObject["forceSquared"].toBool() : false;
 
         _scalingVariants.push_back(scalingVariant);
     }
@@ -107,6 +108,7 @@ bool SpritePackerProjectFile::write(const QString &fileName) {
         scalingVariantObject["scale"] = scalingVariant.scale;
         scalingVariantObject["maxTextureSize"] = scalingVariant.maxTextureSize;
         scalingVariantObject["pow2"] = scalingVariant.pow2;
+        scalingVariantObject["forceSquared"] = scalingVariant.forceSquared;
         scalingVariants.append(scalingVariantObject);
     }
     json["scalingVariants"] = scalingVariants;
@@ -199,6 +201,7 @@ bool SpritePackerProjectFileTPS::read(const QString &fileName) {
     }
 
     bool pow2 = false;
+    bool forceSquared = false;
     if (tpsMap.find("algorithmSettings") != tpsMap.end()) {
         QVariantMap algorithmSettings = tpsMap["algorithmSettings"].toMap();
         if (algorithmSettings["sizeConstraints"].toString() == "POT") {
@@ -206,6 +209,8 @@ bool SpritePackerProjectFileTPS::read(const QString &fileName) {
         } else {
             pow2 = false;
         }
+
+        forceSquared = algorithmSettings["forceSquared"].toBool();
     }
 
 //    if (tpsMap.find("pngOptimizationLevel") != tpsMap.end()) {
@@ -245,6 +250,7 @@ bool SpritePackerProjectFileTPS::read(const QString &fileName) {
             }
 
             scalingVariant.pow2 = pow2;
+            scalingVariant.forceSquared = forceSquared;
             _scalingVariants.push_back(scalingVariant);
         }
     }

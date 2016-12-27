@@ -144,24 +144,33 @@ bool PublishSpriteSheet::publish(const QString& format, bool errorMessage) {
                     }
                 }
             } else if ((_imageFormat == kPKM) || (_imageFormat == kPVR) || (_imageFormat == kPVR_CCZ)) {
-                CPVRTextureHeader pvrHeader(PVRStandard8PixelType.PixelTypeID, outputData._atlasImage.width(), outputData._atlasImage.height());
-
+                CPVRTextureHeader pvrHeader(PVRStandard8PixelType.PixelTypeID,
+                                            outputData._atlasImage.width(),
+                                            outputData._atlasImage.height());
                 // create the texture
                 CPVRTexture pvrTexture(pvrHeader, outputData._atlasImage.bits());
                 switch (_pixelFormat) {
-                    case kETC1: Transcode(pvrTexture, ePVRTPF_ETC1, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
-                    case kPVRTC2: Transcode(pvrTexture, ePVRTPF_PVRTCI_2bpp_RGB, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
-                    case kPVRTC2A: Transcode(pvrTexture, ePVRTPF_PVRTCI_2bpp_RGBA, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
-                    case kPVRTC4: Transcode(pvrTexture, ePVRTPF_PVRTCI_4bpp_RGB, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
-                    case kPVRTC4A: Transcode(pvrTexture, ePVRTPF_PVRTCI_4bpp_RGBA, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
-                    default: Transcode(pvrTexture, ePVRTPF_ETC1, ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+                    case kETC1: Transcode(pvrTexture, PixelType(ePVRTPF_ETC1), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+                    case kETC2: Transcode(pvrTexture, PixelType(ePVRTPF_ETC2_RGB), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+                    case kETC2A: Transcode(pvrTexture, PixelType(ePVRTPF_ETC2_RGBA), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+                    case kPVRTC2: Transcode(pvrTexture, PixelType(ePVRTPF_PVRTCI_2bpp_RGB), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+                    case kPVRTC2A: Transcode(pvrTexture, PixelType(ePVRTPF_PVRTCI_2bpp_RGBA), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+                    case kPVRTC4: Transcode(pvrTexture, PixelType(ePVRTPF_PVRTCI_4bpp_RGB), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+                    case kPVRTC4A: Transcode(pvrTexture, PixelType(ePVRTPF_PVRTCI_4bpp_RGBA), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+                    default: Transcode(pvrTexture, PixelType(ePVRTPF_ETC1), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
                 }
+
+                qDebug() << "Transcode complete.";
                 // save the file
                 if (_imageFormat == kPVR_CCZ) {
                     //TODO: use qCompress
+                    //QByteArray
+                    //pvrTexture.
+                    //pvrTexture.saveFile((outputFilePath + imagePrefix(_imageFormat)).toStdString().c_str());
                 } else {
                     pvrTexture.saveFile((outputFilePath + imagePrefix(_imageFormat)).toStdString().c_str());
                 }
+                qDebug() << "Write to file complete.";
             }
         }
     }

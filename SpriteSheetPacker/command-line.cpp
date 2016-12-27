@@ -82,6 +82,7 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
     int textureBorder = 0;
     int spriteBorder = 2;
     bool pow2 = false;
+    bool forceSquared = false;
     int maxSize = 8192;
     float imageScale = 1;
     QString format = "cocos2d";
@@ -213,7 +214,7 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
             }
 
             // Generate sprite atlas
-            SpriteAtlas atlas(QStringList() << projectFile->srcList(), textureBorder, spriteBorder, trim, pow2, maxSize, scale);
+            SpriteAtlas atlas(QStringList() << projectFile->srcList(), textureBorder, spriteBorder, trim, pow2, forceSquared, maxSize, scale);
             if (trimMode == "Polygon") {
                 atlas.enablePolygonMode(true, epsilon);
             }

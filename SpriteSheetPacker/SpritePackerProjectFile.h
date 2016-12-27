@@ -10,6 +10,7 @@ struct ScalingVariant{
     float   scale;
     int     maxTextureSize;
     bool    pow2;
+    bool    forceSquared;
 };
 
 class SpritePackerProjectFile

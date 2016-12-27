@@ -21,6 +21,8 @@ enum PixelFormat {
     kRGB565,
     kALPHA,
     kETC1,
+    kETC2,
+    kETC2A,
     kPVRTC2,
     kPVRTC2A,
     kPVRTC4,
@@ -58,6 +60,8 @@ inline QString pixelFormatToString(PixelFormat pixelFormat) {
         case kRGB565: return "RGB565";
         case kALPHA: return "ALPHA";
         case kETC1: return "ETC1";
+        case kETC2: return "ETC2";
+        case kETC2A: return "ETC2A";
         case kPVRTC2: return "PVRTC2";
         case kPVRTC2A: return "PVRTC2A";
         case kPVRTC4: return "PVRTC4";
@@ -74,6 +78,8 @@ inline PixelFormat pixelFormatFromString(const QString& pixelFormat) {
     if (pixelFormat == "RGB565") return kRGB565;
     if (pixelFormat == "ALPHA") return kALPHA;
     if (pixelFormat == "ETC1") return kETC1;
+    if (pixelFormat == "ETC2") return kETC2;
+    if (pixelFormat == "ETC2A") return kETC2A;
     if (pixelFormat == "PVRTC2") return kPVRTC2;
     if (pixelFormat == "PVRTC2A") return kPVRTC2A;
     if (pixelFormat == "PVRTC4") return kPVRTC4;
