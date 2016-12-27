@@ -4,6 +4,7 @@
 * Added forceSquared option
 * Added ETC2 and ETC2A pixel format
 * Complete pvr.ccz compressed file format
+* Created installer for Windows
 
 
 ##1.0.6
