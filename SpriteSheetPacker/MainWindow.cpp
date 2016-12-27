@@ -976,6 +976,7 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
 }
 
 void MainWindow::on_pixelFormatComboBox_currentIndexChanged(int index) {
+    bool needUpdatePreview = true;
     PixelFormat pixelFormat = (PixelFormat)index;
     if ((pixelFormat == kPVRTC2) ||
             (pixelFormat == kPVRTC2A) ||
@@ -987,6 +988,7 @@ void MainWindow::on_pixelFormatComboBox_currentIndexChanged(int index) {
             if (scalingVariantWidget) {
                 scalingVariantWidget->setPow2(true);
                 scalingVariantWidget->setEnabledPow2(false);
+                needUpdatePreview = false;
             }
         }
     } else {
@@ -1013,7 +1015,9 @@ void MainWindow::on_pixelFormatComboBox_currentIndexChanged(int index) {
     }
 
     setProjectDirty();
-    refreshPreview();
+    if (needUpdatePreview) {
+        refreshPreview();
+    }
 }
 
 void MainWindow::on_dataFormatComboBox_currentIndexChanged(int) {
