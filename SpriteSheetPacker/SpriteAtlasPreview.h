@@ -9,6 +9,19 @@ namespace Ui {
 class SpriteAtlasPreview;
 }
 
+class PreviewGraphicsScene: public QGraphicsScene {
+    Q_OBJECT
+public:
+    explicit PreviewGraphicsScene(QWidget *parent = 0);
+
+    void setView(QGraphicsView* view) { _view = view; }
+    virtual void drawBackground(QPainter *painter, const QRectF &rect);
+
+private:
+    QGraphicsView* _view;
+    QBrush         _backgroundBrush;
+};
+
 class SpriteAtlasPreview : public QWidget
 {
     Q_OBJECT
@@ -30,7 +43,7 @@ public slots:
 private:
     Ui::SpriteAtlasPreview* ui;
 
-    QGraphicsScene*         _scene;
+    PreviewGraphicsScene*   _scene;
     QGraphicsItemGroup*     _outlinesGroup;
 };
 

@@ -4,16 +4,31 @@
 #define MAX_SCALE 10.f
 #define MIN_SCALE 0.1f
 
+
+PreviewGraphicsScene::PreviewGraphicsScene(QWidget *parent)
+    : QGraphicsScene(parent)
+{
+    _view = nullptr;
+    _backgroundBrush = QBrush(QPixmap("://res/patterns_tweed.png"));
+}
+
+void PreviewGraphicsScene::drawBackground(QPainter *painter, const QRectF &) {
+    if (!_view) return;
+    painter->resetTransform();
+    painter->fillRect(_view->visibleRegion().boundingRect(), _backgroundBrush);
+}
+
 SpriteAtlasPreview::SpriteAtlasPreview(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::SpriteAtlasPreview)
 {
     ui->setupUi(this);
 
-    _scene = new QGraphicsScene(this);
-    _scene->setBackgroundBrush(QBrush(QPixmap("://res/patterns_tweed.png")));
+    _scene = new PreviewGraphicsScene(this);
+    _scene->setView(ui->graphicsView);
     ui->graphicsView->setScene(_scene);
     ui->graphicsView->setAcceptDrops(false);
+
     _outlinesGroup = NULL;
 }
 
@@ -38,6 +53,9 @@ void SpriteAtlasPreview::setAtlas(const SpriteAtlas& atlas, PixelFormat pixelFor
         auto outputData = (*it);
         auto atlasImage = outputData._atlasImage;
         auto spriteFrames = outputData._spriteFrames;
+        if (atlasImage.isNull()) continue;
+        if (!spriteFrames.size()) continue;
+
 
         QGraphicsPixmapItem* atlasPixmapItem = _scene->addPixmap(QPixmap::fromImage(convertImage(atlasImage, pixelFormat, premultiplied)));
         atlasPixmapItem->setPos(atlasPositionX, 0);
