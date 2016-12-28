@@ -172,9 +172,11 @@ void MainWindow::openRecent() {
 
     if (!_currentProjectFileName.isEmpty() && (fileName != _currentProjectFileName)) {
         MainWindow* wnd = new MainWindow();
-        wnd->setAttribute(Qt:: WA_DeleteOnClose);
-        wnd->openSpritePackerProject(fileName);
+        wnd->setAttribute(Qt::WA_DeleteOnClose);
         wnd->show();
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+        wnd->openSpritePackerProject(fileName);
+
     } else {
         openSpritePackerProject(fileName);
     }
@@ -503,7 +505,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 
 void MainWindow::on_actionNew_triggered() {
     MainWindow* wnd = new MainWindow();
-    wnd->setAttribute(Qt:: WA_DeleteOnClose);
+    wnd->setAttribute(Qt::WA_DeleteOnClose);
     wnd->show();
 }
 
@@ -523,9 +525,10 @@ void MainWindow::on_actionOpen_triggered() {
     qDebug() << selectedFilter;
     if (!_currentProjectFileName.isEmpty() && !fileName.isEmpty() && (fileName != _currentProjectFileName)) {
         MainWindow* wnd = new MainWindow();
-        wnd->setAttribute(Qt:: WA_DeleteOnClose);
-        wnd->openSpritePackerProject(fileName);
+        wnd->setAttribute(Qt::WA_DeleteOnClose);
         wnd->show();
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+        wnd->openSpritePackerProject(fileName);
     } else {
         openSpritePackerProject(fileName);
     }
