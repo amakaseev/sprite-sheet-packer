@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    setAttribute(Qt::WA_DeleteOnClose);
     ui->setupUi(this);
 
 #if defined(Q_OS_WIN)
@@ -106,7 +107,7 @@ MainWindow::MainWindow(QWidget *parent) :
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
     restoreState(settings.value("MainWindow/state").toByteArray());
 
-    refreshAtlas();
+    //refreshAtlas();
     on_actionCheckForUpdates_triggered();
 }
 
@@ -172,7 +173,6 @@ void MainWindow::openRecent() {
 
     if (!_currentProjectFileName.isEmpty() && (fileName != _currentProjectFileName)) {
         MainWindow* wnd = new MainWindow();
-        wnd->setAttribute(Qt::WA_DeleteOnClose);
         wnd->show();
         QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
         wnd->openSpritePackerProject(fileName);
@@ -505,7 +505,6 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 
 void MainWindow::on_actionNew_triggered() {
     MainWindow* wnd = new MainWindow();
-    wnd->setAttribute(Qt::WA_DeleteOnClose);
     wnd->show();
 }
 
@@ -525,7 +524,6 @@ void MainWindow::on_actionOpen_triggered() {
     qDebug() << selectedFilter;
     if (!_currentProjectFileName.isEmpty() && !fileName.isEmpty() && (fileName != _currentProjectFileName)) {
         MainWindow* wnd = new MainWindow();
-        wnd->setAttribute(Qt::WA_DeleteOnClose);
         wnd->show();
         QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
         wnd->openSpritePackerProject(fileName);
