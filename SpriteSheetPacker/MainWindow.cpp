@@ -170,12 +170,11 @@ void MainWindow::openRecent() {
     QAction* senderAction = dynamic_cast<QAction*>(sender());
     QString fileName = senderAction->text();
 
-    if (!_currentProjectFileName.isEmpty()) {
-        if (fileName != _currentProjectFileName) {
-            QPointer<MainWindow> wnd(new MainWindow());
-            wnd->openSpritePackerProject(fileName);
-            wnd->show();
-        }
+    if (!_currentProjectFileName.isEmpty() && (fileName != _currentProjectFileName)) {
+        MainWindow* wnd = new MainWindow();
+        wnd->setAttribute(Qt:: WA_DeleteOnClose);
+        wnd->openSpritePackerProject(fileName);
+        wnd->show();
     } else {
         openSpritePackerProject(fileName);
     }
@@ -503,7 +502,8 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 }
 
 void MainWindow::on_actionNew_triggered() {
-    QPointer<MainWindow> wnd(new MainWindow());
+    MainWindow* wnd = new MainWindow();
+    wnd->setAttribute(Qt:: WA_DeleteOnClose);
     wnd->show();
 }
 
@@ -521,12 +521,11 @@ void MainWindow::on_actionOpen_triggered() {
                                                     dir,
                                                     tr("Supported formats (*.json *.ssp *.tps)"));
     qDebug() << selectedFilter;
-    if (!_currentProjectFileName.isEmpty()) {
-        if (!fileName.isEmpty() && fileName != _currentProjectFileName) {
-            QPointer<MainWindow> wnd(new MainWindow());
-            wnd->openSpritePackerProject(fileName);
-            wnd->show();
-        }
+    if (!_currentProjectFileName.isEmpty() && !fileName.isEmpty() && (fileName != _currentProjectFileName)) {
+        MainWindow* wnd = new MainWindow();
+        wnd->setAttribute(Qt:: WA_DeleteOnClose);
+        wnd->openSpritePackerProject(fileName);
+        wnd->show();
     } else {
         openSpritePackerProject(fileName);
     }
@@ -621,7 +620,7 @@ void MainWindow::on_actionPublish_triggered() {
     publisher->setPixelFormat(pixelFormatFromString(ui->pixelFormatComboBox->currentText()));
     publisher->setPremultiplied(ui->premultipliedCheckBox->isChecked());
     publisher->setPngQuality(ui->pngOptModeComboBox->currentText(), ui->pngOptLevelSlider->value());
-    publisher->setJpgQuality(ui->jpgQualitySlider->value());    
+    publisher->setJpgQuality(ui->jpgQualitySlider->value());
     publisher->setTrimSpriteNames(ui->trimSpriteNamesCheckBox->isChecked());
     publisher->setPrependSmartFolderName(ui->prependSmartFolderNameCheckBox->isChecked());
 
