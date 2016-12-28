@@ -168,7 +168,17 @@ void MainWindow::refreshOpenRecentMenu() {
 
 void MainWindow::openRecent() {
     QAction* senderAction = dynamic_cast<QAction*>(sender());
-    openSpritePackerProject(senderAction->text());
+    QString fileName = senderAction->text();
+
+    if (!_currentProjectFileName.isEmpty()) {
+        if (fileName != _currentProjectFileName) {
+            QPointer<MainWindow> wnd(new MainWindow());
+            wnd->openSpritePackerProject(fileName);
+            wnd->show();
+        }
+    } else {
+        openSpritePackerProject(fileName);
+    }
 }
 
 void MainWindow::createRefreshButton() {
@@ -294,6 +304,9 @@ void MainWindow::refreshPreview() {
 }
 
 void MainWindow::openSpritePackerProject(const QString& fileName) {
+    QSettings settings;
+    settings.setValue("spritePackerFileName", fileName);
+
     std::string suffix = QFileInfo(fileName).suffix().toStdString();
     SpritePackerProjectFile* projectFile = SpritePackerProjectFile::factory().get(suffix)();
     if (projectFile) {
@@ -359,7 +372,6 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     setWindowTitle(_currentProjectFileName + " - SpriteSheet Packer");
 
     // add to recent file
-    QSettings settings;
     QStringList openRecentList = settings.value("openRecentList").toStringList();
     openRecentList.removeAll(fileName);
     openRecentList.prepend(fileName);
@@ -491,13 +503,8 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 }
 
 void MainWindow::on_actionNew_triggered() {
-    ui->spriteSheetLineEdit->setText("");
-    _spritesTreeWidget->clear();
-
-    _currentProjectFileName.clear();
-    setWindowTitle("SpriteSheet Packer");
-
-    refreshAtlas();
+    QPointer<MainWindow> wnd(new MainWindow());
+    wnd->show();
 }
 
 void MainWindow::on_actionOpen_triggered() {
@@ -514,8 +521,13 @@ void MainWindow::on_actionOpen_triggered() {
                                                     dir,
                                                     tr("Supported formats (*.json *.ssp *.tps)"));
     qDebug() << selectedFilter;
-    if (!fileName.isEmpty()) {
-        settings.setValue("spritePackerFileName", fileName);
+    if (!_currentProjectFileName.isEmpty()) {
+        if (!fileName.isEmpty() && fileName != _currentProjectFileName) {
+            QPointer<MainWindow> wnd(new MainWindow());
+            wnd->openSpritePackerProject(fileName);
+            wnd->show();
+        }
+    } else {
         openSpritePackerProject(fileName);
     }
 }
