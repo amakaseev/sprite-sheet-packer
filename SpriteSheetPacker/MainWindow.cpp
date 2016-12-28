@@ -285,6 +285,13 @@ void MainWindow::refreshPreview() {
         ui->atlasPreviewTabWidget->addTab(new SpriteAtlasPreview(this), "tab");
     }
 
+    // show info if contents is empty
+    if (!_spritesTreeWidget->contentList().size()) {
+        ui->previewStackedWidget->setCurrentIndex(0);
+    } else {
+        ui->previewStackedWidget->setCurrentIndex(1);
+    }
+
     for (auto i=0; i<_spriteAtlas.size(); ++i) {
         const SpriteAtlas& atlas = _spriteAtlas[i];
         SpriteAtlasPreview* spriteAtlasPreview = qobject_cast<SpriteAtlasPreview*>(ui->atlasPreviewTabWidget->widget(i));
