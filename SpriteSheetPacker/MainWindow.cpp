@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    setAttribute(Qt::WA_DeleteOnClose);
     ui->setupUi(this);
 
 #if defined(Q_OS_WIN)
@@ -106,7 +107,7 @@ MainWindow::MainWindow(QWidget *parent) :
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
     restoreState(settings.value("MainWindow/state").toByteArray());
 
-    refreshAtlas();
+    //refreshAtlas();
     on_actionCheckForUpdates_triggered();
 }
 
@@ -168,7 +169,17 @@ void MainWindow::refreshOpenRecentMenu() {
 
 void MainWindow::openRecent() {
     QAction* senderAction = dynamic_cast<QAction*>(sender());
-    openSpritePackerProject(senderAction->text());
+    QString fileName = senderAction->text();
+
+    if (!_currentProjectFileName.isEmpty() && (fileName != _currentProjectFileName)) {
+        MainWindow* wnd = new MainWindow();
+        wnd->show();
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+        wnd->openSpritePackerProject(fileName);
+
+    } else {
+        openSpritePackerProject(fileName);
+    }
 }
 
 void MainWindow::createRefreshButton() {
@@ -294,6 +305,9 @@ void MainWindow::refreshPreview() {
 }
 
 void MainWindow::openSpritePackerProject(const QString& fileName) {
+    QSettings settings;
+    settings.setValue("spritePackerFileName", fileName);
+
     std::string suffix = QFileInfo(fileName).suffix().toStdString();
     SpritePackerProjectFile* projectFile = SpritePackerProjectFile::factory().get(suffix)();
     if (projectFile) {
@@ -359,7 +373,6 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     setWindowTitle(_currentProjectFileName + " - SpriteSheet Packer");
 
     // add to recent file
-    QSettings settings;
     QStringList openRecentList = settings.value("openRecentList").toStringList();
     openRecentList.removeAll(fileName);
     openRecentList.prepend(fileName);
@@ -491,13 +504,8 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 }
 
 void MainWindow::on_actionNew_triggered() {
-    ui->spriteSheetLineEdit->setText("");
-    _spritesTreeWidget->clear();
-
-    _currentProjectFileName.clear();
-    setWindowTitle("SpriteSheet Packer");
-
-    refreshAtlas();
+    MainWindow* wnd = new MainWindow();
+    wnd->show();
 }
 
 void MainWindow::on_actionOpen_triggered() {
@@ -514,8 +522,12 @@ void MainWindow::on_actionOpen_triggered() {
                                                     dir,
                                                     tr("Supported formats (*.json *.ssp *.tps)"));
     qDebug() << selectedFilter;
-    if (!fileName.isEmpty()) {
-        settings.setValue("spritePackerFileName", fileName);
+    if (!_currentProjectFileName.isEmpty() && !fileName.isEmpty() && (fileName != _currentProjectFileName)) {
+        MainWindow* wnd = new MainWindow();
+        wnd->show();
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+        wnd->openSpritePackerProject(fileName);
+    } else {
         openSpritePackerProject(fileName);
     }
 }
@@ -609,7 +621,7 @@ void MainWindow::on_actionPublish_triggered() {
     publisher->setPixelFormat(pixelFormatFromString(ui->pixelFormatComboBox->currentText()));
     publisher->setPremultiplied(ui->premultipliedCheckBox->isChecked());
     publisher->setPngQuality(ui->pngOptModeComboBox->currentText(), ui->pngOptLevelSlider->value());
-    publisher->setJpgQuality(ui->jpgQualitySlider->value());    
+    publisher->setJpgQuality(ui->jpgQualitySlider->value());
     publisher->setTrimSpriteNames(ui->trimSpriteNamesCheckBox->isChecked());
     publisher->setPrependSmartFolderName(ui->prependSmartFolderNameCheckBox->isChecked());
 

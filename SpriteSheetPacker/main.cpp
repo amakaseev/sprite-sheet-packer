@@ -20,8 +20,8 @@ int main(int argc, char *argv[])
     if (argc > 1) {
         return commandLine(app);
     } else {
-        MainWindow w;
-        w.show();
+        MainWindow* wnd = new MainWindow();
+        wnd->show();
         return app.exec();
     }
 }
