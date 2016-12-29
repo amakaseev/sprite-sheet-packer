@@ -771,7 +771,6 @@ void MainWindow::on_actionAnimationPreview_triggered() {
     if (AnimationPreviewDialog::instance()) {
         auto dlg = AnimationPreviewDialog::instance();
         dlg->close();
-        delete dlg;
         return;
     }
 

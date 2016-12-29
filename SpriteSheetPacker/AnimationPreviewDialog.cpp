@@ -11,6 +11,7 @@ AnimationPreviewDialog::AnimationPreviewDialog(SpritesTreeWidget* spritesTreeWid
     ui(new Ui::AnimationPreviewDialog),
     _spritesTreeWidget(spritesTreeWidget)
 {
+    setAttribute(Qt::WA_DeleteOnClose);
     ui->setupUi(this);
 
     _instance = this;
