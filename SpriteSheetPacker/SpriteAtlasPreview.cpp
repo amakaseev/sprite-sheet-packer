@@ -18,6 +18,27 @@ void PreviewGraphicsScene::drawBackground(QPainter *painter, const QRectF &) {
     painter->fillRect(_view->visibleRegion().boundingRect(), _backgroundBrush);
 }
 
+PreviewGraphicsView::PreviewGraphicsView(QWidget *parent)
+    : QGraphicsView(parent)
+{
+}
+
+void PreviewGraphicsView::wheelEvent(QWheelEvent *event) {
+#if defined(Q_OS_OSX)
+    if (QApplication::keyboardModifiers() == Qt::AltModifier) {
+#endif
+        setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+
+        if (event->delta() > 0) {
+            emit zoomed(true);
+        } else {
+            emit zoomed(false);
+        }
+#if defined(Q_OS_OSX)
+    }
+#endif
+}
+
 SpriteAtlasPreview::SpriteAtlasPreview(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::SpriteAtlasPreview)
@@ -30,6 +51,13 @@ SpriteAtlasPreview::SpriteAtlasPreview(QWidget *parent) :
     ui->graphicsView->setAcceptDrops(false);
 
     _outlinesGroup = NULL;
+
+    connect(ui->graphicsView, &PreviewGraphicsView::zoomed, [=] (bool in) {
+        int oldValue = ui->zoomSlider->value();
+        int zoom = in ? 2 : -2;
+
+        ui->zoomSlider->setValue(oldValue + zoom);
+    });
 }
 
 SpriteAtlasPreview::~SpriteAtlasPreview()
