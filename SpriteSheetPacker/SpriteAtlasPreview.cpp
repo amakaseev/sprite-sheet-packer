@@ -5,22 +5,15 @@
 #define MIN_SCALE 0.1f
 
 
-PreviewGraphicsScene::PreviewGraphicsScene(QWidget *parent)
-    : QGraphicsScene(parent)
-{
-    _view = nullptr;
-    _backgroundBrush = QBrush(QPixmap("://res/patterns_tweed.png"));
-}
-
-void PreviewGraphicsScene::drawBackground(QPainter *painter, const QRectF &) {
-    if (!_view) return;
-    painter->resetTransform();
-    painter->fillRect(_view->visibleRegion().boundingRect(), _backgroundBrush);
-}
-
 PreviewGraphicsView::PreviewGraphicsView(QWidget *parent)
     : QGraphicsView(parent)
 {
+    _backgroundBrush = QBrush(QPixmap("://res/patterns_tweed.png"));
+}
+
+void PreviewGraphicsView::drawBackground(QPainter *painter, const QRectF &) {
+    painter->resetTransform();
+    painter->fillRect(visibleRegion().boundingRect(), _backgroundBrush);
 }
 
 void PreviewGraphicsView::wheelEvent(QWheelEvent *event) {
@@ -35,6 +28,8 @@ void PreviewGraphicsView::wheelEvent(QWheelEvent *event) {
             emit zoomed(false);
         }
 #if defined(Q_OS_OSX)
+    } else {
+        QGraphicsView::wheelEvent(event);
     }
 #endif
 }
@@ -45,8 +40,7 @@ SpriteAtlasPreview::SpriteAtlasPreview(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    _scene = new PreviewGraphicsScene(this);
-    _scene->setView(ui->graphicsView);
+    _scene = new QGraphicsScene(this);
     ui->graphicsView->setScene(_scene);
     ui->graphicsView->setAcceptDrops(false);
 

@@ -9,29 +9,20 @@ namespace Ui {
 class SpriteAtlasPreview;
 }
 
-class PreviewGraphicsScene : public QGraphicsScene {
-    Q_OBJECT
-public:
-    explicit PreviewGraphicsScene(QWidget *parent = 0);
-
-    void setView(QGraphicsView* view) { _view = view; }
-    virtual void drawBackground(QPainter *painter, const QRectF &rect);
-
-private:
-    QGraphicsView* _view;
-    QBrush         _backgroundBrush;
-};
-
 class PreviewGraphicsView : public QGraphicsView {
     Q_OBJECT
 public:
     explicit PreviewGraphicsView(QWidget *parent = 0);
 
 protected:
+    virtual void drawBackground(QPainter *painter, const QRectF &rect);
     virtual void wheelEvent(QWheelEvent* event);
 
 signals:
     void zoomed(bool in);
+
+private:
+    QBrush  _backgroundBrush;
 };
 
 class SpriteAtlasPreview : public QWidget
@@ -55,8 +46,8 @@ public slots:
 private:
     Ui::SpriteAtlasPreview* ui;
 
-    PreviewGraphicsScene*   _scene;
-    QGraphicsItemGroup*     _outlinesGroup;
+    QGraphicsScene*     _scene;
+    QGraphicsItemGroup* _outlinesGroup;
 };
 
 #endif // SPRITEATLASPREVIEW_H
