@@ -197,7 +197,7 @@
      </property>
      <property name="icon">
       <iconset resource="resources.qrc">
-       <normaloff>:/res/standardbutton-delete-128.png</normaloff>:/res/standardbutton-delete-128.png</iconset>
+       <normaloff>:/res/icon-delete.png</normaloff>:/res/icon-delete.png</iconset>
      </property>
     </widget>
    </item>

@@ -85,7 +85,7 @@
        </property>
        <property name="icon">
         <iconset resource="resources.qrc">
-         <normaloff>:/res/zoomout.png</normaloff>:/res/zoomout.png</iconset>
+         <normaloff>:/res/icon-zoomout.png</normaloff>:/res/icon-zoomout.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -102,7 +102,7 @@
        </property>
        <property name="icon">
         <iconset resource="resources.qrc">
-         <normaloff>:/res/zoomin.png</normaloff>:/res/zoomin.png</iconset>
+         <normaloff>:/res/icon-zoomout.png</normaloff>:/res/icon-zoomout.png</iconset>
        </property>
        <property name="iconSize">
         <size>

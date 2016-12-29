@@ -277,7 +277,7 @@
    </property>
    <property name="windowIcon">
     <iconset resource="resources.qrc">
-     <normaloff>:/res/settings.png</normaloff>:/res/settings.png</iconset>
+     <normaloff>:/res/icon-settings.png</normaloff>:/res/icon-settings.png</iconset>
    </property>
    <property name="floating">
     <bool>false</bool>
@@ -603,7 +603,7 @@
                <widget class="QToolButton" name="dataFormatSetupToolButton">
                 <property name="icon">
                  <iconset resource="resources.qrc">
-                  <normaloff>:/res/preferences-system.png</normaloff>:/res/preferences-system.png</iconset>
+                  <normaloff>:/res/icon-preferences.png</normaloff>:/res/icon-preferences.png</iconset>
                 </property>
                </widget>
               </item>
@@ -1054,7 +1054,7 @@
   <action name="actionNew">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/res/filenew.png</normaloff>:/res/filenew.png</iconset>
+     <normaloff>:/res/document-new.png</normaloff>:/res/document-new.png</iconset>
    </property>
    <property name="text">
     <string>New project</string>
@@ -1090,7 +1090,7 @@
   <action name="actionAddSprites">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/res/add_sprite.png</normaloff>:/res/add_sprite.png</iconset>
+     <normaloff>:/res/icon-addSprite.png</normaloff>:/res/icon-addSprite.png</iconset>
    </property>
    <property name="text">
     <string>Add sprites</string>
@@ -1105,7 +1105,7 @@
   <action name="actionAddFolder">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/res/add_folder.png</normaloff>:/res/add_folder.png</iconset>
+     <normaloff>:/res/icon-addFolder.png</normaloff>:/res/icon-addFolder.png</iconset>
    </property>
    <property name="text">
     <string>Add smart folder</string>
@@ -1120,7 +1120,7 @@
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/res/standardbutton-delete-128.png</normaloff>:/res/standardbutton-delete-128.png</iconset>
+     <normaloff>:/res/icon-delete.png</normaloff>:/res/icon-delete.png</iconset>
    </property>
    <property name="text">
     <string>Remove sprites</string>
@@ -1132,7 +1132,7 @@
   <action name="actionPublish">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/res/iPhone.png</normaloff>:/res/iPhone.png</iconset>
+     <normaloff>:/res/icon-publish.png</normaloff>:/res/icon-publish.png</iconset>
    </property>
    <property name="text">
     <string>Publish sprite sheet</string>
@@ -1156,7 +1156,7 @@
   <action name="actionPreferences">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/res/preferences-system.png</normaloff>:/res/preferences-system.png</iconset>
+     <normaloff>:/res/icon-preferences.png</normaloff>:/res/icon-preferences.png</iconset>
    </property>
    <property name="text">
     <string>Preferences ...</string>
@@ -1176,7 +1176,7 @@
   <action name="actionAnimationPreview">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/res/icon_animation.png</normaloff>:/res/icon_animation.png</iconset>
+     <normaloff>:/res/icon-animation.png</normaloff>:/res/icon-animation.png</iconset>
    </property>
    <property name="text">
     <string>Animation Preview</string>

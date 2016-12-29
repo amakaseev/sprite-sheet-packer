@@ -87,7 +87,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->mainToolBar->insertWidget(ui->actionPreferences ,empty);
 
     _statusBarWidget = new StatusBarWidget(this);
-    _statusBarWidget->showMessage("Ready.", QPixmap("://res/icon_ok.png"));
+    _statusBarWidget->showMessage("Ready.", QPixmap("://res/icon-ok.png"));
     ui->statusBar->addPermanentWidget(_statusBarWidget);
 
     createRefreshButton();
@@ -191,7 +191,7 @@ void MainWindow::createRefreshButton() {
     auto refreshButton = new QToolButton(this);
     refreshButton->setAutoRaise(true);
     refreshButton->setIconSize(QSize(24, 24));
-    refreshButton->setIcon(QIcon(":/res/refresh-32.png"));
+    refreshButton->setIcon(QIcon(":/res/icon-refresh.png"));
     connect(refreshButton, &QToolButton::pressed, [this](){
         refreshAtlas();
     });
@@ -1106,7 +1106,7 @@ void MainWindow::onRefreshAtlasStarted() {
 void MainWindow::onRefreshAtlasCompleted() {
     qDebug() << "onRefreshAtlasCompleted";
     _statusBarWidget->hideSpinner();
-    _statusBarWidget->showMessage("Finished.", QPixmap("://res/icon_ok.png"));
+    _statusBarWidget->showMessage("Finished.", QPixmap("://res/icon-ok.png"));
 
     refreshPreview();
     validatedSpriteSheetLineEdit();

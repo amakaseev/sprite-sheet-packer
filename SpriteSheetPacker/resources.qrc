@@ -1,30 +1,25 @@
 <RCC>
     <qresource prefix="/">
+        <file>res/icon.png</file>
         <file>res/background_tran.png</file>
-        <file>res/designer-property-editor-configure.png</file>
-        <file>res/designer-reload-resources-button.png</file>
+        <file>res/patterns_tweed.png</file>
         <file>res/document-open.png</file>
         <file>res/document-save.png</file>
-        <file>res/document-save-as.png</file>
-        <file>res/filenew.png</file>
-        <file>res/preferences-system.png</file>
-        <file>res/refresh-32.png</file>
-        <file>res/settings.png</file>
-        <file>res/standardbutton-delete-128.png</file>
-        <file>res/zoomin.png</file>
-        <file>res/zoomout.png</file>
-        <file>res/add_folder.png</file>
-        <file>res/add_sprite.png</file>
-        <file>res/atlas.png</file>
-        <file>res/Delete.png</file>
-        <file>res/iPhone.png</file>
-        <file>res/icon.png</file>
+        <file>res/document-new.png</file>
+        <file>res/icon-ok.png</file>
+        <file>res/icon-warning.png</file>
+        <file>res/icon-preferences.png</file>
+        <file>res/icon-refresh.png</file>
+        <file>res/icon-settings.png</file>
+        <file>res/icon-delete.png</file>
+        <file>res/icon-zoomin.png</file>
+        <file>res/icon-zoomout.png</file>
+        <file>res/icon-addFolder.png</file>
+        <file>res/icon-addSprite.png</file>
+        <file>res/icon-publish.png</file>
+        <file>res/icon-animation.png</file>
         <file>res/identical.png</file>
         <file>res/spinner.gif</file>
-        <file>res/icon_ok.png</file>
-        <file>res/icon_warning.png</file>
-        <file>res/icon_animation.png</file>
-        <file>res/patterns_tweed.png</file>
         <file>res/playback/control_end_blue.png</file>
         <file>res/playback/control_fastforward_blue.png</file>
         <file>res/playback/control_pause_blue.png</file>
