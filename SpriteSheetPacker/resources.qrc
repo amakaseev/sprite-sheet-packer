@@ -14,8 +14,9 @@
         <file>res/icon-delete.png</file>
         <file>res/icon-zoomin.png</file>
         <file>res/icon-zoomout.png</file>
-        <file>res/icon-addFolder.png</file>
         <file>res/icon-addSprite.png</file>
+        <file>res/icon-deleteSprite.png</file>
+        <file>res/icon-addFolder.png</file>
         <file>res/icon-publish.png</file>
         <file>res/icon-animation.png</file>
         <file>res/identical.png</file>

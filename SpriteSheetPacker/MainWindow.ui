@@ -1120,7 +1120,7 @@
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/res/icon-delete.png</normaloff>:/res/icon-delete.png</iconset>
+     <normaloff>:/res/icon-deleteSprite.png</normaloff>:/res/icon-deleteSprite.png</iconset>
    </property>
    <property name="text">
     <string>Remove sprites</string>
