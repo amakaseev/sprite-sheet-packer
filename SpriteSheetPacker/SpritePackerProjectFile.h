@@ -31,6 +31,9 @@ public:
     void setEpsilon(float epsilon) { _epsilon = epsilon; }
     float epsilon() const { return _epsilon; }
 
+    void setHeuristicMask(bool heuristicMask) { _heuristicMask = heuristicMask; }
+    bool heuristicMask() const { return _heuristicMask; }
+
     void setTextureBorder(int textureBorder) { _textureBorder = textureBorder; }
     int textureBorder() const { return _textureBorder; }
 
@@ -88,6 +91,7 @@ protected:
     QString     _trimMode;
     int         _trimThreshold;
     float       _epsilon;
+    bool        _heuristicMask;
     int         _textureBorder;
     int         _spriteBorder;
     ImageFormat _imageFormat;
