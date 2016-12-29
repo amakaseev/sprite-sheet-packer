@@ -61,7 +61,7 @@ void SpriteAtlasPreview::setAtlas(const SpriteAtlas& atlas, PixelFormat pixelFor
         atlasPixmapItem->setPos(atlasPositionX, 0);
         atlasPositionX += atlasPixmapItem->boundingRect().width() + 100;
 
-        auto rect = _scene->addRect(atlasPixmapItem->sceneBoundingRect(), QPen(Qt::darkRed), QBrush(QPixmap("://res/background_tran.png")));
+        auto rect = _scene->addRect(atlasPixmapItem->sceneBoundingRect(), QPen(Qt::darkRed), QBrush(QPixmap("://res/patterns_transparent.png")));
         rect->setZValue(-1);
 
         QColor brushColor(Qt::blue);

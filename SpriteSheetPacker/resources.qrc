@@ -1,11 +1,11 @@
 <RCC>
     <qresource prefix="/">
         <file>res/icon.png</file>
-        <file>res/background_tran.png</file>
+        <file>res/patterns_transparent.png</file>
         <file>res/patterns_tweed.png</file>
-        <file>res/document-open.png</file>
-        <file>res/document-save.png</file>
-        <file>res/document-new.png</file>
+        <file>res/icon-open.png</file>
+        <file>res/icon-save.png</file>
+        <file>res/icon-new.png</file>
         <file>res/icon-ok.png</file>
         <file>res/icon-warning.png</file>
         <file>res/icon-preferences.png</file>

@@ -259,8 +259,8 @@
    <addaction name="actionSave"/>
    <addaction name="separator"/>
    <addaction name="actionAddSprites"/>
-   <addaction name="actionAddFolder"/>
    <addaction name="actionRemove"/>
+   <addaction name="actionAddFolder"/>
    <addaction name="separator"/>
    <addaction name="actionPublish"/>
    <addaction name="separator"/>
@@ -914,7 +914,7 @@
                 </property>
                 <property name="icon">
                  <iconset resource="resources.qrc">
-                  <normaloff>:/res/document-open.png</normaloff>:/res/document-open.png</iconset>
+                  <normaloff>:/res/icon-open.png</normaloff>:/res/icon-open.png</iconset>
                 </property>
                </widget>
               </item>
@@ -1054,7 +1054,7 @@
   <action name="actionNew">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/res/document-new.png</normaloff>:/res/document-new.png</iconset>
+     <normaloff>:/res/icon-new.png</normaloff>:/res/icon-new.png</iconset>
    </property>
    <property name="text">
     <string>New project</string>
@@ -1066,7 +1066,7 @@
   <action name="actionOpen">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/res/document-open.png</normaloff>:/res/document-open.png</iconset>
+     <normaloff>:/res/icon-open.png</normaloff>:/res/icon-open.png</iconset>
    </property>
    <property name="text">
     <string>Open project</string>
@@ -1078,7 +1078,7 @@
   <action name="actionSave">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/res/document-save.png</normaloff>:/res/document-save.png</iconset>
+     <normaloff>:/res/icon-save.png</normaloff>:/res/icon-save.png</iconset>
    </property>
    <property name="text">
     <string>Save project</string>
@@ -1144,7 +1144,7 @@
   <action name="actionSaveAs">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/res/document-save.png</normaloff>:/res/document-save.png</iconset>
+     <normaloff>:/res/icon-save.png</normaloff>:/res/icon-save.png</iconset>
    </property>
    <property name="text">
     <string>Save As...</string>
