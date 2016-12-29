@@ -415,8 +415,6 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content, SpriteAtlasG
         if (content.rotated) {
             image = packContent.image().copy(packContent.rect());
             image = rotate90(image);
-        } else {
-            image = packContent.image();
         }
 
         SpriteFrameInfo spriteFrame;
@@ -443,7 +441,7 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content, SpriteAtlasG
         if (content.rotated) {
             painter.drawImage(QPoint(content.coord.x + _textureBorder, content.coord.y + _textureBorder), image);
         } else {
-            painter.drawImage(QPoint(content.coord.x + _textureBorder, content.coord.y + _textureBorder), image, packContent.rect());
+            painter.drawImage(QPoint(content.coord.x + _textureBorder, content.coord.y + _textureBorder), packContent.image(), packContent.rect());
         }
 
         outputData._spriteFrames[packContent.name()] = spriteFrame;
@@ -507,8 +505,6 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content, SpriteAtl
         const PackContent &packContent = content.content();
         SpriteFrameInfo spriteFrame;
 
-        QImage image(packContent.image());
-
         spriteFrame.triangles = packContent.triangles();
         spriteFrame.frame = QRect(QPoint(content.bounds().left + _textureBorder, content.bounds().top + _textureBorder), QPoint(content.bounds().right, content.bounds().bottom));
         spriteFrame.offset = QPoint(
@@ -517,7 +513,7 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content, SpriteAtl
                     );
         spriteFrame.rotated = false;
         spriteFrame.sourceColorRect = packContent.rect();
-        spriteFrame.sourceSize = image.size();
+        spriteFrame.sourceSize = packContent.image().size();
 
         QPainterPath clipPath;
         for (auto polygon: packContent.polygons()) {
@@ -525,7 +521,7 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content, SpriteAtl
         }
         clipPath.translate(content.bounds().left + _textureBorder, content.bounds().top + _textureBorder);
         painter.setClipPath(clipPath);
-        painter.drawImage(QPoint(content.bounds().left + _textureBorder, content.bounds().top + _textureBorder), image, packContent.rect());
+        painter.drawImage(QPoint(content.bounds().left + _textureBorder, content.bounds().top + _textureBorder), packContent.image(), packContent.rect());
 
         outputData._spriteFrames[packContent.name()] = spriteFrame;
 
