@@ -1,4 +1,7 @@
 ##1.0.7
+* Supported multi window added by [TheCodez](https://github.com/TheCodez)
+
+##1.0.7
 * Update pngquant
 * Removed webenginewidgets
 * Added forceSquared option
