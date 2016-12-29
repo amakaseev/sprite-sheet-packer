@@ -24,13 +24,19 @@ PreviewGraphicsView::PreviewGraphicsView(QWidget *parent)
 }
 
 void PreviewGraphicsView::wheelEvent(QWheelEvent *event) {
-    setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+#if defined(Q_OS_OSX)
+    if (QApplication::keyboardModifiers() == Qt::AltModifier) {
+#endif
+        setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
 
-    if (event->delta() > 0) {
-        emit zoomed(true);
-    } else {
-        emit zoomed(false);
+        if (event->delta() > 0) {
+            emit zoomed(true);
+        } else {
+            emit zoomed(false);
+        }
+#if defined(Q_OS_OSX)
     }
+#endif
 }
 
 SpriteAtlasPreview::SpriteAtlasPreview(QWidget *parent) :
@@ -48,9 +54,9 @@ SpriteAtlasPreview::SpriteAtlasPreview(QWidget *parent) :
 
     connect(ui->graphicsView, &PreviewGraphicsView::zoomed, [=] (bool in) {
         int oldValue = ui->zoomSlider->value();
-        int adjust = in ? 2 : -2;
+        int zoom = in ? 2 : -2;
 
-        ui->zoomSlider->setValue(oldValue + adjust);
+        ui->zoomSlider->setValue(oldValue + zoom);
     });
 }
 
