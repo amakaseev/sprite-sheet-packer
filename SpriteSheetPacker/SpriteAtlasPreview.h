@@ -9,7 +9,7 @@ namespace Ui {
 class SpriteAtlasPreview;
 }
 
-class PreviewGraphicsScene: public QGraphicsScene {
+class PreviewGraphicsScene : public QGraphicsScene {
     Q_OBJECT
 public:
     explicit PreviewGraphicsScene(QWidget *parent = 0);
@@ -20,6 +20,18 @@ public:
 private:
     QGraphicsView* _view;
     QBrush         _backgroundBrush;
+};
+
+class PreviewGraphicsView : public QGraphicsView {
+    Q_OBJECT
+public:
+    explicit PreviewGraphicsView(QWidget *parent = 0);
+
+protected:
+    virtual void wheelEvent(QWheelEvent* event);
+
+signals:
+    void zoomed(bool in);
 };
 
 class SpriteAtlasPreview : public QWidget
