@@ -14,18 +14,18 @@ class AnimationPreviewDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit AnimationPreviewDialog(SpritesTreeWidget* spritesTreeWidget, QWidget *parent = 0);
+    explicit AnimationPreviewDialog(QWidget *parent = 0);
     ~AnimationPreviewDialog();
 
     static AnimationPreviewDialog* instance() { return _instance; }
 
-    void timerEvent(QTimerEvent* event);
+    void spritesSelectionChanged(SpritesTreeWidget* spritesTreeWidget);
 
 protected:
+    void timerEvent(QTimerEvent* event);
     void scanFolder(QTreeWidgetItem* item);
 
 private slots:
-    void spritesSelectionChanged();
     void on_framePerSecondSpinBox_valueChanged(int arg1);
     void on_framesSlider_valueChanged(int value);
     void on_playToolButton_toggled(bool checked);
@@ -38,7 +38,6 @@ private:
     static AnimationPreviewDialog*  _instance;
 
     Ui::AnimationPreviewDialog*     ui;
-    SpritesTreeWidget*              _spritesTreeWidget;
     QVector<QPixmap>                _frames;
     int                             _animationTimer;
 };

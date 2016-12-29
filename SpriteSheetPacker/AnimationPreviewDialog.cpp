@@ -6,10 +6,9 @@
 
 AnimationPreviewDialog* AnimationPreviewDialog::_instance = nullptr;
 
-AnimationPreviewDialog::AnimationPreviewDialog(SpritesTreeWidget* spritesTreeWidget, QWidget *parent) :
+AnimationPreviewDialog::AnimationPreviewDialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::AnimationPreviewDialog),
-    _spritesTreeWidget(spritesTreeWidget)
+    ui(new Ui::AnimationPreviewDialog)
 {
     setAttribute(Qt::WA_DeleteOnClose);
     ui->setupUi(this);
@@ -19,8 +18,6 @@ AnimationPreviewDialog::AnimationPreviewDialog(SpritesTreeWidget* spritesTreeWid
 
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
     ui->previewLabel->setStyleSheet("background-image: url(://res/patterns_tweed.png)");
-
-    spritesSelectionChanged();
 
     QSettings settings;
     restoreGeometry(settings.value("AnimationPreviewDialog/geometry").toByteArray());
@@ -38,16 +35,10 @@ AnimationPreviewDialog::~AnimationPreviewDialog() {
     delete ui;
 }
 
-void AnimationPreviewDialog::timerEvent(QTimerEvent* /*event*/) {
-    on_nextFrameToolButton_clicked();
-}
-
-void AnimationPreviewDialog::spritesSelectionChanged() {
-    qDebug() << "spritesSelectionChanged";
-
+void AnimationPreviewDialog::spritesSelectionChanged(SpritesTreeWidget* spritesTreeWidget) {
     _frames.clear();
 
-    auto items = _spritesTreeWidget->selectedItems();
+    auto items = spritesTreeWidget->selectedItems();
     for (auto item: items) {
         if (item->childCount()) {
             scanFolder(item);
@@ -62,6 +53,10 @@ void AnimationPreviewDialog::spritesSelectionChanged() {
     } else {
         ui->framesSlider->setMaximum(0);
     }
+}
+
+void AnimationPreviewDialog::timerEvent(QTimerEvent* /*event*/) {
+    on_nextFrameToolButton_clicked();
 }
 
 void AnimationPreviewDialog::scanFolder(QTreeWidgetItem* item) {
