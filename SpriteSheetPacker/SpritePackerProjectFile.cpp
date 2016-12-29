@@ -12,6 +12,7 @@ SpritePackerProjectFile::SpritePackerProjectFile() {
     _trimMode = "Rect";
     _trimThreshold = 1;
     _epsilon = 5;
+    _heuristicMask = false;
     _textureBorder = 0;
     _spriteBorder = 2;
     _imageFormat = kPNG,
@@ -45,6 +46,7 @@ bool SpritePackerProjectFile::read(const QString &fileName) {
     if (json.contains("trimMode")) _trimMode = json["trimMode"].toString();
     if (json.contains("trimThreshold")) _trimThreshold = json["trimThreshold"].toInt();
     if (json.contains("epsilon")) _epsilon = json["epsilon"].toDouble();
+    if (json.contains("heuristicMask")) _heuristicMask = json["heuristicMask"].toBool();
     if (json.contains("textureBorder")) _textureBorder = json["textureBorder"].toInt();
     if (json.contains("spriteBorder")) _spriteBorder = json["spriteBorder"].toInt();
     if (json.contains("imageFormat")) _imageFormat = imageFormatFromString(json["imageFormat"].toString());
@@ -92,6 +94,7 @@ bool SpritePackerProjectFile::write(const QString &fileName) {
     json["trimMode"] = _trimMode;
     json["trimThreshold"] = _trimThreshold;
     json["epsilon"] = _epsilon;
+    json["heuristicMask"] = _heuristicMask;
     json["textureBorder"] = _textureBorder;
     json["spriteBorder"] = _spriteBorder;
     json["imageFormat"] = imageFormatToString(_imageFormat);
@@ -154,6 +157,10 @@ bool SpritePackerProjectFileTPS::read(const QString &fileName) {
 
     if (tpsMap.find("prependSmartFolderName") != tpsMap.end()) {
         _prependSmartFolderName = tpsMap["prependSmartFolderName"].toBool();
+    }
+
+    if (tpsMap.find("heuristicMask") != tpsMap.end()) {
+        _heuristicMask = tpsMap["heuristicMask"].toBool();
     }
 
     if (tpsMap.find("globalSpriteSettings") != tpsMap.end()) {

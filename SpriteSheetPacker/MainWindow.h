@@ -65,6 +65,7 @@ private slots:
     void on_trimSpinBox_valueChanged(int value);
     void on_epsilonHorizontalSlider_sliderMoved(int value);
     void on_epsilonHorizontalSlider_sliderReleased();
+    void on_heuristicMaskCheckBox_stateChanged(int state);
     void on_textureBorderSpinBox_valueChanged(int value);
     void on_spriteBorderSpinBox_valueChanged(int value);
     void on_imageFormatComboBox_currentIndexChanged(int index);
@@ -73,7 +74,7 @@ private slots:
     void on_destPathLineEdit_textChanged(const QString& text);
     void on_spriteSheetLineEdit_textChanged(const QString& text);
     void on_pngOptModeComboBox_currentTextChanged(const QString &text);
-    void on_premultipliedCheckBox_toggled(bool checked);
+    void on_premultipliedCheckBox_stateChanged(int state);
 
     void onScalingVariantWidgetValueChanged(bool);
 

@@ -194,7 +194,7 @@
      <x>0</x>
      <y>0</y>
      <width>1328</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="defaultUp">
@@ -276,7 +276,7 @@
     </size>
    </property>
    <property name="windowIcon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/icon-settings.png</normaloff>:/res/icon-settings.png</iconset>
    </property>
    <property name="floating">
@@ -306,8 +306,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>314</width>
-          <height>843</height>
+          <width>320</width>
+          <height>763</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -484,6 +484,20 @@
                  </item>
                 </layout>
                </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_8">
+                 <item>
+                  <widget class="QCheckBox" name="heuristicMaskCheckBox">
+                   <property name="layoutDirection">
+                    <enum>Qt::RightToLeft</enum>
+                   </property>
+                   <property name="text">
+                    <string>Heuristic mask: </string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
               </layout>
              </widget>
             </item>
@@ -602,7 +616,7 @@
               <item>
                <widget class="QToolButton" name="dataFormatSetupToolButton">
                 <property name="icon">
-                 <iconset resource="resources.qrc">
+                 <iconset>
                   <normaloff>:/res/icon-preferences.png</normaloff>:/res/icon-preferences.png</iconset>
                 </property>
                </widget>
@@ -913,7 +927,7 @@
                  <string>...</string>
                 </property>
                 <property name="icon">
-                 <iconset resource="resources.qrc">
+                 <iconset>
                   <normaloff>:/res/icon-open.png</normaloff>:/res/icon-open.png</iconset>
                 </property>
                </widget>
@@ -1053,7 +1067,7 @@
   </widget>
   <action name="actionNew">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/icon-new.png</normaloff>:/res/icon-new.png</iconset>
    </property>
    <property name="text">
@@ -1065,7 +1079,7 @@
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/icon-open.png</normaloff>:/res/icon-open.png</iconset>
    </property>
    <property name="text">
@@ -1077,7 +1091,7 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/icon-save.png</normaloff>:/res/icon-save.png</iconset>
    </property>
    <property name="text">
@@ -1089,7 +1103,7 @@
   </action>
   <action name="actionAddSprites">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/icon-addSprite.png</normaloff>:/res/icon-addSprite.png</iconset>
    </property>
    <property name="text">
@@ -1104,7 +1118,7 @@
   </action>
   <action name="actionAddFolder">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/icon-addFolder.png</normaloff>:/res/icon-addFolder.png</iconset>
    </property>
    <property name="text">
@@ -1119,7 +1133,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/icon-deleteSprite.png</normaloff>:/res/icon-deleteSprite.png</iconset>
    </property>
    <property name="text">
@@ -1131,7 +1145,7 @@
   </action>
   <action name="actionPublish">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/icon-publish.png</normaloff>:/res/icon-publish.png</iconset>
    </property>
    <property name="text">
@@ -1143,7 +1157,7 @@
   </action>
   <action name="actionSaveAs">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/icon-save.png</normaloff>:/res/icon-save.png</iconset>
    </property>
    <property name="text">
@@ -1155,7 +1169,7 @@
   </action>
   <action name="actionPreferences">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/icon-preferences.png</normaloff>:/res/icon-preferences.png</iconset>
    </property>
    <property name="text">
@@ -1175,7 +1189,7 @@
   </action>
   <action name="actionAnimationPreview">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/icon-animation.png</normaloff>:/res/icon-animation.png</iconset>
    </property>
    <property name="text">
@@ -1189,9 +1203,7 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>jpgQualitySlider</sender>

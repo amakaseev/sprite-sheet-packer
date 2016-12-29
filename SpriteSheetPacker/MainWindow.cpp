@@ -234,6 +234,7 @@ void MainWindow::refreshAtlas(bool generate) {
                                                     ui->textureBorderSpinBox->value(),
                                                     ui->spriteBorderSpinBox->value(),
                                                     ui->trimSpinBox->value(),
+                                                    ui->heuristicMaskCheckBox->isChecked(),
                                                     pow2,
                                                     forceSquared,
                                                     maxTextureSize,
@@ -333,6 +334,7 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     ui->trimModeComboBox->setCurrentText(projectFile->trimMode());
     ui->trimSpinBox->setValue(projectFile->trimThreshold());
     ui->epsilonHorizontalSlider->setValue(projectFile->epsilon() * 10);
+    ui->heuristicMaskCheckBox->setChecked(projectFile->heuristicMask());
     ui->textureBorderSpinBox->setValue(projectFile->textureBorder());
     ui->spriteBorderSpinBox->setValue(projectFile->spriteBorder());
     ui->dataFormatComboBox->setCurrentText(projectFile->dataFormat());
@@ -403,6 +405,7 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
     projectFile->setTrimMode(ui->trimModeComboBox->currentText());
     projectFile->setTrimThreshold(ui->trimSpinBox->value());
     projectFile->setEpsilon(ui->epsilonHorizontalSlider->value() / 10.f);
+    projectFile->setHeuristicMask(ui->heuristicMaskCheckBox->isChecked());
     projectFile->setTextureBorder(ui->textureBorderSpinBox->value());
     projectFile->setSpriteBorder(ui->spriteBorderSpinBox->value());
     projectFile->setDataFormat(ui->dataFormatComboBox->currentText());
@@ -874,6 +877,11 @@ void MainWindow::on_epsilonHorizontalSlider_sliderReleased() {
     }
 }
 
+void MainWindow::on_heuristicMaskCheckBox_stateChanged(int) {
+    propertiesValueChanged();
+    setProjectDirty();
+}
+
 void MainWindow::on_algorithmComboBox_currentTextChanged(const QString& text) {
     if (text == "Polygon") {
         ui->trimModeComboBox->setCurrentText("Polygon");
@@ -1074,7 +1082,7 @@ void MainWindow::on_spriteSheetLineEdit_textChanged(const QString&) {
     setProjectDirty();
 }
 
-void MainWindow::on_premultipliedCheckBox_toggled(bool) {
+void MainWindow::on_premultipliedCheckBox_stateChanged(int) {
     setProjectDirty();
 }
 

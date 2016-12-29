@@ -69,6 +69,7 @@ public:
                 int textureBorder = 0,
                 int spriteBorder = 1,
                 int trim = 1,
+                bool heuristicMask = false,
                 bool pow2 = false,
                 bool forceSquared = false,
                 int maxSize = 8192,
@@ -99,6 +100,7 @@ private:
     bool _forceSquared;
     int _maxTextureSize;
     float _scale;
+    bool _heuristicMask;
     // polygon mode
     struct TPolygonMode{
         bool enable;

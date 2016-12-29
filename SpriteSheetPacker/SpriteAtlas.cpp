@@ -72,11 +72,12 @@ void PackContent::trim(int alpha) {
     }
 }
 
-SpriteAtlas::SpriteAtlas(const QStringList& sourceList, int textureBorder, int spriteBorder, int trim, bool pow2, bool forceSquared, int maxSize, float scale)
+SpriteAtlas::SpriteAtlas(const QStringList& sourceList, int textureBorder, int spriteBorder, int trim, bool heuristicMask, bool pow2, bool forceSquared, int maxSize, float scale)
     : _sourceList(sourceList)
     , _trim(trim)
     , _textureBorder(textureBorder)
     , _spriteBorder(spriteBorder)
+    , _heuristicMask(heuristicMask)
     , _pow2(pow2)
     , _forceSquared(forceSquared)
     , _maxTextureSize(maxSize)
@@ -91,16 +92,6 @@ void SpriteAtlas::enablePolygonMode(bool enable, float epsilon) {
     _polygonMode.epsilon = epsilon;
 }
 
-// TODO: QThread: gui is freeze on very large atlases (no profit) wtf?
-//void SpriteAtlas::generateOnThread() {
-//    QThread* generateThread = new QThread(this);
-
-//     connect(generateThread, SIGNAL(started()), this, SLOT(generate()));
-//     connect(generateThread, SIGNAL(finished()), this, SLOT(deleteLater()));
-
-//     generateThread->start();
-//}
-
 bool SpriteAtlas::generate(SpriteAtlasGenerateProgress* progress) {
     QTime timePerform;
     timePerform.start();
@@ -108,7 +99,7 @@ bool SpriteAtlas::generate(SpriteAtlasGenerateProgress* progress) {
     _outputData.clear();
 
     if (progress)
-        progress->setProgressText(QString("Optimizing sptites..."));
+        progress->setProgressText(QString("Optimizing sprites..."));
 
     QStringList nameFilter;
     nameFilter << "*.png" << "*.jpg" << "*.jpeg" << "*.gif" << "*.bmp";
@@ -142,6 +133,13 @@ bool SpriteAtlas::generate(SpriteAtlasGenerateProgress* progress) {
         if (image.isNull()) continue;
         if (_scale != 1) {
             image = image.scaled(ceil(image.width() * _scale), ceil(image.height() * _scale), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        }
+
+        // Apply Heuristic mask
+        if (_heuristicMask) {
+            QPixmap pix = QPixmap::fromImage(image);
+            pix.setMask(pix.createHeuristicMask());
+            image = pix.toImage();
         }
 
         PackContent packContent((*it_f).second, image);
