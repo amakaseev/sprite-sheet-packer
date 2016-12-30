@@ -1,5 +1,6 @@
 #include "SpriteAtlas.h"
 
+#include <functional>
 #include "binpack2d.hpp"
 #include "polypack2d.h"
 #include "ImageRotate.h"
@@ -98,8 +99,10 @@ bool SpriteAtlas::generate(SpriteAtlasGenerateProgress* progress) {
 
     _outputData.clear();
 
-    if (progress)
-        progress->setProgressText(QString("Optimizing sprites..."));
+    _progress = progress;
+
+    if (_progress)
+        _progress->setProgressText(QString("Optimizing sprites..."));
 
     QStringList nameFilter;
     nameFilter << "*.png" << "*.jpg" << "*.jpeg" << "*.gif" << "*.bmp";
@@ -177,9 +180,9 @@ bool SpriteAtlas::generate(SpriteAtlasGenerateProgress* progress) {
 
     bool result = false;
     if ((_algorithm == "Polygon") && (_polygonMode.enable)) {
-        result = packWithPolygon(inputContent, progress);
+        result = packWithPolygon(inputContent);
     } else {
-        result = packWithRect(inputContent, progress);
+        result = packWithRect(inputContent);
     }
 
     int elapsed = timePerform.elapsed();
@@ -188,9 +191,9 @@ bool SpriteAtlas::generate(SpriteAtlasGenerateProgress* progress) {
     return result;
 }
 
-bool SpriteAtlas::packWithRect(const QVector<PackContent>& content, SpriteAtlasGenerateProgress* progress) {
-    if (progress)
-        progress->setProgressText("Optimizing atlas...");
+bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
+    if (_progress)
+        _progress->setProgressText("Optimizing atlas...");
 
     int volume = 0;
     BinPack2D::ContentAccumulator<PackContent> inputContent;
@@ -251,7 +254,7 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content, SpriteAtlasG
                     outputContent = BinPack2D::ContentAccumulator<PackContent>();
                     canvasArray.CollectContent(outputContent);
 
-                    packWithRect(remainderContent, progress);
+                    packWithRect(remainderContent);
 
                     break;
                 }
@@ -335,7 +338,7 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content, SpriteAtlasG
                     outputContent = BinPack2D::ContentAccumulator<PackContent>();
                     canvasArray.CollectContent(outputContent);
 
-                    packWithRect(remainderContent, progress);
+                    packWithRect(remainderContent);
 
                     break;
                 }
@@ -394,8 +397,8 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content, SpriteAtlasG
     }
 
     qDebug() << "Found optimize size:" << w << "x" << h;
-    if (progress)
-        progress->setProgressText(QString("Found optimize size: %1x%2").arg(w).arg(h));
+    if (_progress)
+        _progress->setProgressText(QString("Found optimize size: %1x%2").arg(w).arg(h));
 
     OutputData outputData;
 
@@ -464,9 +467,9 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content, SpriteAtlasG
     return true;
 }
 
-bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content, SpriteAtlasGenerateProgress* progress) {
-    if (progress)
-        progress->setProgressText("Build pack contents...");
+bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
+    if (_progress)
+        _progress->setProgressText("Build pack contents...");
 
     // initialize content
     PolyPack2D::ContentList<PackContent> inputContent;
@@ -488,7 +491,7 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content, SpriteAtl
     }
 
     PolyPack2D::Container<PackContent> container;
-    container.place(inputContent, _maxTextureSize);
+    container.place(inputContent, _maxTextureSize, 5, std::bind(&SpriteAtlas::onPlaceCallback, this, std::placeholders::_1, std::placeholders::_2));
 
     auto outputContent = container.contentList();
 
@@ -541,4 +544,9 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content, SpriteAtl
     _outputData.push_front(outputData);
 
     return true;
+}
+
+void SpriteAtlas::onPlaceCallback(int current, int count) {
+    if (_progress)
+        _progress->setProgressText(QString("Placing: %1/%2").arg(current).arg(count));
 }

@@ -26,6 +26,7 @@
 #include <QPointF>
 #include <QDebug>
 #include <math.h>
+#include <functional>
 
 namespace PolyPack2D {
 
@@ -207,7 +208,7 @@ namespace PolyPack2D {
 
     template <class T> class Container: public std::vector<Content<T>> {
     public:
-        void place(const ContentList<T>& inputContent, int sizeLimit = 8192, int step = 5) {
+        void place(const ContentList<T>& inputContent, int sizeLimit = 8192, int step = 5, std::function<void (int, int)> callback = NULL) {
             int contentIndex = 0;
             for (auto it = inputContent.begin(); it != inputContent.end(); ++it, ++contentIndex) {
                 auto content = (*it);
@@ -279,7 +280,10 @@ namespace PolyPack2D {
                     }
 
                     if (isPlaces) {
-                        qDebug() << "place: " << contentIndex << "/" << inputContent.size();
+                        qDebug() << "Placing: " << contentIndex << "/" << inputContent.size();
+                        if (callback)
+                            callback(contentIndex, inputContent.size());
+
                         content.setOffset(bestOffset);
                         if (_bounds.left > content.bounds().left) _bounds.left = content.bounds().left;
                         if (_bounds.right < content.bounds().right) _bounds.right = content.bounds().right;
