@@ -877,7 +877,7 @@ void MainWindow::on_epsilonHorizontalSlider_sliderReleased() {
     }
 }
 
-void MainWindow::on_heuristicMaskCheckBox_stateChanged(int) {
+void MainWindow::on_heuristicMaskCheckBox_toggled() {
     propertiesValueChanged();
     setProjectDirty();
 }
@@ -1082,7 +1082,7 @@ void MainWindow::on_spriteSheetLineEdit_textChanged(const QString&) {
     setProjectDirty();
 }
 
-void MainWindow::on_premultipliedCheckBox_stateChanged(int) {
+void MainWindow::on_premultipliedCheckBox_toggled() {
     setProjectDirty();
 }
 
