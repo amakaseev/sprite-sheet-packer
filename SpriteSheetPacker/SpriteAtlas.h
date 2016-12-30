@@ -87,8 +87,10 @@ public:
     const QMap<QString, QVector<QString>>& identicalFrames() const { return _identicalFrames; }
 
 protected:
-    bool packWithRect(const QVector<PackContent>& content, SpriteAtlasGenerateProgress* progress);
-    bool packWithPolygon(const QVector<PackContent>& content, SpriteAtlasGenerateProgress* progress);
+    bool packWithRect(const QVector<PackContent>& content);
+    bool packWithPolygon(const QVector<PackContent>& content);
+
+    void onPlaceCallback(int current, int count);
 
 private:
     QStringList _sourceList;
@@ -106,6 +108,8 @@ private:
         bool enable;
         float epsilon;
     } _polygonMode;
+
+    SpriteAtlasGenerateProgress* _progress;
 
     // output data
     QVector<OutputData> _outputData;
