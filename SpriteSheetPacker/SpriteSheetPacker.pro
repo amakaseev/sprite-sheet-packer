@@ -38,7 +38,8 @@ SOURCES += main.cpp\
     SpriteAtlasPreview.cpp \
     StatusBarWidget.cpp \
     AnimationPreviewDialog.cpp \
-    UpdaterDialog.cpp
+    UpdaterDialog.cpp \
+    ContentProtectionDialog.cpp
 
 HEADERS += MainWindow.h \
     ImageRotate.h \
@@ -56,7 +57,8 @@ HEADERS += MainWindow.h \
     ImageFormat.h \
     StatusBarWidget.h \
     AnimationPreviewDialog.h \
-    UpdaterDialog.h
+    UpdaterDialog.h \
+    ContentProtectionDialog.h
 
 #algorithm
 INCLUDEPATH += algorithm
@@ -78,7 +80,8 @@ FORMS += MainWindow.ui \
     SpriteAtlasPreview.ui \
     StatusBarWidgetatusbarwidget.ui \
     AnimationPreviewDialog.ui \
-    UpdaterDialog.ui
+    UpdaterDialog.ui \
+    ContentProtectionDialog.ui
 
 RESOURCES += resources.qrc
 

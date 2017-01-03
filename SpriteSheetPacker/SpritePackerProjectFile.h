@@ -79,6 +79,9 @@ public:
     void setPrependSmartFolderName(bool prependSmartFolderName) { _prependSmartFolderName = prependSmartFolderName; }
     bool prependSmartFolderName() const { return _prependSmartFolderName; }
 
+    void setEncryptionKey(const QString& key) { _encryptionKey = key; }
+    const QString& encryptionKey() { return _encryptionKey; }
+
     virtual bool write(const QString& fileName);
     virtual bool read(const QString& fileName);
 
@@ -111,6 +114,7 @@ protected:
 
     bool        _trimSpriteNames;
     bool        _prependSmartFolderName;
+    QString     _encryptionKey;
 
 private:
     static GenericObjectFactory<std::string, SpritePackerProjectFile> _factory;

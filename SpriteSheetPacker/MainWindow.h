@@ -58,6 +58,7 @@ private slots:
 
     void on_destFolderToolButton_clicked();
     void on_dataFormatSetupToolButton_clicked();
+    void on_contentProtectionToolButton_clicked();
     void on_addScalingVariantPushButton_clicked();
 
     void on_algorithmComboBox_currentTextChanged(const QString& text);
@@ -101,6 +102,7 @@ private:
     bool                    _atlasDirty;
     bool                    _needFitAfterRefresh;
     bool                    _epsilonValueChanged;
+    QString                 _encryptionKey;
 
     QFuture<bool>           _future;
     QFutureWatcher<bool>    _watcher;

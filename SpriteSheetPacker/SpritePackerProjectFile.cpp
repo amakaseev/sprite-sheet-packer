@@ -83,6 +83,8 @@ bool SpritePackerProjectFile::read(const QString &fileName) {
     if (json.contains("trimSpriteNames")) _trimSpriteNames = json["trimSpriteNames"].toBool();
     if (json.contains("prependSmartFolderName")) _prependSmartFolderName = json["prependSmartFolderName"].toBool();
 
+    if (json.contains("encryptionKey")) _encryptionKey = json["encryptionKey"].toString();
+
     return true;
 }
 
@@ -125,6 +127,7 @@ bool SpritePackerProjectFile::write(const QString &fileName) {
     json["srcList"] = QJsonArray::fromStringList(srcRelative);
     json["trimSpriteNames"] = _trimSpriteNames;
     json["prependSmartFolderName"] = _prependSmartFolderName;
+    json["encryptionKey"] = _encryptionKey;
 
     QFile file(fileName);
     file.open(QIODevice::WriteOnly | QIODevice::Text);

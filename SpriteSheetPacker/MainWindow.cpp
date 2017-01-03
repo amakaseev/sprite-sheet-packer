@@ -9,6 +9,7 @@
 #include "PreferencesDialog.h"
 #include "PublishStatusDialog.h"
 #include "AnimationPreviewDialog.h"
+#include "ContentProtectionDialog.h"
 #include "UpdaterDialog.h"
 #include "ui_MainWindow.h"
 
@@ -350,6 +351,9 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     ui->trimSpriteNamesCheckBox->setChecked(projectFile->trimSpriteNames());
     ui->prependSmartFolderNameCheckBox->setChecked(projectFile->prependSmartFolderName());
 
+    _encryptionKey = projectFile->encryptionKey();
+    ui->contentProtectionToolButton->setChecked(!_encryptionKey.isEmpty());
+
     while(ui->scalingVariantsGroupBox->layout()->count() > 0){
         QLayoutItem *item = ui->scalingVariantsGroupBox->layout()->takeAt(0);
         delete item->widget();
@@ -419,6 +423,7 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
     projectFile->setJpgQuality(ui->jpgQualitySlider->value());
     projectFile->setTrimSpriteNames(ui->trimSpriteNamesCheckBox->isChecked());
     projectFile->setPrependSmartFolderName(ui->prependSmartFolderNameCheckBox->isChecked());
+    projectFile->setEncryptionKey(_encryptionKey);
 
     QVector<ScalingVariant> scalingVariants;
     for (int i=0; i<ui->scalingVariantsGroupBox->layout()->count(); ++i) {
@@ -531,13 +536,13 @@ void MainWindow::on_actionOpen_triggered() {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open project file."),
                                                     dir,
                                                     tr("Supported formats (*.json *.ssp *.tps)"));
-    qDebug() << selectedFilter;
+
     if (!_currentProjectFileName.isEmpty() && !fileName.isEmpty() && (fileName != _currentProjectFileName)) {
         MainWindow* wnd = new MainWindow();
         wnd->show();
         QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
         wnd->openSpritePackerProject(fileName);
-    } else {
+    } else if (!fileName.isEmpty()){
         openSpritePackerProject(fileName);
     }
 }
@@ -809,6 +814,16 @@ void MainWindow::on_destFolderToolButton_clicked() {
 
 void MainWindow::on_dataFormatSetupToolButton_clicked() {
     on_actionPreferences_triggered();
+}
+
+void MainWindow::on_contentProtectionToolButton_clicked() {
+    ui->contentProtectionToolButton->setChecked(!_encryptionKey.isEmpty());
+
+    ContentProtectionDialog* dlg = new ContentProtectionDialog(_encryptionKey, this);
+    if (dlg->exec()) {
+        _encryptionKey = dlg->encryptionKey();
+        ui->contentProtectionToolButton->setChecked(!_encryptionKey.isEmpty());
+    }
 }
 
 void MainWindow::on_addScalingVariantPushButton_clicked() {
