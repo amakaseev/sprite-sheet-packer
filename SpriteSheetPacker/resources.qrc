@@ -19,7 +19,9 @@
         <file>res/icon-addFolder.png</file>
         <file>res/icon-publish.png</file>
         <file>res/icon-animation.png</file>
-        <file>res/identical.png</file>
+        <file>res/icon-identical.png</file>
+        <file>res/icon-lock.png</file>
+        <file>res/icon-unlock.png</file>
         <file>res/spinner.gif</file>
         <file>res/playback/control_end_blue.png</file>
         <file>res/playback/control_fastforward_blue.png</file>

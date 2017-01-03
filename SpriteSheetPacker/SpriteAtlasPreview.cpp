@@ -143,7 +143,7 @@ void SpriteAtlasPreview::setAtlas(const SpriteAtlas& atlas, PixelFormat pixelFor
             // show identical statistics
             auto identicalFrames = atlas.identicalFrames().find(it.key());
             if (identicalFrames != atlas.identicalFrames().end()) {
-                auto identicalItem = _scene->addPixmap(QPixmap(":/res/identical.png"));
+                auto identicalItem = _scene->addPixmap(QPixmap(":/res/icon-identical.png"));
                 QString identicalString;
                 identicalString += it.key() + "\n";
                 for (auto frame: identicalFrames.value()) {
