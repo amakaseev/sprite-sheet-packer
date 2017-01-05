@@ -8,7 +8,7 @@
 #include "PVRTextureUtilities.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-inline unsigned int checksumPvr(const unsigned int *data, ssize_t len) {
+unsigned int checksumPvr(const unsigned int *data, unsigned int len) {
     unsigned int cs = 0;
     const int cslen = 128;
 
@@ -22,7 +22,7 @@ inline unsigned int checksumPvr(const unsigned int *data, ssize_t len) {
     return cs;
 }
 
-void encodePvr(unsigned int *data, ssize_t len, unsigned int keys[4]) {
+void encodePvr(unsigned int *data, unsigned int len, unsigned int keys[4]) {
     unsigned int encryptionKey[1024];
     memset(encryptionKey, 0, sizeof(encryptionKey));
 
@@ -222,8 +222,8 @@ bool PublishSpriteSheet::publish(const QString& format, bool errorMessage) {
                 }
             } else if ((_imageFormat == kPKM) || (_imageFormat == kPVR) || (_imageFormat == kPVR_CCZ)) {
                 CPVRTextureHeader pvrHeader(PVRStandard8PixelType.PixelTypeID,
-                                            outputData._atlasImage.width(),
-                                            outputData._atlasImage.height());
+                                            outputData._atlasImage.height(),
+                                            outputData._atlasImage.width());
                 // create the texture
                 CPVRTexture pvrTexture(pvrHeader, outputData._atlasImage.bits());
                 switch (_pixelFormat) {
@@ -284,7 +284,7 @@ bool PublishSpriteSheet::publish(const QString& format, bool errorMessage) {
                         keys[3] = key.left(8).toUInt(nullptr, 16); key.remove(0, 8);
 
                         unsigned int* ints = (unsigned int*)(compressedData.data()+12);
-                        ssize_t enclen = (compressedData.length()-12)/4;
+                        unsigned int enclen = (compressedData.length()-12)/4;
 
                         CCZHeader* header = (CCZHeader*)compressedData.data();
                         header->reserved = qToBigEndian<unsigned int>(checksumPvr(ints, enclen));
