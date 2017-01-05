@@ -34,6 +34,7 @@ public:
     void setJpgQuality(int quality) { _jpgQuality = quality; }
     void setTrimSpriteNames(bool trimSpriteNames) { _trimSpriteNames = trimSpriteNames; }
     void setPrependSmartFolderName(bool prependSmartFolderName) { _prependSmartFolderName = prependSmartFolderName; }
+    void setEncryptionKey(const QString& key) { _encryptionKey = key; }
 
     bool publish(const QString& format, bool errorMessage = true);
 
@@ -68,6 +69,8 @@ protected:
 
     bool        _trimSpriteNames;
     bool        _prependSmartFolderName;
+
+    QString     _encryptionKey;
 
     static QMap<QString, QString> _formats;
 };

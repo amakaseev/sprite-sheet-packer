@@ -7,6 +7,82 @@
 #include "PVRTexture.h"
 #include "PVRTextureUtilities.h"
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+inline unsigned int checksumPvr(const unsigned int *data, ssize_t len) {
+    unsigned int cs = 0;
+    const int cslen = 128;
+
+    len = (len < cslen) ? len : cslen;
+
+    for(int i = 0; i < len; i++)
+    {
+        cs = cs ^ data[i];
+    }
+
+    return cs;
+}
+
+void encodePvr(unsigned int *data, ssize_t len, unsigned int keys[4]) {
+    unsigned int encryptionKey[1024];
+    memset(encryptionKey, 0, sizeof(encryptionKey));
+
+    bool s_bEncryptionKeyIsValid = false;
+
+    const int enclen = 1024;
+    const int securelen = 512;
+    const int distance = 64;
+
+    // create long key
+    if(!s_bEncryptionKeyIsValid) {
+        unsigned int y, p, e;
+        unsigned int rounds = 6;
+        unsigned int sum = 0;
+        unsigned int z = encryptionKey[enclen-1];
+
+        do {
+#define DELTA 0x9e3779b9
+#define MX (((z>>5^y<<2) + (y>>3^z<<4)) ^ ((sum^y) + (keys[(p&3)^e] ^ z)))
+
+            sum += DELTA;
+            e = (sum >> 2) & 3;
+
+            for (p = 0; p < enclen - 1; p++)
+            {
+                y = encryptionKey[p + 1];
+                z = encryptionKey[p] += MX;
+            }
+
+            y = encryptionKey[0];
+            z = encryptionKey[enclen - 1] += MX;
+
+        } while (--rounds);
+
+        s_bEncryptionKeyIsValid = true;
+    }
+
+    int b = 0;
+    int i = 0;
+
+    // encrypt first part completely
+    for(; i < len && i < securelen; i++) {
+        data[i] ^= encryptionKey[b++];
+
+        if(b >= enclen) {
+            b = 0;
+        }
+    }
+
+    // encrypt second section partially
+    for(; i < len; i += distance) {
+        data[i] ^= encryptionKey[b++];
+
+        if(b >= enclen) {
+            b = 0;
+        }
+    }
+}
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 using namespace pvrtexture;
 
 QMap<QString, QString> PublishSpriteSheet::_formats;
@@ -170,6 +246,7 @@ bool PublishSpriteSheet::publish(const QString& format, bool errorMessage) {
                     // read and compress
                     QFile file(tempFileName);
                     file.open(QIODevice::ReadOnly);
+                    unsigned int uncompressedLen = file.size();
                     QByteArray compressedData = qCompress(file.readAll());
                     file.close();
                     QFile::remove(tempFileName);
@@ -189,14 +266,31 @@ bool PublishSpriteSheet::publish(const QString& format, bool errorMessage) {
                     cczHeader.sig[0] = 'C';
                     cczHeader.sig[1] = 'C';
                     cczHeader.sig[2] = 'Z';
-                    cczHeader.sig[3] = '!';
-                    cczHeader.compression_type = qToBigEndian(0);
-                    cczHeader.version = qToBigEndian(2);
-                    cczHeader.reserved = 0;
-                    cczHeader.len = qToBigEndian(compressedData.length());
-                    int sizeBefore = compressedData.size();
+                    cczHeader.sig[3] = _encryptionKey.isEmpty()? '!':'p';
+                    cczHeader.compression_type = qToBigEndian<unsigned short>(0);
+                    cczHeader.version = qToBigEndian<unsigned short>(0);
+                    cczHeader.reserved = qToBigEndian<unsigned int>(0);
+                    cczHeader.len = qToBigEndian<unsigned int>(uncompressedLen);
+
                     compressedData.insert(0, QByteArray((const char *)&cczHeader, sizeof(CCZHeader)));
-                    qDebug() << compressedData.size() - sizeBefore << ":" << sizeof(CCZHeader);
+
+                    // encrypt
+                    if (!_encryptionKey.isEmpty()) {
+                        QString key = _encryptionKey;
+                        uint32_t keys[4];
+                        keys[0] = key.left(8).toUInt(nullptr, 16); key.remove(0, 8);
+                        keys[1] = key.left(8).toUInt(nullptr, 16); key.remove(0, 8);
+                        keys[2] = key.left(8).toUInt(nullptr, 16); key.remove(0, 8);
+                        keys[3] = key.left(8).toUInt(nullptr, 16); key.remove(0, 8);
+
+                        unsigned int* ints = (unsigned int*)(compressedData.data()+12);
+                        ssize_t enclen = (compressedData.length()-12)/4;
+
+                        CCZHeader* header = (CCZHeader*)compressedData.data();
+                        header->reserved = qToBigEndian<unsigned int>(checksumPvr(ints, enclen));
+
+                        encodePvr(ints, enclen, keys);
+                    }
 
                     // write compressed data
                     file.setFileName(fileName);

@@ -6,6 +6,7 @@ ContentProtectionDialog::ContentProtectionDialog(const QString& encryptionKey, Q
     ui(new Ui::ContentProtectionDialog)
 {
     ui->setupUi(this);
+    setWindowFlags((windowFlags() | Qt::CustomizeWindowHint) & ~Qt::WindowMaximizeButtonHint);
 
     ui->encryptionKeyLineEdit->setText(encryptionKey);
 }

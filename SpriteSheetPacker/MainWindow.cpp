@@ -639,6 +639,7 @@ void MainWindow::on_actionPublish_triggered() {
     publisher->setJpgQuality(ui->jpgQualitySlider->value());
     publisher->setTrimSpriteNames(ui->trimSpriteNamesCheckBox->isChecked());
     publisher->setPrependSmartFolderName(ui->prependSmartFolderNameCheckBox->isChecked());
+    publisher->setEncryptionKey(_encryptionKey);
 
     PublishStatusDialog publishStatusDialog(this);
     publishStatusDialog.open();
