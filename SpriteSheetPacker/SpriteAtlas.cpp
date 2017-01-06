@@ -86,6 +86,8 @@ SpriteAtlas::SpriteAtlas(const QStringList& sourceList, int textureBorder, int s
 {
     _algorithm = "Rect";
     _polygonMode.enable = false;
+
+    _aborted = false;
 }
 
 void SpriteAtlas::enablePolygonMode(bool enable, float epsilon) {
@@ -94,6 +96,8 @@ void SpriteAtlas::enablePolygonMode(bool enable, float epsilon) {
 }
 
 bool SpriteAtlas::generate(SpriteAtlasGenerateProgress* progress) {
+    _aborted = false;
+
     QTime timePerform;
     timePerform.start();
 
@@ -109,12 +113,16 @@ bool SpriteAtlas::generate(SpriteAtlasGenerateProgress* progress) {
 
     QList< QPair<QString, QString> > fileList;
     for(auto pathName: _sourceList) {
+        if (_aborted) return false;
+
         QFileInfo fi(pathName);
 
         if (fi.isDir()) {
             QDir dir(fi.path());
             QDirIterator fileNames(pathName, nameFilter, QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
             while(fileNames.hasNext()){
+                if (_aborted) return false;
+
                 fileNames.next();
                 fileList.push_back(qMakePair(fileNames.filePath(), dir.relativeFilePath(fileNames.filePath())));
             }
@@ -132,6 +140,8 @@ bool SpriteAtlas::generate(SpriteAtlasGenerateProgress* progress) {
     QVector<PackContent> inputContent;
     auto it_f = fileList.begin();
     for(; it_f != fileList.end(); ++it_f, ++progressIndex) {
+        if (_aborted) return false;
+
         QImage image((*it_f).first);
         if (image.isNull()) continue;
         if (_scale != 1) {
@@ -228,6 +238,8 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
 
         bool k = true;
         while (1) {
+            if (_aborted) return false;
+
             BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
 
             bool success = canvasArray.Place(inputContent, remainder);
@@ -272,6 +284,8 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
             qDebug() << "Resize for bigger:" << w << "x" << h;
         }
         while (w > 2) {
+            if (_aborted) return false;
+
             w = w/2;
             if (_forceSquared) {
                 h = w;
@@ -293,6 +307,8 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
         }
         if (!_forceSquared) {
             while (h > 2) {
+                if (_aborted) return false;
+
                 h = h/2;
                 BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
 
@@ -312,6 +328,8 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
         bool k = true;
         int step = (w + h) / 20;
         while (1) {
+            if (_aborted) return false;
+
             BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
 
             bool success = canvasArray.Place(inputContent, remainder);
@@ -358,6 +376,8 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
         }
         step = (w + h) / 20;
         while (w) {
+            if (_aborted) return false;
+
             w -= step;
             if (_forceSquared) {
                 h = w;
@@ -380,6 +400,8 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
         if (!_forceSquared) {
             step = (w + h) / 20;
             while (h) {
+                if (_aborted) return false;
+
                 h -= step;
                 BinPack2D::CanvasArray<PackContent> canvasArray = BinPack2D::UniformCanvasArrayBuilder<PackContent>(w - _textureBorder*2, h - _textureBorder*2, 1).Build();
 
@@ -407,6 +429,8 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
     outputData._atlasImage.fill(QColor(0, 0, 0, 0));
     QPainter painter(&outputData._atlasImage);
     for(auto itor = outputContent.Get().begin(); itor != outputContent.Get().end(); itor++ ) {
+        if (_aborted) return false;
+
         const BinPack2D::Content<PackContent> &content = *itor;
 
         // retreive your data.
@@ -491,6 +515,7 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
     }
 
     PolyPack2D::Container<PackContent> container;
+    // TODO: abort this place if _aborted
     container.place(inputContent, _maxTextureSize, 5, std::bind(&SpriteAtlas::onPlaceCallback, this, std::placeholders::_1, std::placeholders::_2));
 
     auto outputContent = container.contentList();
@@ -502,6 +527,8 @@ bool SpriteAtlas::packWithPolygon(const QVector<PackContent>& content) {
 
     QPainter painter(&outputData._atlasImage);
     for(auto itor = outputContent.begin(); itor != outputContent.end(); itor++ ) {
+        if (_aborted) return false;
+
         const PolyPack2D::Content<PackContent> &content = *itor;
 
         // retreive your data.

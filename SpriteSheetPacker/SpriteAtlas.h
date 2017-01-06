@@ -79,6 +79,7 @@ public:
     void enablePolygonMode(bool enable, float epsilon = 2.f);
 
     bool generate(SpriteAtlasGenerateProgress* progress = nullptr);
+    void abortGeneration() { _aborted = true; }
 
     QString algorithm() const { return _algorithm; }
     float scale() const { return _scale; }
@@ -114,6 +115,8 @@ private:
     // output data
     QVector<OutputData> _outputData;
     QMap<QString, QVector<QString>> _identicalFrames;
+
+    bool _aborted;
 };
 
 #endif // SPRITEATLAS_H

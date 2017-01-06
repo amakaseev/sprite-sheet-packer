@@ -218,12 +218,11 @@ void MainWindow::createRefreshButton() {
 void MainWindow::refreshAtlas(bool generate) {
     if (generate) {
 
-//        if (_future.isRunning()) {
-//            _future.cancel();
-//            _future.waitForFinished();
-//        }
+        if (_future.isRunning()) {
+            emit abortRefreshAtlas();
+        }
 
-        _future = QtConcurrent::run([this](){
+        _future = QtConcurrent::run([this]() {
             _mutex.lock();
             _spriteAtlas.clear();
             for (int i=0; i<ui->scalingVariantsGroupBox->layout()->count(); ++i) {
@@ -251,21 +250,21 @@ void MainWindow::refreshAtlas(bool generate) {
                     }
 
                     SpriteAtlasGenerateProgress* progress = new SpriteAtlasGenerateProgress();
-                    QObject::connect(progress, SIGNAL(progressTextChanged(const QString&)), this, SLOT(onRefreshAtlasProgressTextChanged(const QString&)));
+                    connect(progress, SIGNAL(progressTextChanged(const QString&)), this, SLOT(onRefreshAtlasProgressTextChanged(const QString&)));
 
-//                    QObject::connect(&_watcher, &QFutureWatcher<bool>::canceled, [progress]() {
-//                        qDebug() << "cancel";
-//                        delete progress;
-//                    });
+                    auto connection = connect(this, &MainWindow::abortRefreshAtlas, [&atlas]() {
+                        atlas.abortGeneration();
+                    });
 
                     if (!atlas.generate(progress)) {
-                        QMessageBox::critical(this, "Generate error of scalingVariant:" + scalingVariantWidget->name(), "Max texture size limit is small!");
+                        disconnect(connection);
                         delete progress;
                         _mutex.unlock();
                         return false;
                     } else {
                         _spriteAtlas.push_back(atlas);
                     }
+                    disconnect(connection);
                     delete progress;
                 }
             }

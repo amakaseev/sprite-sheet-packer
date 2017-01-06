@@ -34,6 +34,9 @@ protected:
     void saveSpritePackerProject(const QString& fileName);
     void setProjectDirty();
 
+signals:
+    void abortRefreshAtlas();
+
 protected:
     void dragEnterEvent(QDragEnterEvent* event);
     void dropEvent(QDropEvent* event);
