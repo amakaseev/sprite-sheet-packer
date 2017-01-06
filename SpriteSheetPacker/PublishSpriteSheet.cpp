@@ -233,7 +233,10 @@ bool PublishSpriteSheet::publish(const QString& format, bool errorMessage) {
                     case kPVRTC2A: Transcode(pvrTexture, PixelType(ePVRTPF_PVRTCI_2bpp_RGBA), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB, ePVRTCBest, true); break;
                     case kPVRTC4: Transcode(pvrTexture, PixelType(ePVRTPF_PVRTCI_4bpp_RGB), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB, ePVRTCBest, true); break;
                     case kPVRTC4A: Transcode(pvrTexture, PixelType(ePVRTPF_PVRTCI_4bpp_RGBA), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB, ePVRTCBest, true); break;
-                    default: Transcode(pvrTexture, PixelType(ePVRTPF_ETC2_RGBA), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB, eETCFast, true); break;
+                    case kDXT1: Transcode(pvrTexture, PixelType(ePVRTPF_DXT1), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB, ePVRTCBest, true); break;
+                    case kDXT3: Transcode(pvrTexture, PixelType(ePVRTPF_DXT3), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB, ePVRTCBest, true); break;
+                    case kDXT5: Transcode(pvrTexture, PixelType(ePVRTPF_DXT5), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB, ePVRTCBest, true); break;
+                    default: Transcode(pvrTexture, PixelType(ePVRTPF_PVRTCI_4bpp_RGBA), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB, ePVRTCBest, true); break;
                 }
 
                 qDebug() << "Transcode complete.";

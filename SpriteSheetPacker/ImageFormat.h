@@ -26,7 +26,10 @@ enum PixelFormat {
     kPVRTC2,
     kPVRTC2A,
     kPVRTC4,
-    kPVRTC4A
+    kPVRTC4A,
+    kDXT1,
+    kDXT3,
+    kDXT5
 };
 
 inline QString imageFormatToString(ImageFormat imageFormat) {
@@ -66,6 +69,9 @@ inline QString pixelFormatToString(PixelFormat pixelFormat) {
         case kPVRTC2A: return "PVRTC2A";
         case kPVRTC4: return "PVRTC4";
         case kPVRTC4A: return "PVRTC4A";
+        case kDXT1: return "DXT1";
+        case kDXT3: return "DXT3";
+        case kDXT5: return "DXT5";
         default: return "ARGB8888";
     }
 }
@@ -84,6 +90,9 @@ inline PixelFormat pixelFormatFromString(const QString& pixelFormat) {
     if (pixelFormat == "PVRTC2A") return kPVRTC2A;
     if (pixelFormat == "PVRTC4") return kPVRTC4;
     if (pixelFormat == "PVRTC4A") return kPVRTC4A;
+    if (pixelFormat == "DXT1") return kDXT1;
+    if (pixelFormat == "DXT3") return kDXT3;
+    if (pixelFormat == "DXT5") return kDXT5;
     return kARGB8888;
 }
 

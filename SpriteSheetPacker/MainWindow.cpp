@@ -54,6 +54,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->pixelFormatComboBox->addItem(pixelFormatToString(kPVRTC2A));
     ui->pixelFormatComboBox->addItem(pixelFormatToString(kPVRTC4));
     ui->pixelFormatComboBox->addItem(pixelFormatToString(kPVRTC4A));
+    ui->pixelFormatComboBox->addItem(pixelFormatToString(kDXT1));
+    ui->pixelFormatComboBox->addItem(pixelFormatToString(kDXT3));
+    ui->pixelFormatComboBox->addItem(pixelFormatToString(kDXT5));
     ui->pixelFormatComboBox->setCurrentIndex(0);
     ui->imageFormatComboBox->addItem(imageFormatToString(kPNG));
     ui->imageFormatComboBox->addItem(imageFormatToString(kJPG));
@@ -954,6 +957,9 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4A, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kDXT1, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kDXT3, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kDXT5, false);
         if (!isEnabledComboBoxItem(ui->pixelFormatComboBox, ui->pixelFormatComboBox->currentIndex())) {
             ui->pixelFormatComboBox->setCurrentIndex(kARGB8888);
         }
@@ -974,6 +980,9 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4A, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kDXT1, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kDXT3, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kDXT5, false);
         if (!isEnabledComboBoxItem(ui->pixelFormatComboBox, ui->pixelFormatComboBox->currentIndex())) {
             ui->pixelFormatComboBox->setCurrentIndex(kRGB888);
         }
@@ -994,6 +1003,9 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4A, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kDXT1, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kDXT3, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kDXT5, false);
         if (!isEnabledComboBoxItem(ui->pixelFormatComboBox, ui->pixelFormatComboBox->currentIndex())) {
             ui->pixelFormatComboBox->setCurrentIndex(kRGB888);
         }
@@ -1013,6 +1025,9 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4A, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kDXT1, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kDXT3, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kDXT5, false);
         if (!isEnabledComboBoxItem(ui->pixelFormatComboBox, ui->pixelFormatComboBox->currentIndex())) {
             ui->pixelFormatComboBox->setCurrentIndex(kETC1);
         }
@@ -1032,6 +1047,9 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC2A, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kPVRTC4A, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kDXT1, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kDXT3, true);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kDXT5, true);
         if (!isEnabledComboBoxItem(ui->pixelFormatComboBox, ui->pixelFormatComboBox->currentIndex())) {
             ui->pixelFormatComboBox->setCurrentIndex(kPVRTC4A);
         }
@@ -1044,9 +1062,12 @@ void MainWindow::on_pixelFormatComboBox_currentIndexChanged(int index) {
     bool needUpdatePreview = true;
     PixelFormat pixelFormat = (PixelFormat)index;
     if ((pixelFormat == kPVRTC2) ||
-            (pixelFormat == kPVRTC2A) ||
-            (pixelFormat == kPVRTC4) ||
-            (pixelFormat == kPVRTC4A))
+        (pixelFormat == kPVRTC2A) ||
+        (pixelFormat == kPVRTC4) ||
+        (pixelFormat == kPVRTC4A) ||
+        (pixelFormat == kDXT1) ||
+        (pixelFormat == kDXT3) ||
+        (pixelFormat == kDXT5))
     {
         for (int i=0; i<ui->scalingVariantsGroupBox->layout()->count(); ++i) {
             ScalingVariantWidget* scalingVariantWidget = qobject_cast<ScalingVariantWidget*>(ui->scalingVariantsGroupBox->layout()->itemAt(i)->widget());
@@ -1065,7 +1086,7 @@ void MainWindow::on_pixelFormatComboBox_currentIndexChanged(int index) {
         }
     }
 
-    QVector<PixelFormat> formatsWithAlpha = {kARGB8888, kARGB8565, kARGB4444, kPVRTC2A, kPVRTC4A};
+    QVector<PixelFormat> formatsWithAlpha = {kARGB8888, kARGB8565, kARGB4444, kETC2A, kPVRTC2A, kPVRTC4A, kDXT1, kDXT3, kDXT5};
     if (formatsWithAlpha.indexOf(pixelFormat) != -1) {
         ui->premultipliedCheckBox->show();
     } else {
