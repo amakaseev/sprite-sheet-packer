@@ -14,8 +14,7 @@ unsigned int checksumPvr(const unsigned int *data, unsigned int len) {
 
     len = (len < cslen) ? len : cslen;
 
-    for(int i = 0; i < len; i++)
-    {
+    for(unsigned int i = 0; i < len; i++) {
         cs = cs ^ data[i];
     }
 
@@ -61,7 +60,7 @@ void encodePvr(unsigned int *data, unsigned int len, unsigned int keys[4]) {
     }
 
     int b = 0;
-    int i = 0;
+    unsigned int i = 0;
 
     // encrypt first part completely
     for(; i < len && i < securelen; i++) {

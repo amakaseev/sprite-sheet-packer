@@ -99,7 +99,6 @@ void ScalingVariantWidget::on_pow2CheckBox_toggled(bool) {
     emit valueChanged(true);
 }
 
-void ScalingVariantWidget::on_forceSquaredCheckBox_toggled(bool checked)
-{
-    emit valueChanged(true);//forceSquaredCheckBox
+void ScalingVariantWidget::on_forceSquaredCheckBox_toggled(bool) {
+    emit valueChanged(true);
 }

@@ -98,11 +98,11 @@ private:
     int _trim;
     int _textureBorder;
     int _spriteBorder;
+    bool _heuristicMask;
     bool _pow2;
     bool _forceSquared;
     int _maxTextureSize;
     float _scale;
-    bool _heuristicMask;
     // polygon mode
     struct TPolygonMode{
         bool enable;
