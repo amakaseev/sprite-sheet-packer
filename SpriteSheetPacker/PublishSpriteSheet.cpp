@@ -226,14 +226,14 @@ bool PublishSpriteSheet::publish(const QString& format, bool errorMessage) {
                 // create the texture
                 CPVRTexture pvrTexture(pvrHeader, outputData._atlasImage.bits());
                 switch (_pixelFormat) {
-                    case kETC1: Transcode(pvrTexture, PixelType(ePVRTPF_ETC1), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
-                    case kETC2: Transcode(pvrTexture, PixelType(ePVRTPF_ETC2_RGB), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
-                    case kETC2A: Transcode(pvrTexture, PixelType(ePVRTPF_ETC2_RGBA), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
-                    case kPVRTC2: Transcode(pvrTexture, PixelType(ePVRTPF_PVRTCI_2bpp_RGB), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
-                    case kPVRTC2A: Transcode(pvrTexture, PixelType(ePVRTPF_PVRTCI_2bpp_RGBA), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
-                    case kPVRTC4: Transcode(pvrTexture, PixelType(ePVRTPF_PVRTCI_4bpp_RGB), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
-                    case kPVRTC4A: Transcode(pvrTexture, PixelType(ePVRTPF_PVRTCI_4bpp_RGBA), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
-                    default: Transcode(pvrTexture, PixelType(ePVRTPF_ETC1), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB); break;
+                    case kETC1: Transcode(pvrTexture, PixelType(ePVRTPF_ETC1), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB, eETCFast, true); break;
+                    case kETC2: Transcode(pvrTexture, PixelType(ePVRTPF_ETC2_RGB), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB, eETCFast, true); break;
+                    case kETC2A: Transcode(pvrTexture, PixelType(ePVRTPF_ETC2_RGBA), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB, eETCFast, true); break;
+                    case kPVRTC2: Transcode(pvrTexture, PixelType(ePVRTPF_PVRTCI_2bpp_RGB), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB, ePVRTCBest, true); break;
+                    case kPVRTC2A: Transcode(pvrTexture, PixelType(ePVRTPF_PVRTCI_2bpp_RGBA), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB, ePVRTCBest, true); break;
+                    case kPVRTC4: Transcode(pvrTexture, PixelType(ePVRTPF_PVRTCI_4bpp_RGB), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB, ePVRTCBest, true); break;
+                    case kPVRTC4A: Transcode(pvrTexture, PixelType(ePVRTPF_PVRTCI_4bpp_RGBA), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB, ePVRTCBest, true); break;
+                    default: Transcode(pvrTexture, PixelType(ePVRTPF_ETC2_RGBA), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB, eETCFast, true); break;
                 }
 
                 qDebug() << "Transcode complete.";
