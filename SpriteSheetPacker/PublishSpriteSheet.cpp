@@ -236,7 +236,7 @@ bool PublishSpriteSheet::publish(const QString& format, bool errorMessage) {
                     case kDXT1: Transcode(pvrTexture, PixelType(ePVRTPF_DXT1), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB, ePVRTCBest, true); break;
                     case kDXT3: Transcode(pvrTexture, PixelType(ePVRTPF_DXT3), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB, ePVRTCBest, true); break;
                     case kDXT5: Transcode(pvrTexture, PixelType(ePVRTPF_DXT5), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB, ePVRTCBest, true); break;
-                    default: Transcode(pvrTexture, PixelType(ePVRTPF_PVRTCI_4bpp_RGBA), ePVRTVarTypeUnsignedByteNorm, ePVRTCSpacelRGB, ePVRTCBest, true); break;
+                    default: break;
                 }
 
                 qDebug() << "Transcode complete.";

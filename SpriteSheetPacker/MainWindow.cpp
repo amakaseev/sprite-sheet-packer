@@ -1033,7 +1033,7 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
     } else if ((imageFormat == kPVR)||(imageFormat == kPVR_CCZ)) {
         imageTabBar->setTabEnabled(0, false);
         imageTabBar->setTabEnabled(1, false);
-        setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8888, false);
+        setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8888, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8565, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB4444, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kRGB888, false);
