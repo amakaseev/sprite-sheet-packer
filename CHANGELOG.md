@@ -1,4 +1,4 @@
-##1.0.7
+##1.0.8
 * Added [WebP](https://developers.google.com/speed/webp/) image format
 * Added content protection in pvrtc
 * Added support DXT1 DXT3 DXT5 pixel format and fixed ETC1(2)
@@ -11,7 +11,6 @@
 * Added ETC2 and ETC2A pixel format
 * Complete pvr.ccz compressed file format
 * Created installer for Windows
-
 
 ##1.0.6
 * Generate atlas in thread
