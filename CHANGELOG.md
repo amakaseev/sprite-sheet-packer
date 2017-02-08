@@ -1,4 +1,7 @@
 ##1.0.7
+* Added [WebP](https://developers.google.com/speed/webp/) image format
+* Added content protection in pvrtc
+* Added support DXT1 DXT3 DXT5 pixel format and fixed ETC1(2)
 * Supported multi window added by [TheCodez](https://github.com/TheCodez)
 
 ##1.0.7
