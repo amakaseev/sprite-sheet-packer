@@ -6,6 +6,7 @@
 
 enum ImageFormat {
     kPNG = 0,
+    kWEBP,
     kJPG,
     kJPG_PNG,
     kPKM,
@@ -35,6 +36,7 @@ enum PixelFormat {
 inline QString imageFormatToString(ImageFormat imageFormat) {
     switch (imageFormat) {
         case kPNG: return "*.png";
+        case kWEBP: return "*.webp";
         case kJPG: return "*.jpg";
         case kJPG_PNG: return "(*.jpg) + (*.png)";
         case kPKM: return "*.pkm";
@@ -46,6 +48,7 @@ inline QString imageFormatToString(ImageFormat imageFormat) {
 
 inline ImageFormat imageFormatFromString(const QString& imageFormat) {
     if (imageFormat == "*.png") return kPNG;
+    if (imageFormat == "*.webp") return kWEBP;
     if (imageFormat == "*.jpg") return kJPG;
     if (imageFormat == "(*.jpg) + (*.png)") return kJPG_PNG;
     if (imageFormat == "*.pkm") return kPKM;

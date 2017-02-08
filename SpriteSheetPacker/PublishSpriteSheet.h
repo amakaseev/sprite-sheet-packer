@@ -31,6 +31,7 @@ public:
     void setPixelFormat(PixelFormat pixelFormat) { _pixelFormat = pixelFormat; }
     void setPremultiplied(bool premultiplied) { _premultiplied = premultiplied; }
     void setPngQuality(const QString& optMode, int optLevel) { _pngQuality.optMode = optMode; _pngQuality.optLevel = optLevel; }
+    void setWebpQuality(int quality) { _webpQuality = quality; }
     void setJpgQuality(int quality) { _jpgQuality = quality; }
     void setTrimSpriteNames(bool trimSpriteNames) { _trimSpriteNames = trimSpriteNames; }
     void setPrependSmartFolderName(bool prependSmartFolderName) { _prependSmartFolderName = prependSmartFolderName; }
@@ -65,6 +66,7 @@ protected:
         int     optLevel;
     } _pngQuality;
 
+    int         _webpQuality;
     int         _jpgQuality;
 
     bool        _trimSpriteNames;

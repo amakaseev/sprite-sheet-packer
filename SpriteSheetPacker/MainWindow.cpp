@@ -59,6 +59,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->pixelFormatComboBox->addItem(pixelFormatToString(kDXT5));
     ui->pixelFormatComboBox->setCurrentIndex(0);
     ui->imageFormatComboBox->addItem(imageFormatToString(kPNG));
+    ui->imageFormatComboBox->addItem(imageFormatToString(kWEBP));
     ui->imageFormatComboBox->addItem(imageFormatToString(kJPG));
     ui->imageFormatComboBox->addItem(imageFormatToString(kJPG_PNG));
     ui->imageFormatComboBox->addItem(imageFormatToString(kPKM));
@@ -348,6 +349,7 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     ui->premultipliedCheckBox->setChecked(projectFile->premultiplied());
     ui->pngOptModeComboBox->setCurrentText(projectFile->pngOptMode());
     ui->pngOptLevelSlider->setValue(projectFile->pngOptLevel());
+    ui->webpQualitySlider->setValue(projectFile->webpQuality());
     ui->jpgQualitySlider->setValue(projectFile->jpgQuality());
 
     ui->trimSpriteNamesCheckBox->setChecked(projectFile->trimSpriteNames());
@@ -422,6 +424,7 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
     projectFile->setPremultiplied(ui->premultipliedCheckBox->isChecked());
     projectFile->setPngOptMode(ui->pngOptModeComboBox->currentText());
     projectFile->setPngOptLevel(ui->pngOptLevelSlider->value());
+    projectFile->setWebpQuality(ui->webpQualitySlider->value());
     projectFile->setJpgQuality(ui->jpgQualitySlider->value());
     projectFile->setTrimSpriteNames(ui->trimSpriteNamesCheckBox->isChecked());
     projectFile->setPrependSmartFolderName(ui->prependSmartFolderNameCheckBox->isChecked());
@@ -638,6 +641,7 @@ void MainWindow::on_actionPublish_triggered() {
     publisher->setPixelFormat(pixelFormatFromString(ui->pixelFormatComboBox->currentText()));
     publisher->setPremultiplied(ui->premultipliedCheckBox->isChecked());
     publisher->setPngQuality(ui->pngOptModeComboBox->currentText(), ui->pngOptLevelSlider->value());
+    publisher->setWebpQuality(ui->webpQualitySlider->value());
     publisher->setJpgQuality(ui->jpgQualitySlider->value());
     publisher->setTrimSpriteNames(ui->trimSpriteNamesCheckBox->isChecked());
     publisher->setPrependSmartFolderName(ui->prependSmartFolderNameCheckBox->isChecked());
@@ -939,10 +943,11 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
 
     QTabBar* imageTabBar = ui->imageFormatSettingsTabWidget->tabBar();
     ImageFormat imageFormat = (ImageFormat)index;
-    if (imageFormat == kPNG) {
-        imageTabBar->setTabEnabled(0, true);
-        imageTabBar->setTabEnabled(1, false);
-        imageTabBar->setCurrentIndex(0);
+    if ((imageFormat == kPNG) || (imageFormat == kWEBP)) {
+        imageTabBar->setTabEnabled(0, imageFormat == kPNG);
+        imageTabBar->setTabEnabled(1, imageFormat == kWEBP);
+        imageTabBar->setTabEnabled(2, false);
+        imageTabBar->setCurrentIndex((imageFormat == kPNG)? 0:1);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8888, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8565, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB4444, true);
@@ -964,8 +969,9 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
         }
     } else if (imageFormat == kJPG) {
         imageTabBar->setTabEnabled(0, false);
-        imageTabBar->setTabEnabled(1, true);
-        imageTabBar->setCurrentIndex(1);
+        imageTabBar->setTabEnabled(1, false);
+        imageTabBar->setTabEnabled(2, true);
+        imageTabBar->setCurrentIndex(2);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8888, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8565, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB4444, false);
@@ -986,9 +992,10 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
             ui->pixelFormatComboBox->setCurrentIndex(kRGB888);
         }
     } else if (imageFormat == kJPG_PNG) {
-        imageTabBar->setTabEnabled(0, false);
-        imageTabBar->setTabEnabled(1, true);
-        imageTabBar->setCurrentIndex(1);
+        imageTabBar->setTabEnabled(0, true);
+        imageTabBar->setTabEnabled(1, false);
+        imageTabBar->setTabEnabled(2, true);
+        imageTabBar->setCurrentIndex(2);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8888, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8565, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB4444, false);
@@ -1011,6 +1018,7 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
     } else if (imageFormat == kPKM) {
         imageTabBar->setTabEnabled(0, false);
         imageTabBar->setTabEnabled(1, false);
+        imageTabBar->setTabEnabled(2, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8888, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8565, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB4444, false);
@@ -1033,6 +1041,7 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
     } else if ((imageFormat == kPVR)||(imageFormat == kPVR_CCZ)) {
         imageTabBar->setTabEnabled(0, false);
         imageTabBar->setTabEnabled(1, false);
+        imageTabBar->setTabEnabled(2, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8888, true);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB8565, false);
         setEnabledComboBoxItem(ui->pixelFormatComboBox, kARGB4444, false);
@@ -1053,6 +1062,14 @@ void MainWindow::on_imageFormatComboBox_currentIndexChanged(int index) {
             ui->pixelFormatComboBox->setCurrentIndex(kPVRTC4A);
         }
     }
+
+    // enable/disable tabs content
+    bool anyEnabled = false;
+    for (int tab=0; tab<ui->imageFormatSettingsTabWidget->count(); ++tab) {
+        ui->imageFormatSettingsTabWidget->widget(tab)->setEnabled(imageTabBar->isTabEnabled(tab));
+        if (imageTabBar->isTabEnabled(tab)) anyEnabled = true;
+    }
+    ui->imageFormatSettingsTabWidget->setVisible(anyEnabled);
 
     setProjectDirty();
 }

@@ -21,6 +21,7 @@ SpritePackerProjectFile::SpritePackerProjectFile() {
     _pngOptMode = "None";
     _pngOptLevel = 7;
     _jpgQuality = 80;
+    _webpQuality = 80;
 
     _trimSpriteNames = true;
     _prependSmartFolderName = true;
@@ -54,6 +55,7 @@ bool SpritePackerProjectFile::read(const QString &fileName) {
     if (json.contains("premultiplied")) _premultiplied = json["premultiplied"].toBool();
     if (json.contains("pngOptMode")) _pngOptMode = json["pngOptMode"].toString();
     if (json.contains("pngOptLevel")) _pngOptLevel = json["pngOptLevel"].toInt();
+    if (json.contains("webpQuality")) _webpQuality = json["webpQuality"].toInt();
     if (json.contains("jpgQuality")) _jpgQuality = json["jpgQuality"].toInt();
 
     _scalingVariants.clear();
@@ -104,6 +106,7 @@ bool SpritePackerProjectFile::write(const QString &fileName) {
     json["premultiplied"] = _premultiplied;
     json["pngOptMode"] = _pngOptMode;
     json["pngOptLevel"] = _pngOptLevel;
+    json["webpQuality"] = _webpQuality;
     json["jpgQuality"] = _jpgQuality;
 
     QJsonArray scalingVariants;
@@ -227,6 +230,10 @@ bool SpritePackerProjectFileTPS::read(const QString &fileName) {
 //         _pngOptLevel = qBound(1, tpsMap["pngOptimizationLevel"].toInt(), 7);
 //         _pngOptMode = "Lossless";
 //    }
+
+    if (tpsMap.find("webpQuality") != tpsMap.end()) {
+         _webpQuality = qBound(0, tpsMap["webpQualityLevel"].toInt(), 100);
+    }
 
     if (tpsMap.find("jpgQuality") != tpsMap.end()) {
          _jpgQuality = qBound(0, tpsMap["jpgQuality"].toInt(), 100);

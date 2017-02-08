@@ -89,6 +89,7 @@ QMap<QString, QString> PublishSpriteSheet::_formats;
 QString imagePrefix(ImageFormat imageFormat) {
     switch (imageFormat) {
         case kPNG: return ".png";
+        case kWEBP: return ".webp";
         case kJPG: return ".jpg";
         case kPKM: return ".pvr";
         case kPVR: return ".pvr";
@@ -150,6 +151,7 @@ PublishSpriteSheet::PublishSpriteSheet() {
     _imageFormat = kPNG;
     _pixelFormat = kARGB8888;
     _premultiplied = true;
+    _webpQuality = 80;
     _jpgQuality = 80;
 
     _trimSpriteNames = true;
@@ -195,13 +197,19 @@ bool PublishSpriteSheet::publish(const QString& format, bool errorMessage) {
             // save image
             QString fileName = outputFilePath + imagePrefix(_imageFormat);
             qDebug() << "Save image:" << fileName;
-            if ((_imageFormat == kPNG) || (_imageFormat == kJPG) || (_imageFormat == kJPG_PNG)) {
+            if ((_imageFormat == kPNG) || (_imageFormat == kWEBP) || (_imageFormat == kJPG) || (_imageFormat == kJPG_PNG)) {
                 QImage image = convertImage(outputData._atlasImage, _pixelFormat, _premultiplied);
                 if (_imageFormat == kPNG) {
                     QImageWriter writer(outputFilePath + imagePrefix(kPNG), "png");
                     writer.setOptimizedWrite(true);
                     writer.setCompression(100);
                     writer.setQuality(0);
+                    writer.write(image);
+                } else if (_imageFormat == kWEBP) {
+                    QImageWriter writer(outputFilePath + imagePrefix(kWEBP), "webp");
+                    writer.setOptimizedWrite(true);
+                    writer.setCompression(100);
+                    writer.setQuality(_webpQuality);
                     writer.write(image);
                 } else if ((_imageFormat == kJPG) || (_imageFormat == kJPG_PNG)) {
                     QImageWriter writer(outputFilePath + imagePrefix(kJPG), "jpg");

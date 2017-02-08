@@ -720,7 +720,7 @@
             <item>
              <widget class="QTabWidget" name="imageFormatSettingsTabWidget">
               <property name="currentIndex">
-               <number>0</number>
+               <number>1</number>
               </property>
               <widget class="QWidget" name="png">
                <attribute name="title">
@@ -824,6 +824,81 @@
                    <size>
                     <width>20</width>
                     <height>40</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QWidget" name="webp">
+               <attribute name="title">
+                <string>WEBP</string>
+               </attribute>
+               <layout class="QVBoxLayout" name="verticalLayout_14">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_18">
+                  <item>
+                   <widget class="QLabel" name="jpgQualityLabel_2">
+                    <property name="text">
+                     <string>WebP quality:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QSlider" name="webpQualitySlider">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;PNG Optimization level&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Sets the optimization value for the losless png optimizer. A value of 2 is most of the time sufficent.&lt;p&gt;1 = least possible optimization&lt;/p&gt;&lt;p&gt;2-7 apply better optimization(higher values take longer)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="minimum">
+                     <number>0</number>
+                    </property>
+                    <property name="maximum">
+                     <number>100</number>
+                    </property>
+                    <property name="singleStep">
+                     <number>10</number>
+                    </property>
+                    <property name="pageStep">
+                     <number>1</number>
+                    </property>
+                    <property name="value">
+                     <number>80</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="jpgQualityText_2">
+                    <property name="text">
+                     <string>80</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <spacer name="verticalSpacer_5">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>20</width>
+                    <height>35</height>
                    </size>
                   </property>
                  </spacer>
@@ -1235,12 +1310,12 @@
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>236</x>
-     <y>662</y>
+     <x>270</x>
+     <y>714</y>
     </hint>
     <hint type="destinationlabel">
-     <x>284</x>
-     <y>660</y>
+     <x>295</x>
+     <y>714</y>
     </hint>
    </hints>
   </connection>
@@ -1251,12 +1326,28 @@
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>231</x>
-     <y>696</y>
+     <x>279</x>
+     <y>750</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>295</x>
+     <y>750</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>webpQualitySlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>jpgQualityText_2</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>214</x>
+     <y>704</y>
     </hint>
     <hint type="destinationlabel">
      <x>284</x>
-     <y>698</y>
+     <y>705</y>
     </hint>
    </hints>
   </connection>
