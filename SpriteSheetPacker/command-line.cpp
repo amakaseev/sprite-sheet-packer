@@ -83,6 +83,7 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
     int spriteBorder = 2;
     bool pow2 = false;
     bool forceSquared = false;
+    bool heuristicMask = false;
     int maxSize = 8192;
     float imageScale = 1;
     QString format = "cocos2d";
@@ -214,7 +215,7 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
             }
 
             // Generate sprite atlas
-            SpriteAtlas atlas(QStringList() << projectFile->srcList(), textureBorder, spriteBorder, trim, pow2, forceSquared, maxSize, scale);
+            SpriteAtlas atlas(QStringList() << projectFile->srcList(), textureBorder, spriteBorder, trim, heuristicMask, pow2, forceSquared, maxSize, scale);
             if (trimMode == "Polygon") {
                 atlas.enablePolygonMode(true, epsilon);
             }
@@ -224,13 +225,17 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
             }
 
             publisher.addSpriteSheet(atlas, destFileInfo.filePath());
+
+            if (!parser.isSet("format")) {
+                format = projectFile->dataFormat();
+            }
         }
 
         delete projectFile;
         projectFile = nullptr;
     } else {
         // Generate sprite atlas
-        SpriteAtlas atlas(QStringList() << source.filePath(), textureBorder, spriteBorder, trim, pow2, maxSize, imageScale);
+        SpriteAtlas atlas(QStringList() << source.filePath(), textureBorder, spriteBorder, trim, heuristicMask, pow2, forceSquared, maxSize, imageScale);
         if (trimMode == "Polygon") {
             atlas.enablePolygonMode(true, epsilon);
         }
