@@ -1,3 +1,6 @@
+##1.0.9
+* Fixed command line crash
+
 ##1.0.8
 * Added [WebP](https://developers.google.com/speed/webp/) image format
 * Added content protection in pvrtc
