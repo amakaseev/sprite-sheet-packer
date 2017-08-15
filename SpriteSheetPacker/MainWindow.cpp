@@ -244,6 +244,7 @@ void MainWindow::refreshAtlas(bool generate) {
                                                     maxTextureSize,
                                                     scale);
 
+                    atlas.setRotateSprites(ui->rotateSpritesCheckBox->isChecked());
                     atlas.setAlgorithm(ui->algorithmComboBox->currentText());
 
                     if (ui->trimModeComboBox->currentText() == "Polygon") {
@@ -339,6 +340,7 @@ void MainWindow::openSpritePackerProject(const QString& fileName) {
     ui->trimSpinBox->setValue(projectFile->trimThreshold());
     ui->epsilonHorizontalSlider->setValue(projectFile->epsilon() * 10);
     ui->heuristicMaskCheckBox->setChecked(projectFile->heuristicMask());
+    ui->rotateSpritesCheckBox->setChecked(projectFile->rotateSprites());
     ui->textureBorderSpinBox->setValue(projectFile->textureBorder());
     ui->spriteBorderSpinBox->setValue(projectFile->spriteBorder());
     ui->dataFormatComboBox->setCurrentText(projectFile->dataFormat());
@@ -414,6 +416,7 @@ void MainWindow::saveSpritePackerProject(const QString& fileName) {
     projectFile->setTrimThreshold(ui->trimSpinBox->value());
     projectFile->setEpsilon(ui->epsilonHorizontalSlider->value() / 10.f);
     projectFile->setHeuristicMask(ui->heuristicMaskCheckBox->isChecked());
+    projectFile->setRotateSprites(ui->rotateSpritesCheckBox->isChecked());
     projectFile->setTextureBorder(ui->textureBorderSpinBox->value());
     projectFile->setSpriteBorder(ui->spriteBorderSpinBox->value());
     projectFile->setDataFormat(ui->dataFormatComboBox->currentText());
@@ -900,6 +903,11 @@ void MainWindow::on_epsilonHorizontalSlider_sliderReleased() {
 }
 
 void MainWindow::on_heuristicMaskCheckBox_toggled() {
+    propertiesValueChanged();
+    setProjectDirty();
+}
+
+void MainWindow::on_rotateSpritesCheckBox_toggled() {
     propertiesValueChanged();
     setProjectDirty();
 }

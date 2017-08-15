@@ -307,7 +307,7 @@
           <x>0</x>
           <y>0</y>
           <width>314</width>
-          <height>879</height>
+          <height>909</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -493,6 +493,20 @@
                    </property>
                    <property name="text">
                     <string>Heuristic mask: </string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_11">
+                 <item>
+                  <widget class="QCheckBox" name="rotateSpritesCheckBox">
+                   <property name="layoutDirection">
+                    <enum>Qt::RightToLeft</enum>
+                   </property>
+                   <property name="text">
+                    <string>Rotate sprites:</string>
                    </property>
                   </widget>
                  </item>

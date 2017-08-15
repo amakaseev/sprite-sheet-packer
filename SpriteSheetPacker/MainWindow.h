@@ -70,6 +70,7 @@ private slots:
     void on_epsilonHorizontalSlider_sliderMoved(int value);
     void on_epsilonHorizontalSlider_sliderReleased();
     void on_heuristicMaskCheckBox_toggled();
+    void on_rotateSpritesCheckBox_toggled();
     void on_textureBorderSpinBox_valueChanged(int value);
     void on_spriteBorderSpinBox_valueChanged(int value);
     void on_imageFormatComboBox_currentIndexChanged(int index);

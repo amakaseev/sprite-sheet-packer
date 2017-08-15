@@ -34,6 +34,9 @@ public:
     void setHeuristicMask(bool heuristicMask) { _heuristicMask = heuristicMask; }
     bool heuristicMask() const { return _heuristicMask; }
 
+    void setRotateSprites(bool rotate) { _rotateSprites = rotate; }
+    bool rotateSprites() { return _rotateSprites; }
+
     void setTextureBorder(int textureBorder) { _textureBorder = textureBorder; }
     int textureBorder() const { return _textureBorder; }
 
@@ -98,6 +101,7 @@ protected:
     int         _trimThreshold;
     float       _epsilon;
     bool        _heuristicMask;
+    bool        _rotateSprites;
     int         _textureBorder;
     int         _spriteBorder;
     ImageFormat _imageFormat;

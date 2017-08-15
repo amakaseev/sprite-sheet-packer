@@ -209,30 +209,34 @@ namespace BinPack2D {
 
         typedef std::vector<Content<_T> > Vector;
 
+        /*const*/ bool tryRotate;
         /*const*/ bool rotated;
         /*const*/ Coord coord;
         /*const*/ Size  size;
         /*const*/ _T content;
 
         Content( const Content<_T> &src )
-        : rotated(src.rotated),
+        : tryRotate(src.tryRotate),
+        rotated(src.rotated),
         coord(src.coord),
         size(src.size),
         content(src.content)
         {}
 
-        Content( const _T &content, const Coord &coord, const Size &size, bool rotated )
-        :
+        Content( const _T &content, const Coord &coord, const Size &size, bool tryRotate, bool rotated )
+        : tryRotate(tryRotate),
         rotated(rotated),
         coord(coord),
         size(size),
         content(content)
         {}
 
-        void Rotate() {
-
-            rotated = !rotated;
-            size = Size( size.h, size.w );
+        bool Rotate() {
+            if (tryRotate) {
+                rotated = !rotated;
+                size = Size( size.h, size.w );
+            }
+            return rotated;
         }
 
         bool intersects(const Content<_T> &that) const {
@@ -359,19 +363,20 @@ namespace BinPack2D {
                 }
             }
 
-            return false; // yvt: BitmapAtlasGenerator doesn't support rotated contents.
+            //return false; // yvt: BitmapAtlasGenerator doesn't support rotated contents.
 
             // EXPERIMENTAL - TRY ROTATED?
-            content.Rotate();
-            for( Coord::List::iterator itor = topLefts.begin(); itor != topLefts.end(); itor++ ) {
+            if (content.Rotate()) {
+                for( Coord::List::iterator itor = topLefts.begin(); itor != topLefts.end(); itor++ ) {
 
-                content.coord = *itor;
+                    content.coord = *itor;
 
-                if( Fits( content ) ) {
+                    if( Fits( content ) ) {
 
-                    Use( content );
-                    topLefts.erase( itor );
-                    return true;
+                        Use( content );
+                        topLefts.erase( itor );
+                        return true;
+                    }
                 }
             }
             ////////////////////////////////

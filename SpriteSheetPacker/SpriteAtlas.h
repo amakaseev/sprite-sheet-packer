@@ -78,6 +78,8 @@ public:
     void setAlgorithm(const QString& algorithm) { _algorithm = algorithm; }
     void enablePolygonMode(bool enable, float epsilon = 2.f);
 
+    void setRotateSprites(bool value) { _rotateSprites = value; }
+
     bool generate(SpriteAtlasGenerateProgress* progress = nullptr);
     void abortGeneration() { _aborted = true; }
 
@@ -104,6 +106,7 @@ private:
     bool _forceSquared;
     int _maxTextureSize;
     float _scale;
+    bool _rotateSprites;
     // polygon mode
     struct TPolygonMode{
         bool enable;

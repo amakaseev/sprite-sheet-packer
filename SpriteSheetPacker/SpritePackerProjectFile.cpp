@@ -13,6 +13,7 @@ SpritePackerProjectFile::SpritePackerProjectFile() {
     _trimThreshold = 1;
     _epsilon = 5;
     _heuristicMask = false;
+    _rotateSprites = false;
     _textureBorder = 0;
     _spriteBorder = 2;
     _imageFormat = kPNG,
@@ -48,6 +49,7 @@ bool SpritePackerProjectFile::read(const QString &fileName) {
     if (json.contains("trimThreshold")) _trimThreshold = json["trimThreshold"].toInt();
     if (json.contains("epsilon")) _epsilon = json["epsilon"].toDouble();
     if (json.contains("heuristicMask")) _heuristicMask = json["heuristicMask"].toBool();
+    if (json.contains("rotateSprites")) _rotateSprites = json["rotateSprites"].toBool();
     if (json.contains("textureBorder")) _textureBorder = json["textureBorder"].toInt();
     if (json.contains("spriteBorder")) _spriteBorder = json["spriteBorder"].toInt();
     if (json.contains("imageFormat")) _imageFormat = imageFormatFromString(json["imageFormat"].toString());
@@ -99,6 +101,7 @@ bool SpritePackerProjectFile::write(const QString &fileName) {
     json["trimThreshold"] = _trimThreshold;
     json["epsilon"] = _epsilon;
     json["heuristicMask"] = _heuristicMask;
+    json["rotateSprites"] = _rotateSprites;
     json["textureBorder"] = _textureBorder;
     json["spriteBorder"] = _spriteBorder;
     json["imageFormat"] = imageFormatToString(_imageFormat);

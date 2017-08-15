@@ -85,6 +85,7 @@ SpriteAtlas::SpriteAtlas(const QStringList& sourceList, int textureBorder, int s
     , _scale(scale)
 {
     _algorithm = "Rect";
+    _rotateSprites = false;
     _polygonMode.enable = false;
 
     _aborted = false;
@@ -215,6 +216,7 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
         inputContent += BinPack2D::Content<PackContent>(packContent,
                                                         BinPack2D::Coord(),
                                                         BinPack2D::Size(width + _spriteBorder, height + _spriteBorder),
+                                                        _rotateSprites,
                                                         false);
     }
 
