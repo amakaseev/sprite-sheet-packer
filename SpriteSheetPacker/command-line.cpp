@@ -146,11 +146,11 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
         format = parser.value("format");
     }
 
-     if (parser.isSet("opt-mode")) {
+     if (parser.isSet("png-opt-mode")) {
          pngOptMode = parser.value("png-opt-mode");
      }
 
-    if (parser.isSet("opt-level")) {
+    if (parser.isSet("png-opt-level")) {
         pngOptLevel = parser.value("png-opt-level").toInt();
         pngOptLevel = qBound(1, pngOptLevel, 7);
     }
