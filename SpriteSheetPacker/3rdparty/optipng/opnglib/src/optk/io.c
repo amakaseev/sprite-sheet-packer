@@ -886,9 +886,9 @@ optk_test(const char *path, const char *mode)
 
         if (stat(path, &sbuf) != 0)
             return 0;
-        if (freg && !(sbuf.st_mode & S_IFREG))
+        if (freg && !S_ISREG(sbuf.st_mode))
             return 0;
-        if (fdir && !(sbuf.st_mode & S_IFDIR))
+        if (fdir && !S_ISDIR(sbuf.st_mode))
             return 0;
         if (faccess == 0)
             return 1;
@@ -971,7 +971,7 @@ optk_test_dir(const char *path)
     /* Check if the path is a directory. */
     if (stat(path, &sbuf) == -1)
         return 0;
-    return (sbuf.st_mode & S_IFDIR) ? 1 : 0;
+    return S_ISDIR(sbuf.st_mode) ? 1 : 0;
 
 #else  /* generic */
 

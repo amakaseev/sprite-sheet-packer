@@ -29,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
     setWindowIcon(QIcon("SpritePacker.ico"));
 #elif defined(Q_OS_MAC)
     setWindowIcon(QIcon("SpritePacker.icns"));
+#elif defined(Q_OS_LINUX)
+    setWindowIcon(QIcon(":/res/icon.png"));
 #endif
 
     setUnifiedTitleAndToolBarOnMac(true);

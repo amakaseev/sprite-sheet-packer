@@ -5,7 +5,8 @@ INCLUDEPATH += $$PWD
 INCLUDEPATH += $$PWD/optipng
 HEADERS += \
     $$PWD/optipng/proginfo.h \
-    $$PWD/optipng/strconv.h
+    $$PWD/optipng/strconv.h \
+    $$PWD/libpng/pngusr.h
 SOURCES += $$PWD/optipng/strconv.c
 
 #opngreduc
@@ -42,7 +43,7 @@ SOURCES += \
     $$PWD/libpng/pngwio.c \
     $$PWD/libpng/pngwrite.c \
     $$PWD/libpng/pngwtran.c \
-    $$PWD/libpng/pngwutil.c
+    $$PWD/libpng/pngwutil.c \
 
 #pngxtern
 INCLUDEPATH += $$PWD/pngxtern

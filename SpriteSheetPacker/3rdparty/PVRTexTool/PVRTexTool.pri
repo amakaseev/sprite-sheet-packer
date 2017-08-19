@@ -35,3 +35,11 @@ win32 {
         QMAKE_PRE_LINK += $${QMAKE_COPY} $$shell_quote($$shell_path($$PWD/Windows_x86_32/PVRTexLib.dll)) $$shell_quote($$shell_path($$DESTDIR/PVRTexLib.dll)) $$escape_expand(\\n\\t)
     }
 }
+
+linux {
+    linux:contains(QMAKE_HOST.arch, x86_64) {
+        LIBS += $$PWD/Linux_x86_64/libPVRTexLib.so
+    } else {
+        LIBS += $$PWD/Linux_x86_32/libPVRTexLib.so
+    }
+}

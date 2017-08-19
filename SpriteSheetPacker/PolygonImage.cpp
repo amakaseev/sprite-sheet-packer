@@ -359,9 +359,9 @@ float PolygonImage::perpendicularDistance(const QPointF& i, const QPointF& start
     float intercept;
 
     if(start.x() == end.x()) {
-        res = abs(i.x() - end.x());
+        res = std::abs(i.x() - end.x());
     } else if (start.y() == end.y()) {
-        res = abs(i.y() - end.y());
+        res = std::abs(i.y() - end.y());
     } else {
         slope = (end.y() - start.y()) / (end.x() - start.x());
         intercept = start.y() - (slope * start.x());
