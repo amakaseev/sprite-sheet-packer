@@ -15,9 +15,11 @@ CONFIG += c++11
 CONFIG(release,debug|release) {
     win32: DESTDIR = $$PWD/../install/win/bin
     macx: DESTDIR = $$PWD/../install/macos/bin
+    linux: DESTDIR = $$PWD/../install/linux/bin
 } else {
     macx: DESTDIR = $$OUT_PWD
     win32: DESTDIR = $$OUT_PWD/debug
+    linux: DESTDIR = $$OUT_PWD
 }
 
 INCLUDEPATH += 3rdparty

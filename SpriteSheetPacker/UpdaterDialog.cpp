@@ -8,6 +8,8 @@
     static QString updaterFileName = "SpriteSheetPacker-Installer.dmg";
 #elif defined(Q_OS_WIN)
     static QString updaterFileName = "SpriteSheetPacker-Installer.exe";
+#elif defined(Q_OS_LINUX)
+    static QString updaterFileName = "SpriteSheetPacker-Installer.AppImage";
 #endif
 
 
