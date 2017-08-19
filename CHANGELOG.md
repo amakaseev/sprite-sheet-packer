@@ -1,5 +1,7 @@
 ##1.0.9
 * Fixed command line crash
+* Added rotate sprites
+* Added GNU/Linux support
 
 ##1.0.8
 * Added [WebP](https://developers.google.com/speed/webp/) image format

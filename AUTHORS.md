@@ -14,6 +14,8 @@
     * Added automatically refreshed preview.
     * UI and command line implementation of image optimization
     * Win32: Polished publish dialog (Window title, position)
+* [NathV](https://github.com/NathV)
+	* Add GNU/Linux support
 		
 Thanks to all developers who report & trace bugs, discuss the sprite tools usage in forum!
 

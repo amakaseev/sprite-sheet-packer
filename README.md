@@ -6,12 +6,13 @@ Sprite sheet generator base on Qt created by Aleksey Makaseev.
 * Pack multiple sprite sheets at once
 * Trimming / Cropping (Save space by removing transparency)
 * Include GUI and command-line interface.
+* Support MacOS, Windows and Linux
 
 Uses [Qt - Digia Plc](http://qt-project.org), LGPL license.
 
 ![preview](/../gh-pages/screens/main.png?raw=true "Main screen")
 
-### Supported publish spritesheet formats###
+### Supported publish spritesheet formats ###
 * [cocos2d-x](http://www.cocos2d-x.org) (plist)
 * [pixijs](http://www.pixijs.com) (json)
 * simple json
