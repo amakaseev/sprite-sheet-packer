@@ -1,38 +1,9 @@
 #include "SpriteAtlasPreview.h"
+#include "ZoomGraphicsView.h"
 #include "ui_SpriteAtlasPreview.h"
 
 #define MAX_SCALE 10.f
 #define MIN_SCALE 0.1f
-
-
-PreviewGraphicsView::PreviewGraphicsView(QWidget *parent)
-    : QGraphicsView(parent)
-{
-    _backgroundBrush = QBrush(QPixmap("://res/patterns_tweed.png"));
-}
-
-void PreviewGraphicsView::drawBackground(QPainter *painter, const QRectF &) {
-    painter->resetTransform();
-    painter->fillRect(visibleRegion().boundingRect(), _backgroundBrush);
-}
-
-void PreviewGraphicsView::wheelEvent(QWheelEvent *event) {
-#if defined(Q_OS_OSX)
-    if (QApplication::keyboardModifiers() == Qt::AltModifier) {
-#endif
-        setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-
-        if (event->delta() > 0) {
-            emit zoomed(true);
-        } else {
-            emit zoomed(false);
-        }
-#if defined(Q_OS_OSX)
-    } else {
-        QGraphicsView::wheelEvent(event);
-    }
-#endif
-}
 
 SpriteAtlasPreview::SpriteAtlasPreview(QWidget *parent) :
     QWidget(parent),
@@ -46,7 +17,7 @@ SpriteAtlasPreview::SpriteAtlasPreview(QWidget *parent) :
 
     _outlinesGroup = NULL;
 
-    connect(ui->graphicsView, &PreviewGraphicsView::zoomed, [=] (bool in) {
+    connect(ui->graphicsView, &ZoomGraphicsView::zoomed, [=] (bool in) {
         int oldValue = ui->zoomSlider->value();
         int zoom = in ? 2 : -2;
 

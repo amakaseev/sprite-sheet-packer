@@ -41,7 +41,8 @@ SOURCES += main.cpp\
     StatusBarWidget.cpp \
     AnimationPreviewDialog.cpp \
     UpdaterDialog.cpp \
-    ContentProtectionDialog.cpp
+    ContentProtectionDialog.cpp \
+    ZoomGraphicsView.cpp
 
 HEADERS += MainWindow.h \
     ImageRotate.h \
@@ -60,7 +61,8 @@ HEADERS += MainWindow.h \
     StatusBarWidget.h \
     AnimationPreviewDialog.h \
     UpdaterDialog.h \
-    ContentProtectionDialog.h
+    ContentProtectionDialog.h \
+    ZoomGraphicsView.h
 
 #algorithm
 INCLUDEPATH += algorithm

@@ -794,16 +794,11 @@ void MainWindow::on_actionAnimationPreview_triggered() {
         return;
     }
 
-    auto dlg = new AnimationPreviewDialog(this);
-    dlg->spritesSelectionChanged(_spritesTreeWidget);
+    auto dlg = new AnimationPreviewDialog(_spritesTreeWidget->model(), this);
     dlg->show();
 }
 
 void MainWindow::spritesTreeWidgetItemSelectionChanged() {
-    if (AnimationPreviewDialog::instance()) {
-        AnimationPreviewDialog::instance()->spritesSelectionChanged(_spritesTreeWidget);
-    }
-
     ui->actionRemove->setEnabled(false);
     foreach (QTreeWidgetItem* item, _spritesTreeWidget->selectedItems()) {
         if (!item->parent()) {

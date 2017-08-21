@@ -6,7 +6,7 @@
 
 AnimationPreviewDialog* AnimationPreviewDialog::_instance = nullptr;
 
-AnimationPreviewDialog::AnimationPreviewDialog(QWidget *parent) :
+AnimationPreviewDialog::AnimationPreviewDialog(QAbstractItemModel* model, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::AnimationPreviewDialog)
 {
@@ -15,14 +15,26 @@ AnimationPreviewDialog::AnimationPreviewDialog(QWidget *parent) :
 
     _instance = this;
     _animationTimer = -1;
+    _pixmapItem = nullptr;
 
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
-    ui->previewLabel->setStyleSheet("background-image: url(://res/patterns_tweed.png)");
+
+    ui->graphicsView->setScene(&_scene);
+
+    ui->spritesTreeView->setModel(model);
+    ui->spritesTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    ui->spritesTreeView->setIconSize(QSize(24, 24));
+    ui->spritesTreeView->setRootIsDecorated(true);
+    ui->spritesTreeView->header()->setVisible(false);
+    //connect(ui->spritesTreeView, SIGNAL(itemSelectionChanged()), this, SLOT(spritesTreeWidgetItemSelectionChanged()));
 
     QSettings settings;
     restoreGeometry(settings.value("AnimationPreviewDialog/geometry").toByteArray());
     ui->framePerSecondSpinBox->setValue(settings.value("AnimationPreviewDialog/framePerSecondSpinBox", 24).toInt());
     ui->repeatToolButton->setChecked(settings.value("AnimationPreviewDialog/repeatToolButton", true).toBool());
+
+    ui->splitter->setStretchFactor(0, 0);
+    ui->splitter->setStretchFactor(1, 1);
 }
 
 AnimationPreviewDialog::~AnimationPreviewDialog() {
@@ -35,28 +47,13 @@ AnimationPreviewDialog::~AnimationPreviewDialog() {
     delete ui;
 }
 
-void AnimationPreviewDialog::spritesSelectionChanged(SpritesTreeWidget* spritesTreeWidget) {
-    _frames.clear();
-
-    auto items = spritesTreeWidget->selectedItems();
-    for (auto item: items) {
-        if (item->childCount()) {
-            scanFolder(item);
-        } else if (!item->data(0, Qt::UserRole).toString().isEmpty()) {
-            _frames.push_back(QPixmap(item->data(0, Qt::UserRole).toString()));
-        }
+void AnimationPreviewDialog::setPreviewPixmap(const QPixmap &pixmap) {
+    if (!_pixmapItem) {
+        _pixmapItem = _scene.addPixmap(QPixmap());
     }
 
-    if (_frames.size()) {
-        ui->previewLabel->setPixmap(_frames.front());
-        ui->framesSlider->setMaximum(_frames.size() - 1);
-    } else {
-        ui->framesSlider->setMaximum(0);
-    }
-}
-
-void AnimationPreviewDialog::timerEvent(QTimerEvent* /*event*/) {
-    on_nextFrameToolButton_clicked();
+    _pixmapItem->setPixmap(pixmap);
+    _scene.setSceneRect(_scene.itemsBoundingRect());
 }
 
 void AnimationPreviewDialog::scanFolder(QTreeWidgetItem* item) {
@@ -70,6 +67,30 @@ void AnimationPreviewDialog::scanFolder(QTreeWidgetItem* item) {
     }
 }
 
+void AnimationPreviewDialog::timerEvent(QTimerEvent* /*event*/) {
+    on_nextFrameToolButton_clicked();
+}
+
+void AnimationPreviewDialog::on_spritesTreeView_itemSelectionChanged() {
+    _frames.clear();
+
+//    auto items = ui->spritesTreeView->selectionModel()->selectedItems();
+//    for (auto item: items) {
+//        if (item->childCount()) {
+//            scanFolder(item);
+//        } else if (!item->data(0, Qt::UserRole).toString().isEmpty()) {
+//            _frames.push_back(QPixmap(item->data(0, Qt::UserRole).toString()));
+//        }
+//    }
+
+//    if (_frames.size()) {
+//        setPreviewPixmap(_frames.front());
+//        ui->framesSlider->setMaximum(_frames.size() - 1);
+//    } else {
+//        ui->framesSlider->setMaximum(0);
+//    }
+}
+
 void AnimationPreviewDialog::on_framePerSecondSpinBox_valueChanged(int value) {
     if (_animationTimer !=-1) {
         killTimer(_animationTimer);
@@ -79,10 +100,10 @@ void AnimationPreviewDialog::on_framePerSecondSpinBox_valueChanged(int value) {
 
 void AnimationPreviewDialog::on_framesSlider_valueChanged(int value) {
     if ((value >= 0) && (value < _frames.size())) {
-        ui->previewLabel->setPixmap(_frames[value]);
+        setPreviewPixmap(_frames[value]);
     } else {
-        ui->previewLabel->setPixmap(QPixmap());
-        ui->previewLabel->setText("No sprites selected");
+        setPreviewPixmap(QPixmap());
+        //ui->previewLabel->setText("No sprites selected");
     }
 }
 

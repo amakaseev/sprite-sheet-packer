@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="PreviewGraphicsView" name="graphicsView"/>
+    <widget class="ZoomGraphicsView" name="graphicsView"/>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_11">
@@ -198,9 +198,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PreviewGraphicsView</class>
+   <class>ZoomGraphicsView</class>
    <extends>QGraphicsView</extends>
-   <header>SpriteAtlasPreview.h</header>
+   <header>ZoomGraphicsView.h</header>
   </customwidget>
  </customwidgets>
  <resources>
