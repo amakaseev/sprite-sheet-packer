@@ -21,13 +21,6 @@ AnimationPreviewDialog::AnimationPreviewDialog(SpritesTreeWidget* spritesTreeWid
 
     ui->graphicsView->setScene(&_scene);
 
-    ui->spritesTreeView->setModel(spritesTreeWidget->model());
-    ui->spritesTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    ui->spritesTreeView->setIconSize(QSize(24, 24));
-    ui->spritesTreeView->setRootIsDecorated(true);
-    ui->spritesTreeView->header()->setVisible(false);
-    //connect(ui->spritesTreeView, SIGNAL(itemSelectionChanged()), this, SLOT(spritesTreeWidgetItemSelectionChanged()));
-
     QSettings settings;
     restoreGeometry(settings.value("AnimationPreviewDialog/geometry").toByteArray());
     ui->framePerSecondSpinBox->setValue(settings.value("AnimationPreviewDialog/framePerSecondSpinBox", 24).toInt());
@@ -115,26 +108,6 @@ void AnimationPreviewDialog::timerEvent(QTimerEvent* /*event*/) {
     on_nextFrameToolButton_clicked();
 }
 
-//void AnimationPreviewDialog::on_spritesTreeView_itemSelectionChanged() {
-//    _frames.clear();
-
-//    auto items = ui->spritesTreeView->selectionModel()->selectedItems();
-//    for (auto item: items) {
-//        if (item->childCount()) {
-//            scanFolder(item);
-//        } else if (!item->data(0, Qt::UserRole).toString().isEmpty()) {
-//            _frames.push_back(QPixmap(item->data(0, Qt::UserRole).toString()));
-//        }
-//    }
-
-//    if (_frames.size()) {
-//        setPreviewPixmap(_frames.front());
-//        ui->framesSlider->setMaximum(_frames.size() - 1);
-//    } else {
-//        ui->framesSlider->setMaximum(0);
-//    }
-//}
-
 void AnimationPreviewDialog::on_framePerSecondSpinBox_valueChanged(int value) {
     if (_animationTimer !=-1) {
         killTimer(_animationTimer);
@@ -143,12 +116,7 @@ void AnimationPreviewDialog::on_framePerSecondSpinBox_valueChanged(int value) {
 }
 
 void AnimationPreviewDialog::on_framesSlider_valueChanged(int value) {
-    if ((value >= 0) && (value < _frames.size())) {
-        setPreviewPixmap(_frames[value]);
-    } else {
-        setPreviewPixmap(QPixmap());
-        //ui->previewLabel->setText("No sprites selected");
-    }
+    ui->framesListWidget->setCurrentRow(value);
 }
 
 void AnimationPreviewDialog::on_playToolButton_toggled(bool checked) {
@@ -212,15 +180,39 @@ void AnimationPreviewDialog::on_lastFrameToolButton_clicked() {
 void AnimationPreviewDialog::on_autoDetectPushButton_clicked() {
     auto fileList = _spritesTreeWidget->fileList();
 
+    _animations.clear();
     ui->comboBox->clear();
     while (fileList.length()) {
         auto first = fileList.first();
         fileList.erase(fileList.begin());
         auto animation = detectAnimations(first, fileList);
         if (!animation.name.isEmpty()) {
+            _animations.push_back(animation);
             ui->comboBox->addItem(animation.name);
         }
     }
+}
 
+void AnimationPreviewDialog::on_comboBox_currentIndexChanged(int index) {
+    ui->framesListWidget->clear();
+    if ((index>=0)&&(index<_animations.length())) {
+        for (auto frame: _animations[index].frames) {
+            auto item = new QListWidgetItem(ui->framesListWidget);
+            item->setText(QFileInfo(frame.first).baseName());
+            item->setIcon(QIcon(frame.first));
+            item->setData(Qt::UserRole, frame.first);
+        }
+        ui->framesSlider->setMaximum(_animations[index].frames.length() - 1);
+        ui->framesListWidget->setCurrentRow(0);
+    } else {
+        ui->framesSlider->setMaximum(0);
+    }
+}
 
+void AnimationPreviewDialog::on_framesListWidget_currentRowChanged(int currentRow) {
+    if (currentRow >= 0) {
+        setPreviewPixmap(ui->framesListWidget->item(currentRow)->data(Qt::UserRole).toString());
+    } else {
+        setPreviewPixmap(QPixmap());
+    }
 }

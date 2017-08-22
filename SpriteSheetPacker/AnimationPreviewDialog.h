@@ -40,6 +40,9 @@ private slots:
     void on_firstFrameToolButton_clicked();
     void on_lastFrameToolButton_clicked();
     void on_autoDetectPushButton_clicked();
+    void on_comboBox_currentIndexChanged(int index);
+
+    void on_framesListWidget_currentRowChanged(int currentRow);
 
 private:
     static AnimationPreviewDialog*  _instance;
@@ -47,7 +50,7 @@ private:
     Ui::AnimationPreviewDialog*     ui;
     QGraphicsScene                  _scene;
     QGraphicsPixmapItem*            _pixmapItem;
-    QVector<QPixmap>                _frames;
+    QVector<AnimationInfo>          _animations;
     int                             _animationTimer;
     SpritesTreeWidget*              _spritesTreeWidget;
 };

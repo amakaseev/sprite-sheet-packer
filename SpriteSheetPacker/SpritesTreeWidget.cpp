@@ -4,6 +4,8 @@ SpritesTreeWidget::SpritesTreeWidget(QWidget* parent): QTreeWidget(parent) {
     setSelectionMode(QAbstractItemView::ExtendedSelection);
     setIconSize(QSize(24, 24));
     setRootIsDecorated(true);
+    setDragEnabled(true);
+    setDragDropMode(QAbstractItemView::DragOnly);
     header()->setVisible(false);
 }
 
