@@ -5,8 +5,7 @@
 #include "ui_AnimationPreviewDialog.h"
 
 AnimationPreviewDialog* AnimationPreviewDialog::_instance = nullptr;
-
-AnimationPreviewDialog::AnimationPreviewDialog(QAbstractItemModel* model, QWidget *parent) :
+AnimationPreviewDialog::AnimationPreviewDialog(SpritesTreeWidget* spritesTreeWidget, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::AnimationPreviewDialog)
 {
@@ -16,12 +15,13 @@ AnimationPreviewDialog::AnimationPreviewDialog(QAbstractItemModel* model, QWidge
     _instance = this;
     _animationTimer = -1;
     _pixmapItem = nullptr;
+    _spritesTreeWidget = spritesTreeWidget;
 
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
 
     ui->graphicsView->setScene(&_scene);
 
-    ui->spritesTreeView->setModel(model);
+    ui->spritesTreeView->setModel(spritesTreeWidget->model());
     ui->spritesTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     ui->spritesTreeView->setIconSize(QSize(24, 24));
     ui->spritesTreeView->setRootIsDecorated(true);
@@ -56,23 +56,67 @@ void AnimationPreviewDialog::setPreviewPixmap(const QPixmap &pixmap) {
     _scene.setSceneRect(_scene.itemsBoundingRect());
 }
 
-void AnimationPreviewDialog::scanFolder(QTreeWidgetItem* item) {
-    for (int i=0; i<item->childCount(); ++i) {
-        auto child = item->child(i);
-        if (child->childCount()) {
-            scanFolder(child);
-        } else if (!child->data(0, Qt::UserRole).toString().isEmpty()) {
-            _frames.push_back(QPixmap(child->data(0, Qt::UserRole).toString()));
+bool machString(QString a, QString b) {
+    QString baseName;
+    QString number;
+
+    a = QDir::fromNativeSeparators(QFileInfo(a).path() + QDir::separator() + QFileInfo(a).baseName());
+    b = QDir::fromNativeSeparators(QFileInfo(b).path() + QDir::separator() + QFileInfo(b).baseName());
+
+    bool equal = true;
+    for (int i=0; i<b.length(); ++i) {
+        if (equal && (i<a.length()) && (a[i] == b[i])) {
+            baseName += a[i];
+        } else {
+            equal = false;
+            number += b[i];
         }
     }
+
+    bool ok;
+    number.toInt(&ok, 10);
+    return ok;
+}
+
+QString clearAnimatonName(const QString& name) {
+    QString animationName = QFileInfo(name).baseName();
+    for (int i=animationName.length()-1; i>=0; --i) {
+        if (animationName[i].isDigit()) {
+            animationName.remove(i, 1);
+        } else {
+            if ((animationName.length() > 1) && (animationName[i] == '_')) {
+                animationName.remove(i, 1);
+            }
+            break;
+        }
+    }
+    return animationName;
+}
+
+AnimationInfo AnimationPreviewDialog::detectAnimations(const QPair<QString, QString>& item, QList< QPair<QString, QString> >& items) {
+    AnimationInfo animation;
+    auto it = items.begin();
+    while(it != items.end()) {
+        if (machString(item.second, (*it).second)) {
+            animation.frames.push_back((*it));
+            it = items.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    if (animation.frames.length()) {
+        animation.frames.push_front(item);
+        animation.name = clearAnimatonName(item.second);
+    }
+    return animation;
 }
 
 void AnimationPreviewDialog::timerEvent(QTimerEvent* /*event*/) {
     on_nextFrameToolButton_clicked();
 }
 
-void AnimationPreviewDialog::on_spritesTreeView_itemSelectionChanged() {
-    _frames.clear();
+//void AnimationPreviewDialog::on_spritesTreeView_itemSelectionChanged() {
+//    _frames.clear();
 
 //    auto items = ui->spritesTreeView->selectionModel()->selectedItems();
 //    for (auto item: items) {
@@ -89,7 +133,7 @@ void AnimationPreviewDialog::on_spritesTreeView_itemSelectionChanged() {
 //    } else {
 //        ui->framesSlider->setMaximum(0);
 //    }
-}
+//}
 
 void AnimationPreviewDialog::on_framePerSecondSpinBox_valueChanged(int value) {
     if (_animationTimer !=-1) {
@@ -163,4 +207,20 @@ void AnimationPreviewDialog::on_firstFrameToolButton_clicked() {
 
 void AnimationPreviewDialog::on_lastFrameToolButton_clicked() {
     ui->framesSlider->setValue(ui->framesSlider->maximum());
+}
+
+void AnimationPreviewDialog::on_autoDetectPushButton_clicked() {
+    auto fileList = _spritesTreeWidget->fileList();
+
+    ui->comboBox->clear();
+    while (fileList.length()) {
+        auto first = fileList.first();
+        fileList.erase(fileList.begin());
+        auto animation = detectAnimations(first, fileList);
+        if (!animation.name.isEmpty()) {
+            ui->comboBox->addItem(animation.name);
+        }
+    }
+
+
 }

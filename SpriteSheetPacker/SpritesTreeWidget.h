@@ -11,6 +11,8 @@ public:
     SpritesTreeWidget(QWidget* parent = NULL);
 
     QStringList contentList();
+    QList< QPair<QString, QString> > fileList();
+
     void addContent(const QStringList& content, QTreeWidgetItem* parentItem = NULL);
     void refresh();
 };

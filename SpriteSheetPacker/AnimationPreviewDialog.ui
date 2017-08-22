@@ -32,7 +32,7 @@
      <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QPushButton" name="autoDetectPushButton">
          <property name="text">
           <string>Auto-detect animation</string>
          </property>

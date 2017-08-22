@@ -48,6 +48,29 @@ QStringList SpritesTreeWidget::contentList() {
     return fileList;
 }
 
+QList< QPair<QString, QString> > SpritesTreeWidget::fileList() {
+    QStringList nameFilter;
+    nameFilter << "*.png" << "*.jpg" << "*.jpeg" << "*.gif" << "*.bmp";
+
+    QList< QPair<QString, QString> > fileList;
+    for(auto pathName: contentList()) {
+        QFileInfo fi(pathName);
+
+        if (fi.isDir()) {
+            QDir dir(fi.path());
+            QDirIterator fileNames(pathName, nameFilter, QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+            while(fileNames.hasNext()){
+                fileNames.next();
+                fileList.push_back(qMakePair(fileNames.filePath(), dir.relativeFilePath(fileNames.filePath())));
+            }
+        } else {
+            fileList.push_back(qMakePair(pathName, fi.fileName()));
+        }
+    }
+
+    return fileList;
+}
+
 void SpritesTreeWidget::refresh() {
     auto content = contentList();
     clear();

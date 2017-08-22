@@ -788,14 +788,12 @@ void MainWindow::on_actionAbout_triggered() {
 }
 
 void MainWindow::on_actionAnimationPreview_triggered() {
-    if (AnimationPreviewDialog::instance()) {
-        auto dlg = AnimationPreviewDialog::instance();
-        dlg->close();
-        return;
+    auto dlg = AnimationPreviewDialog::instance();
+    if (!dlg) {
+        dlg = new AnimationPreviewDialog(_spritesTreeWidget, this);
     }
-
-    auto dlg = new AnimationPreviewDialog(_spritesTreeWidget->model(), this);
     dlg->show();
+    dlg->activateWindow();
 }
 
 void MainWindow::spritesTreeWidgetItemSelectionChanged() {
