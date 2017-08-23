@@ -42,7 +42,8 @@ SOURCES += main.cpp\
     UpdaterDialog.cpp \
     ContentProtectionDialog.cpp \
     ZoomGraphicsView.cpp \
-    AnimationDialog.cpp
+    AnimationDialog.cpp \
+    ElapsedTimer.cpp
 
 HEADERS += MainWindow.h \
     ImageRotate.h \
@@ -62,7 +63,8 @@ HEADERS += MainWindow.h \
     UpdaterDialog.h \
     ContentProtectionDialog.h \
     ZoomGraphicsView.h \
-    AnimationDialog.h
+    AnimationDialog.h \
+    ElapsedTimer.h
 
 #algorithm
 INCLUDEPATH += algorithm

@@ -2,6 +2,7 @@
 #define ANIMATIONDIALOG_H
 
 #include <QtWidgets>
+#include "ElapsedTimer.h"
 
 class SpritesTreeWidget;
 
@@ -29,9 +30,10 @@ public:
 
 protected:
     AnimationInfo detectAnimations(const QPair<QString, QString>& item, QList< QPair<QString, QString> >& items);
-    void timerEvent(QTimerEvent* event);
 
 private slots:
+    void updateFrame(int elapsed);
+
     void on_framePerSecondSpinBox_valueChanged(int arg1);
     void on_framesSlider_valueChanged(int value);
     void on_playToolButton_toggled(bool checked);
@@ -47,11 +49,12 @@ private slots:
 private:
     static AnimationDialog*  _instance;
 
-    Ui::AnimationDialog*     ui;
+    Ui::AnimationDialog*            ui;
     QGraphicsScene                  _scene;
     QGraphicsPixmapItem*            _pixmapItem;
     QVector<AnimationInfo>          _animations;
-    int                             _animationTimer;
+    ElapsedTimer*                   _animationTimer;
+    float                           _currentFrame;
     SpritesTreeWidget*              _spritesTreeWidget;
 };
 

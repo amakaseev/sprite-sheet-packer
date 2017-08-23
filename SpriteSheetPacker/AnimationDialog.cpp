@@ -9,15 +9,17 @@ AnimationDialog::AnimationDialog(SpritesTreeWidget* spritesTreeWidget, QWidget *
     QDialog(parent),
     ui(new Ui::AnimationDialog)
 {
-    setAttribute(Qt::WA_DeleteOnClose);
     ui->setupUi(this);
+    setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
+    setAttribute(Qt::WA_DeleteOnClose);
 
     _instance = this;
-    _animationTimer = -1;
     _pixmapItem = nullptr;
+    _currentFrame = 0;
     _spritesTreeWidget = spritesTreeWidget;
 
-    setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
+    _animationTimer = new ElapsedTimer(this);
+    connect(_animationTimer, SIGNAL(timeout(int)), this, SLOT(updateFrame(int)));
 
     ui->graphicsView->setScene(&_scene);
 
@@ -104,15 +106,21 @@ AnimationInfo AnimationDialog::detectAnimations(const QPair<QString, QString>& i
     return animation;
 }
 
-void AnimationDialog::timerEvent(QTimerEvent* /*event*/) {
-    on_nextFrameToolButton_clicked();
+void AnimationDialog::updateFrame(int elapsed) {
+    _currentFrame += (elapsed / 1000.f) * ui->framePerSecondSpinBox->value();
+    while (_currentFrame > ui->framesSlider->maximum()) {
+        if (ui->repeatToolButton->isChecked()) {
+            _currentFrame -= ui->framesSlider->maximum();
+        } else {
+            _currentFrame = ui->framesSlider->maximum();
+            break;
+        }
+    }
+    ui->framesSlider->setValue((int)_currentFrame);
 }
 
 void AnimationDialog::on_framePerSecondSpinBox_valueChanged(int value) {
-    if (_animationTimer !=-1) {
-        killTimer(_animationTimer);
-        _animationTimer = startTimer(1000.f/value);
-    }
+    _animationTimer->setInterval(1000.f/value);
 }
 
 void AnimationDialog::on_framesSlider_valueChanged(int value) {
@@ -121,7 +129,7 @@ void AnimationDialog::on_framesSlider_valueChanged(int value) {
 
 void AnimationDialog::on_playToolButton_toggled(bool checked) {
     if (checked) {
-        _animationTimer = startTimer(1000.f/ui->framePerSecondSpinBox->value());
+        _animationTimer->start(1000.f/ui->framePerSecondSpinBox->value());
         ui->playToolButton->setIcon(QIcon("://res/playback/control_pause_blue.png"));
         ui->framesSlider->setValue(0);
         ui->framesSlider->setEnabled(false);
@@ -130,8 +138,7 @@ void AnimationDialog::on_playToolButton_toggled(bool checked) {
         ui->firstFrameToolButton->setEnabled(false);
         ui->lastFrameToolButton->setEnabled(false);
     } else {
-        killTimer(_animationTimer);
-        _animationTimer = -1;
+        _animationTimer->stop();
         ui->playToolButton->setIcon(QIcon("://res/playback/control_play_blue.png"));
         ui->framesSlider->setEnabled(true);
         ui->prevFrameToolButton->setEnabled(true);
@@ -139,6 +146,7 @@ void AnimationDialog::on_playToolButton_toggled(bool checked) {
         ui->firstFrameToolButton->setEnabled(true);
         ui->lastFrameToolButton->setEnabled(true);
     }
+    _currentFrame = ui->framesSlider->value();
 }
 
 void AnimationDialog::on_prevFrameToolButton_clicked() {
@@ -153,6 +161,7 @@ void AnimationDialog::on_prevFrameToolButton_clicked() {
         }
     }
     ui->framesSlider->setValue(currentFrame);
+    _currentFrame = ui->framesSlider->value();
 }
 
 void AnimationDialog::on_nextFrameToolButton_clicked() {
@@ -167,14 +176,17 @@ void AnimationDialog::on_nextFrameToolButton_clicked() {
         }
     }
     ui->framesSlider->setValue(currentFrame);
+    _currentFrame = ui->framesSlider->value();
 }
 
 void AnimationDialog::on_firstFrameToolButton_clicked() {
     ui->framesSlider->setValue(ui->framesSlider->minimum());
+    _currentFrame = ui->framesSlider->value();
 }
 
 void AnimationDialog::on_lastFrameToolButton_clicked() {
     ui->framesSlider->setValue(ui->framesSlider->maximum());
+    _currentFrame = ui->framesSlider->value();
 }
 
 void AnimationDialog::on_autoDetectPushButton_clicked() {
@@ -207,6 +219,7 @@ void AnimationDialog::on_comboBox_currentIndexChanged(int index) {
     } else {
         ui->framesSlider->setMaximum(0);
     }
+    _currentFrame = ui->framesSlider->value();
 }
 
 void AnimationDialog::on_framesListWidget_currentRowChanged(int currentRow) {
