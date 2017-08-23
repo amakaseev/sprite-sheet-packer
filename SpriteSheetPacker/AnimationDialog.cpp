@@ -1,13 +1,13 @@
 
-#include "AnimationPreviewDialog.h"
+#include "AnimationDialog.h"
 #include "SpritesTreeWidget.h"
 
-#include "ui_AnimationPreviewDialog.h"
+#include "ui_AnimationDialog.h"
 
-AnimationPreviewDialog* AnimationPreviewDialog::_instance = nullptr;
-AnimationPreviewDialog::AnimationPreviewDialog(SpritesTreeWidget* spritesTreeWidget, QWidget *parent) :
+AnimationDialog* AnimationDialog::_instance = nullptr;
+AnimationDialog::AnimationDialog(SpritesTreeWidget* spritesTreeWidget, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::AnimationPreviewDialog)
+    ui(new Ui::AnimationDialog)
 {
     setAttribute(Qt::WA_DeleteOnClose);
     ui->setupUi(this);
@@ -22,25 +22,25 @@ AnimationPreviewDialog::AnimationPreviewDialog(SpritesTreeWidget* spritesTreeWid
     ui->graphicsView->setScene(&_scene);
 
     QSettings settings;
-    restoreGeometry(settings.value("AnimationPreviewDialog/geometry").toByteArray());
-    ui->framePerSecondSpinBox->setValue(settings.value("AnimationPreviewDialog/framePerSecondSpinBox", 24).toInt());
-    ui->repeatToolButton->setChecked(settings.value("AnimationPreviewDialog/repeatToolButton", true).toBool());
+    restoreGeometry(settings.value("AnimationDialog/geometry").toByteArray());
+    ui->framePerSecondSpinBox->setValue(settings.value("AnimationDialog/framePerSecondSpinBox", 24).toInt());
+    ui->repeatToolButton->setChecked(settings.value("AnimationDialog/repeatToolButton", true).toBool());
 
     ui->splitter->setStretchFactor(0, 0);
     ui->splitter->setStretchFactor(1, 1);
 }
 
-AnimationPreviewDialog::~AnimationPreviewDialog() {
+AnimationDialog::~AnimationDialog() {
     QSettings settings;
-    settings.setValue("AnimationPreviewDialog/geometry", saveGeometry());
-    settings.setValue("AnimationPreviewDialog/framePerSecondSpinBox", ui->framePerSecondSpinBox->value());
-    settings.setValue("AnimationPreviewDialog/repeatToolButton", ui->repeatToolButton->isChecked());
+    settings.setValue("AnimationDialog/geometry", saveGeometry());
+    settings.setValue("AnimationDialog/framePerSecondSpinBox", ui->framePerSecondSpinBox->value());
+    settings.setValue("AnimationDialog/repeatToolButton", ui->repeatToolButton->isChecked());
 
     _instance = nullptr;
     delete ui;
 }
 
-void AnimationPreviewDialog::setPreviewPixmap(const QPixmap &pixmap) {
+void AnimationDialog::setPreviewPixmap(const QPixmap &pixmap) {
     if (!_pixmapItem) {
         _pixmapItem = _scene.addPixmap(QPixmap());
     }
@@ -86,7 +86,7 @@ QString clearAnimatonName(const QString& name) {
     return animationName;
 }
 
-AnimationInfo AnimationPreviewDialog::detectAnimations(const QPair<QString, QString>& item, QList< QPair<QString, QString> >& items) {
+AnimationInfo AnimationDialog::detectAnimations(const QPair<QString, QString>& item, QList< QPair<QString, QString> >& items) {
     AnimationInfo animation;
     auto it = items.begin();
     while(it != items.end()) {
@@ -104,22 +104,22 @@ AnimationInfo AnimationPreviewDialog::detectAnimations(const QPair<QString, QStr
     return animation;
 }
 
-void AnimationPreviewDialog::timerEvent(QTimerEvent* /*event*/) {
+void AnimationDialog::timerEvent(QTimerEvent* /*event*/) {
     on_nextFrameToolButton_clicked();
 }
 
-void AnimationPreviewDialog::on_framePerSecondSpinBox_valueChanged(int value) {
+void AnimationDialog::on_framePerSecondSpinBox_valueChanged(int value) {
     if (_animationTimer !=-1) {
         killTimer(_animationTimer);
         _animationTimer = startTimer(1000.f/value);
     }
 }
 
-void AnimationPreviewDialog::on_framesSlider_valueChanged(int value) {
+void AnimationDialog::on_framesSlider_valueChanged(int value) {
     ui->framesListWidget->setCurrentRow(value);
 }
 
-void AnimationPreviewDialog::on_playToolButton_toggled(bool checked) {
+void AnimationDialog::on_playToolButton_toggled(bool checked) {
     if (checked) {
         _animationTimer = startTimer(1000.f/ui->framePerSecondSpinBox->value());
         ui->playToolButton->setIcon(QIcon("://res/playback/control_pause_blue.png"));
@@ -141,7 +141,7 @@ void AnimationPreviewDialog::on_playToolButton_toggled(bool checked) {
     }
 }
 
-void AnimationPreviewDialog::on_prevFrameToolButton_clicked() {
+void AnimationDialog::on_prevFrameToolButton_clicked() {
     int currentFrame = ui->framesSlider->value();
     currentFrame--;
     if (currentFrame < ui->framesSlider->minimum()) {
@@ -155,7 +155,7 @@ void AnimationPreviewDialog::on_prevFrameToolButton_clicked() {
     ui->framesSlider->setValue(currentFrame);
 }
 
-void AnimationPreviewDialog::on_nextFrameToolButton_clicked() {
+void AnimationDialog::on_nextFrameToolButton_clicked() {
     int currentFrame = ui->framesSlider->value();
     currentFrame++;
     if (currentFrame > ui->framesSlider->maximum()) {
@@ -169,15 +169,15 @@ void AnimationPreviewDialog::on_nextFrameToolButton_clicked() {
     ui->framesSlider->setValue(currentFrame);
 }
 
-void AnimationPreviewDialog::on_firstFrameToolButton_clicked() {
+void AnimationDialog::on_firstFrameToolButton_clicked() {
     ui->framesSlider->setValue(ui->framesSlider->minimum());
 }
 
-void AnimationPreviewDialog::on_lastFrameToolButton_clicked() {
+void AnimationDialog::on_lastFrameToolButton_clicked() {
     ui->framesSlider->setValue(ui->framesSlider->maximum());
 }
 
-void AnimationPreviewDialog::on_autoDetectPushButton_clicked() {
+void AnimationDialog::on_autoDetectPushButton_clicked() {
     auto fileList = _spritesTreeWidget->fileList();
 
     _animations.clear();
@@ -193,7 +193,7 @@ void AnimationPreviewDialog::on_autoDetectPushButton_clicked() {
     }
 }
 
-void AnimationPreviewDialog::on_comboBox_currentIndexChanged(int index) {
+void AnimationDialog::on_comboBox_currentIndexChanged(int index) {
     ui->framesListWidget->clear();
     if ((index>=0)&&(index<_animations.length())) {
         for (auto frame: _animations[index].frames) {
@@ -209,7 +209,7 @@ void AnimationPreviewDialog::on_comboBox_currentIndexChanged(int index) {
     }
 }
 
-void AnimationPreviewDialog::on_framesListWidget_currentRowChanged(int currentRow) {
+void AnimationDialog::on_framesListWidget_currentRowChanged(int currentRow) {
     if (currentRow >= 0) {
         setPreviewPixmap(ui->framesListWidget->item(currentRow)->data(Qt::UserRole).toString());
     } else {

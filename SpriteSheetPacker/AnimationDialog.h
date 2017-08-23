@@ -1,12 +1,12 @@
-#ifndef ANIMATIONPREVIEWDIALOG_H
-#define ANIMATIONPREVIEWDIALOG_H
+#ifndef ANIMATIONDIALOG_H
+#define ANIMATIONDIALOG_H
 
 #include <QtWidgets>
 
 class SpritesTreeWidget;
 
 namespace Ui {
-class AnimationPreviewDialog;
+class AnimationDialog;
 }
 
 struct AnimationInfo {
@@ -14,15 +14,15 @@ struct AnimationInfo {
     QList< QPair<QString, QString> > frames;
 };
 
-class AnimationPreviewDialog : public QDialog
+class AnimationDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit AnimationPreviewDialog(SpritesTreeWidget* spritesTreeWidget, QWidget *parent = 0);
-    ~AnimationPreviewDialog();
+    explicit AnimationDialog(SpritesTreeWidget* spritesTreeWidget, QWidget *parent = 0);
+    ~AnimationDialog();
 
-    static AnimationPreviewDialog* instance() { return _instance; }
+    static AnimationDialog* instance() { return _instance; }
 
     void setSpritesTreeModel(QAbstractItemModel* model);
     void setPreviewPixmap(const QPixmap& pixmap);
@@ -45,9 +45,9 @@ private slots:
     void on_framesListWidget_currentRowChanged(int currentRow);
 
 private:
-    static AnimationPreviewDialog*  _instance;
+    static AnimationDialog*  _instance;
 
-    Ui::AnimationPreviewDialog*     ui;
+    Ui::AnimationDialog*     ui;
     QGraphicsScene                  _scene;
     QGraphicsPixmapItem*            _pixmapItem;
     QVector<AnimationInfo>          _animations;
@@ -55,4 +55,4 @@ private:
     SpritesTreeWidget*              _spritesTreeWidget;
 };
 
-#endif // ANIMATIONPREVIEWDIALOG_H
+#endif // ANIMATIONDIALOG_H

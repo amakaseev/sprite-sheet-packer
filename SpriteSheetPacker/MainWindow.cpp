@@ -8,7 +8,7 @@
 #include "AboutDialog.h"
 #include "PreferencesDialog.h"
 #include "PublishStatusDialog.h"
-#include "AnimationPreviewDialog.h"
+#include "AnimationDialog.h"
 #include "ContentProtectionDialog.h"
 #include "UpdaterDialog.h"
 #include "ui_MainWindow.h"
@@ -787,10 +787,10 @@ void MainWindow::on_actionAbout_triggered() {
     aboutDialog.exec();
 }
 
-void MainWindow::on_actionAnimationPreview_triggered() {
-    auto dlg = AnimationPreviewDialog::instance();
+void MainWindow::on_actionAnimation_triggered() {
+    auto dlg = AnimationDialog::instance();
     if (!dlg) {
-        dlg = new AnimationPreviewDialog(_spritesTreeWidget, this);
+        dlg = new AnimationDialog(_spritesTreeWidget, this);
     }
     dlg->show();
     dlg->activateWindow();

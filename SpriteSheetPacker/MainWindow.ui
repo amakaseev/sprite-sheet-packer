@@ -263,8 +263,8 @@
    <addaction name="actionAddFolder"/>
    <addaction name="separator"/>
    <addaction name="actionPublish"/>
+   <addaction name="actionAnimation"/>
    <addaction name="separator"/>
-   <addaction name="actionAnimationPreview"/>
    <addaction name="actionPreferences"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -1297,13 +1297,16 @@
     <bool>false</bool>
    </property>
   </action>
-  <action name="actionAnimationPreview">
+  <action name="actionAnimation">
    <property name="icon">
     <iconset resource="resources.qrc">
      <normaloff>:/res/icon-animation.png</normaloff>:/res/icon-animation.png</iconset>
    </property>
    <property name="text">
-    <string>Animation Preview</string>
+    <string>Setup animation</string>
+   </property>
+   <property name="toolTip">
+    <string>Setup animation</string>
    </property>
   </action>
   <action name="actionCheckForUpdates">

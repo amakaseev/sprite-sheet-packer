@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>AnimationPreviewDialog</class>
- <widget class="QDialog" name="AnimationPreviewDialog">
+ <class>AnimationDialog</class>
+ <widget class="QDialog" name="AnimationDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Animation Preview</string>
+   <string>Animation</string>
   </property>
   <property name="windowIcon">
    <iconset resource="resources.qrc">

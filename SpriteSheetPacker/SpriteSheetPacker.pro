@@ -39,10 +39,10 @@ SOURCES += main.cpp\
     PolygonImage.cpp \
     SpriteAtlasPreview.cpp \
     StatusBarWidget.cpp \
-    AnimationPreviewDialog.cpp \
     UpdaterDialog.cpp \
     ContentProtectionDialog.cpp \
-    ZoomGraphicsView.cpp
+    ZoomGraphicsView.cpp \
+    AnimationDialog.cpp
 
 HEADERS += MainWindow.h \
     ImageRotate.h \
@@ -59,10 +59,10 @@ HEADERS += MainWindow.h \
     SpriteAtlasPreview.h \
     ImageFormat.h \
     StatusBarWidget.h \
-    AnimationPreviewDialog.h \
     UpdaterDialog.h \
     ContentProtectionDialog.h \
-    ZoomGraphicsView.h
+    ZoomGraphicsView.h \
+    AnimationDialog.h
 
 #algorithm
 INCLUDEPATH += algorithm
@@ -83,9 +83,9 @@ FORMS += MainWindow.ui \
     AboutDialog.ui \
     SpriteAtlasPreview.ui \
     StatusBarWidgetatusbarwidget.ui \
-    AnimationPreviewDialog.ui \
     UpdaterDialog.ui \
-    ContentProtectionDialog.ui
+    ContentProtectionDialog.ui \
+    AnimationDialog.ui
 
 RESOURCES += resources.qrc
 
