@@ -11,7 +11,10 @@ class AnimationDialog;
 }
 
 struct AnimationInfo {
+public:
     QString name;
+    int fps;
+    bool loop;
     QList< QPair<QString, QString> > frames;
 };
 
@@ -36,14 +39,14 @@ private slots:
 
     void on_framePerSecondSpinBox_valueChanged(int arg1);
     void on_framesSlider_valueChanged(int value);
+    void on_repeatToolButton_clicked(bool checked);
     void on_playToolButton_toggled(bool checked);
     void on_prevFrameToolButton_clicked();
     void on_nextFrameToolButton_clicked();
     void on_firstFrameToolButton_clicked();
     void on_lastFrameToolButton_clicked();
     void on_autoDetectPushButton_clicked();
-    void on_comboBox_currentIndexChanged(int index);
-
+    void on_animationsComboBox_currentIndexChanged(int index);
     void on_framesListWidget_currentRowChanged(int currentRow);
 
 private:

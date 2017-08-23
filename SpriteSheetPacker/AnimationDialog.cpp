@@ -21,12 +21,11 @@ AnimationDialog::AnimationDialog(SpritesTreeWidget* spritesTreeWidget, QWidget *
     _animationTimer = new ElapsedTimer(this);
     connect(_animationTimer, SIGNAL(timeout(int)), this, SLOT(updateFrame(int)));
 
+    ui->animationPropertiesGroupBox->setEnabled(false);
     ui->graphicsView->setScene(&_scene);
 
     QSettings settings;
     restoreGeometry(settings.value("AnimationDialog/geometry").toByteArray());
-    ui->framePerSecondSpinBox->setValue(settings.value("AnimationDialog/framePerSecondSpinBox", 24).toInt());
-    ui->repeatToolButton->setChecked(settings.value("AnimationDialog/repeatToolButton", true).toBool());
 
     ui->splitter->setStretchFactor(0, 0);
     ui->splitter->setStretchFactor(1, 1);
@@ -35,8 +34,6 @@ AnimationDialog::AnimationDialog(SpritesTreeWidget* spritesTreeWidget, QWidget *
 AnimationDialog::~AnimationDialog() {
     QSettings settings;
     settings.setValue("AnimationDialog/geometry", saveGeometry());
-    settings.setValue("AnimationDialog/framePerSecondSpinBox", ui->framePerSecondSpinBox->value());
-    settings.setValue("AnimationDialog/repeatToolButton", ui->repeatToolButton->isChecked());
 
     _instance = nullptr;
     delete ui;
@@ -121,6 +118,18 @@ void AnimationDialog::updateFrame(int elapsed) {
 
 void AnimationDialog::on_framePerSecondSpinBox_valueChanged(int value) {
     _animationTimer->setInterval(1000.f/value);
+
+    int index = ui->animationsComboBox->currentIndex();
+    if ((index>=0)&&(index<_animations.length())) {
+        _animations[index].fps = value;
+    }
+}
+
+void AnimationDialog::on_repeatToolButton_clicked(bool checked) {
+    int index = ui->animationsComboBox->currentIndex();
+    if ((index>=0)&&(index<_animations.length())) {
+        _animations[index].loop = checked;
+    }
 }
 
 void AnimationDialog::on_framesSlider_valueChanged(int value) {
@@ -131,7 +140,9 @@ void AnimationDialog::on_playToolButton_toggled(bool checked) {
     if (checked) {
         _animationTimer->start(1000.f/ui->framePerSecondSpinBox->value());
         ui->playToolButton->setIcon(QIcon("://res/playback/control_pause_blue.png"));
-        ui->framesSlider->setValue(0);
+        if (ui->framesSlider->value() == ui->framesSlider->maximum()) {
+            ui->framesSlider->setValue(0);
+        }
         ui->framesSlider->setEnabled(false);
         ui->prevFrameToolButton->setEnabled(false);
         ui->nextFrameToolButton->setEnabled(false);
@@ -193,19 +204,21 @@ void AnimationDialog::on_autoDetectPushButton_clicked() {
     auto fileList = _spritesTreeWidget->fileList();
 
     _animations.clear();
-    ui->comboBox->clear();
+    ui->animationsComboBox->clear();
     while (fileList.length()) {
         auto first = fileList.first();
         fileList.erase(fileList.begin());
-        auto animation = detectAnimations(first, fileList);
+        AnimationInfo animation = detectAnimations(first, fileList);
         if (!animation.name.isEmpty()) {
+            animation.fps = 24;
+            animation.loop = true;
             _animations.push_back(animation);
-            ui->comboBox->addItem(animation.name);
+            ui->animationsComboBox->addItem(animation.name);
         }
     }
 }
 
-void AnimationDialog::on_comboBox_currentIndexChanged(int index) {
+void AnimationDialog::on_animationsComboBox_currentIndexChanged(int index) {
     ui->framesListWidget->clear();
     if ((index>=0)&&(index<_animations.length())) {
         for (auto frame: _animations[index].frames) {
@@ -214,10 +227,14 @@ void AnimationDialog::on_comboBox_currentIndexChanged(int index) {
             item->setIcon(QIcon(frame.first));
             item->setData(Qt::UserRole, frame.first);
         }
+        ui->framePerSecondSpinBox->setValue(_animations[index].fps);
+        ui->repeatToolButton->setChecked(_animations[index].loop);
         ui->framesSlider->setMaximum(_animations[index].frames.length() - 1);
         ui->framesListWidget->setCurrentRow(0);
+        ui->animationPropertiesGroupBox->setEnabled(true);
     } else {
         ui->framesSlider->setMaximum(0);
+        ui->animationPropertiesGroupBox->setEnabled(false);
     }
     _currentFrame = ui->framesSlider->value();
 }

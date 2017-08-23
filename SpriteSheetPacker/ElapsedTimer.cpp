@@ -5,8 +5,6 @@ ElapsedTimer::ElapsedTimer(QObject* parent): QTimer(parent) {
         emit timeout(elapsed());
         _time.restart();
     });
-
-    connect(this, SIGNAL(timeout()), this, SLOT(resetTime()));
 }
 
 void ElapsedTimer::start() {
