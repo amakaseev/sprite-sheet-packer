@@ -11,7 +11,6 @@ class AnimationDialog;
 }
 
 struct AnimationInfo {
-public:
     QString name;
     int fps;
     bool loop;
@@ -47,6 +46,9 @@ private slots:
     void on_lastFrameToolButton_clicked();
     void on_autoDetectPushButton_clicked();
     void on_animationsComboBox_currentIndexChanged(int index);
+    void on_animationsComboBox_editTextChanged(const QString &arg1);
+    void on_addAnimationToolButton_clicked();
+    void on_removeAnimationToolButton_clicked();
     void on_framesListWidget_currentRowChanged(int currentRow);
 
 private:

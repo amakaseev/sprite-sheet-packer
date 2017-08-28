@@ -36,6 +36,9 @@
          <property name="text">
           <string>Auto-detect animation</string>
          </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
         </widget>
        </item>
        <item>

@@ -24,6 +24,8 @@ AnimationDialog::AnimationDialog(SpritesTreeWidget* spritesTreeWidget, QWidget *
     ui->animationPropertiesGroupBox->setEnabled(false);
     ui->graphicsView->setScene(&_scene);
 
+    ui->removeAnimationToolButton->setEnabled(false);
+
     QSettings settings;
     restoreGeometry(settings.value("AnimationDialog/geometry").toByteArray());
 
@@ -203,17 +205,29 @@ void AnimationDialog::on_lastFrameToolButton_clicked() {
 void AnimationDialog::on_autoDetectPushButton_clicked() {
     auto fileList = _spritesTreeWidget->fileList();
 
-    _animations.clear();
-    ui->animationsComboBox->clear();
-    while (fileList.length()) {
-        auto first = fileList.first();
-        fileList.erase(fileList.begin());
-        AnimationInfo animation = detectAnimations(first, fileList);
-        if (!animation.name.isEmpty()) {
-            animation.fps = 24;
-            animation.loop = true;
-            _animations.push_back(animation);
-            ui->animationsComboBox->addItem(animation.name);
+    if (fileList.size()) {
+        auto result = QMessageBox::Yes;
+        if (ui->animationsComboBox->count()) {
+            result = QMessageBox::question(this,
+                                           "Auto-Detect animation",
+                                           "Current animations will be removed?",
+                                           QMessageBox::No | QMessageBox::Yes,
+                                           QMessageBox::Yes);
+        }
+        if (result == QMessageBox::Yes) {
+            _animations.clear();
+            ui->animationsComboBox->clear();
+            while (fileList.length()) {
+                auto first = fileList.first();
+                fileList.erase(fileList.begin());
+                AnimationInfo animation = detectAnimations(first, fileList);
+                if (!animation.name.isEmpty()) {
+                    animation.fps = 24;
+                    animation.loop = true;
+                    _animations.push_back(animation);
+                    ui->animationsComboBox->addItem(animation.name);
+                }
+            }
         }
     }
 }
@@ -232,11 +246,50 @@ void AnimationDialog::on_animationsComboBox_currentIndexChanged(int index) {
         ui->framesSlider->setMaximum(_animations[index].frames.length() - 1);
         ui->framesListWidget->setCurrentRow(0);
         ui->animationPropertiesGroupBox->setEnabled(true);
+        ui->removeAnimationToolButton->setEnabled(true);
     } else {
         ui->framesSlider->setMaximum(0);
         ui->animationPropertiesGroupBox->setEnabled(false);
+        ui->removeAnimationToolButton->setEnabled(false);
     }
     _currentFrame = ui->framesSlider->value();
+}
+
+void AnimationDialog::on_animationsComboBox_editTextChanged(const QString &arg1) {
+    int index = ui->animationsComboBox->currentIndex();
+    if ((index>=0)&&(index<_animations.length())) {
+        _animations[index].name = arg1;
+        ui->animationsComboBox->setItemText(index, arg1);
+    }
+}
+
+void AnimationDialog::on_addAnimationToolButton_clicked() {
+    int index = 0;
+    if (ui->animationsComboBox->currentIndex() != -1) {
+        index = ui->animationsComboBox->currentIndex() + 1;
+    }
+    AnimationInfo animation;
+    animation.name = QString("animation_%1").arg(_animations.size());
+    animation.fps = 24;
+    animation.loop = true;
+    _animations.insert(index, animation);
+    ui->animationsComboBox->insertItem(index, animation.name);
+    ui->animationsComboBox->setCurrentIndex(index);
+}
+
+void AnimationDialog::on_removeAnimationToolButton_clicked() {
+    int index = ui->animationsComboBox->currentIndex();
+    if (index != -1) {
+        if (QMessageBox::question(this,
+                                  "Remove animation",
+                                  QString("Are you sure you want to delete [%1] animation?").arg(ui->animationsComboBox->currentText()),
+                                  QMessageBox::No | QMessageBox::Yes,
+                                  QMessageBox::Yes) == QMessageBox::Yes)
+        {
+            _animations.remove(index);
+            ui->animationsComboBox->removeItem(index);
+        }
+    }
 }
 
 void AnimationDialog::on_framesListWidget_currentRowChanged(int currentRow) {
