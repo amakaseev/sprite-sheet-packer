@@ -28,9 +28,10 @@ Lossless - Uses optipng to optimize the filesize. The reduction is mostly small 
 Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70%, but the image quality gets a bit worse.", "int", "0"},
         {"png-opt-level", "Optimizes the image's file size. Only useful in combination with opt-mode Lossless. Allowed values: 1 to 7 (Using a high value might take some time to optimize.", "int", "0"},
         {"scale", "Scales all images before creating the sheet. E.g. use 0.5 for half size, default is 1 (Scale has no effect when source is a project file).", "float", "1"},
+        {"trimSpriteNames", "Remove image file extensions from the sprite names - e.g. .png, .jpg, ...", "bool", "false"},
+        {"prependSmartFolderName", "Prepends the smart folder's name as part of the sprite name.", "bool", "false"},
     });
 
-    //--texture-border 10 /Users/alekseymakaseev/Documents/Work/run-and-jump/Assets/ART/Character /Users/alekseymakaseev/Documents/Work/run-and-jump/RunAndJump/testResources --trim 2
     parser.process(app);
 
     bool destinationSet = true;
@@ -89,6 +90,8 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
     QString format = "cocos2d";
     QString pngOptMode = "None";
     int pngOptLevel = 0;
+    bool trimSpriteNames = false;
+    bool prependSmartFolderName = false;
 
     if (projectFile) {
         if (!projectFile->read(source.filePath())) {
@@ -101,6 +104,8 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
             spriteBorder = projectFile->spriteBorder();
             pngOptMode = projectFile->pngOptMode();
             pngOptLevel = projectFile->pngOptLevel();
+            trimSpriteNames = projectFile->trimSpriteNames();
+            prependSmartFolderName = projectFile->prependSmartFolderName();
 
             if (!destinationSet) {
                 destination.setFile(projectFile->destPath());
@@ -247,6 +252,8 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
         publisher.addSpriteSheet(atlas, destination.filePath() + source.fileName());
     }
 
+    publisher.setTrimSpriteNames(trimSpriteNames);
+    publisher.setPrependSmartFolderName(prependSmartFolderName);
     publisher.setPngQuality(pngOptMode, pngOptLevel);
 
     if (!publisher.publish(format, false)) {
