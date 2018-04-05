@@ -16,6 +16,8 @@
     * Win32: Polished publish dialog (Window title, position)
 * [NathV](https://github.com/NathV)
 	* Add GNU/Linux support
+* [matosummer](https://github.com/matosummer)
+	* Add phaser format
 		
 Thanks to all developers who report & trace bugs, discuss the sprite tools usage in forum!
 
