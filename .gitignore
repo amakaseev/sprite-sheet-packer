@@ -3,3 +3,12 @@ build
 *.app
 *.dmg
 install/win/bin/
+install/linux/bin
+Makefile
+*.o
+moc_*.cpp
+moc_*.h
+ui_*.h
+qrc_*.cpp
+.qmake.stash
+
