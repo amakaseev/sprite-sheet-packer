@@ -190,7 +190,7 @@ bool PublishSpriteSheet::publish(const QString& format, bool errorMessage) {
             outputFilePaths.push_back(outputFilePath);
 
             // generate the data file and the image
-            if (!generateDataFile(outputFilePath, format, outputData._spriteFrames, outputData._atlasImage, errorMessage)) {
+            if (!format.isEmpty() && !generateDataFile(outputFilePath, format, outputData._spriteFrames, outputData._atlasImage, errorMessage)) {
                 return false;
             }
 
