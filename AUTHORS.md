@@ -18,6 +18,8 @@
 	* Add GNU/Linux support
 * [matosummer](https://github.com/matosummer)
 	* Add phaser format
+* [gogoprog](https://github.com/gogoprog)
+	* Some errors were fix
 		
 Thanks to all developers who report & trace bugs, discuss the sprite tools usage in forum!
 
