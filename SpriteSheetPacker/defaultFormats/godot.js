@@ -12,8 +12,8 @@ function exportSpriteSheet(dataFilePath, imageFilePath, spriteFrames)
     for (var key in spriteFrames)
     {
         spriteFrame = spriteFrames[key];
-        imageList += "[sub_resource type=\"AtlasTexture\" id=" + (loopCount + 1) + "]\n"
-        imageList += "atlas = ExtResource( 1 )\n"
+        imageList += "[sub_resource type=\"AtlasTexture\" id=" + (loopCount + 1) + "]\n";
+        imageList += "atlas = ExtResource( 1 )\n";
         imageList += "region = Rect2( " + spriteFrame.frame.x + ", " +
                                           spriteFrame.frame.y + ", " +
                                           spriteFrame.frame.width + ", " +
