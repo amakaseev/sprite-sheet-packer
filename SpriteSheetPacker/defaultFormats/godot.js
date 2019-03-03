@@ -48,7 +48,7 @@ function exportSpriteSheet(dataFilePath, imageFilePath, spriteFrames)
     contents += "[node name=\"AnimatedSprite\" type=\"AnimatedSprite\"]\n";
     contents += "frames = SubResource( " + (imageCount + 1) + " )\n";
     contents += "animation = \"default\"\n";
-    contents += "frame = 1\n";
+    contents += "frame = 0\n";
     contents += "\n";
     
     return {
