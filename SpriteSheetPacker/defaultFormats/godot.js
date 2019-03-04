@@ -8,9 +8,18 @@ function exportSpriteSheet(dataFilePath, imageFilePath, spriteFrames)
     var frameList = "";
     var imageCount = Object.keys(spriteFrames).length;
     var spriteFrame;
+    var animationEntry = {};
+    var previousAnimation = "";
   
     for (var key in spriteFrames)
     {
+        currentAnimation = key.match(/^.+?(?=\/)/);
+        
+        if(currentAnimation == ".")
+        {
+            currentAnimation = "default";
+        }
+        
         spriteFrame = spriteFrames[key];
         imageList += "[sub_resource type=\"AtlasTexture\" id=" + (loopCount + 1) + "]\n";
         imageList += "atlas = ExtResource( 1 )\n";
@@ -23,13 +32,36 @@ function exportSpriteSheet(dataFilePath, imageFilePath, spriteFrames)
                                           (spriteFrame.sourceSize.width - spriteFrame.frame.width) + ", " +
                                           (spriteFrame.sourceSize.height - spriteFrame.frame.height) + " )\n";
         imageList += "\n"
-        loopCount++
-        frameList += "SubResource( " + loopCount + " )";
-        
-        if(loopCount < imageCount)
+        loopCount++;
+        frameList = "SubResource( " + loopCount + " ), ";
+           
+        if(previousAnimation.length == 0)                       // initial case
         {
-            frameList += ", ";
+            previousAnimation = currentAnimation;
         }
+        
+        if(animationEntry[currentAnimation] == undefined)       // if frameList is empty, copy
+        {
+            animationEntry[currentAnimation] = frameList;
+        }
+        else                                                    // if not, append
+        {
+            animationEntry[currentAnimation] += frameList;
+        }
+        
+        if(strcmp(previousAnimation, currentAnimation) != 0)    // if it's different, a new animation
+        {
+            animationEntry[previousAnimation] = animationEntry[previousAnimation].slice(0, -2); // trim comma off
+            frameList = "";                                     // wipe the frameList
+        }
+        
+        if(loopCount == imageCount)                             // if it's the last
+        {
+            animationEntry[currentAnimation] = animationEntry[currentAnimation].slice(0, -2);   // trim comma off
+        }
+        
+        previousAnimation = currentAnimation;
+        
     }
     
     contents += "[gd_scene load_steps=" + (imageCount + 3) + " format=2]\n";
@@ -38,21 +70,41 @@ function exportSpriteSheet(dataFilePath, imageFilePath, spriteFrames)
     contents += "\n";
     contents += imageList;
     contents += "[sub_resource type=\"SpriteFrames\" id=" + (imageCount + 1) + "]\n";
-    contents += "animations = [ {\n";
-    contents += "\"frames\": [ " + frameList + " ],\n";
-    contents += "\"loop\": false,\n";
-    contents += "\"name\": \"default\",\n";
-    contents += "\"speed\": 5.0\n";
-    contents += "} ]\n";
+    contents += "animations = [ ";
+    
+    loopCount = 0;
+    var framecount = Object.keys(animationEntry).length
+    for(var key in animationEntry)
+    {
+        contents += "{\n";
+        contents += "\"frames\": [ " + animationEntry[key] + " ],\n";
+        contents += "\"loop\": true,\n";
+        contents += "\"name\": \"" + key + "\",\n";
+        contents += "\"speed\": 5.0\n";
+        contents += "}";
+        
+        loopCount++;
+        if(loopCount < framecount)
+        {
+            contents += ", ";
+        }
+    }
+    
+    contents += " ]\n";
     contents += "\n";
     contents += "[node name=\"AnimatedSprite\" type=\"AnimatedSprite\"]\n";
     contents += "frames = SubResource( " + (imageCount + 1) + " )\n";
-    contents += "animation = \"default\"\n";
     contents += "frame = 0\n";
+    contents += "playing = true\n";
     contents += "\n";
     
     return {
         data: contents,
         format: "tscn"
     };
+}
+
+function strcmp(a, b)
+{   
+    return (a<b?-1:(a>b?1:0));  
 }
