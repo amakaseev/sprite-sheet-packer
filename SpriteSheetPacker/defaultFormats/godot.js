@@ -61,7 +61,6 @@ function exportSpriteSheet(dataFilePath, imageFilePath, spriteFrames)
         }
         
         previousAnimation = currentAnimation;
-        
     }
     
     contents += "[gd_scene load_steps=" + (imageCount + 3) + " format=2]\n";
