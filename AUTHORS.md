@@ -20,6 +20,8 @@
 	* Add phaser format
 * [gogoprog](https://github.com/gogoprog)
 	* Some errors were fix
+* [piratesephiroth](https://github.com/piratesephiroth)
+	* Added [Godot Engine](https://godotengine.org) format
 		
 Thanks to all developers who report & trace bugs, discuss the sprite tools usage in forum!
 
