@@ -16,6 +16,7 @@ int commandLine(QCoreApplication& app) {
         {"trimMode", "Rect - Removes the transparency around a sprite. The sprites appear to have their original size when using them.\n\
 Polygon - The amount of rendered transparency can be reduced by creating a tight fitting polygon around the solid pixels of a sprite. But: The vertices must be transformed by the CPU — introducing new costs.\n\
 Default is Rect", "mode", "Rect"},
+        {"algorithm", "Rect or Polygon. Default is Rect", "mode", "Rect"},
         {"trim", "Allowed values: 1 to 255, default is 1. Pixels with an alpha value below this value will be considered transparent when trimming the sprite. Very useful for sprites with nearly invisible alpha pixels at the borders.", "int", "1"},
         {"epsilon", "Lower values create a tighter fitting mesh with less transparency but with more vertices.\nHigher values on the other hand reduce the number of vertices at the cost of adding more transparency.", "float", "5"},
         {"texture-border", "Border of the sprite sheet, value adds transparent pixels around the borders of the sprite sheet. Default value is 0.", "int", "0"},
@@ -78,6 +79,7 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
 
     // initialize [options]
     QString trimMode = "Rect";
+    QString algorithm = "Rect";
     int trim = 1;
     float epsilon = 5.f;
     int textureBorder = 0;
@@ -98,6 +100,7 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
             qCritical() << "File format error.";
         } else {
             trimMode = projectFile->trimMode();
+            algorithm = projectFile->algorithm();
             trim = projectFile->trimThreshold();
             epsilon = projectFile->epsilon();
             textureBorder = projectFile->textureBorder();
@@ -125,6 +128,9 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
     // you can override project file options
     if (parser.isSet("trimMode")) {
         trimMode = parser.value("trimMode");
+    }
+    if (parser.isSet("algorithm")) {
+     algorithm = parser.value("algorithm");
     }
     if (parser.isSet("trim")) {
         trim = parser.value("trim").toInt();
@@ -161,6 +167,7 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
     }
 
     qDebug() << "trimMode:" << trimMode;
+    qDebug() << "algorithm:" << algorithm;
     qDebug() << "trim:" << trim;
     qDebug() << "epsilon:" << epsilon;
     qDebug() << "textureBorder:" << textureBorder;
@@ -224,6 +231,9 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
             if (trimMode == "Polygon") {
                 atlas.enablePolygonMode(true, epsilon);
             }
+            if (algorithm == "Polygon") {
+             atlas.setAlgorithm(algorithm);
+            }
             if (!atlas.generate()) {
                 qCritical() << "ERROR: Generate atlas!";
                 return -1;
@@ -243,6 +253,9 @@ Lossy - Uses pngquant to optimize the filesize. The reduction is mostly about 70
         SpriteAtlas atlas(QStringList() << source.filePath(), textureBorder, spriteBorder, trim, heuristicMask, pow2, forceSquared, maxSize, imageScale);
         if (trimMode == "Polygon") {
             atlas.enablePolygonMode(true, epsilon);
+        }
+        if (algorithm == "Polygon") {
+         atlas.setAlgorithm(algorithm);
         }
         if (!atlas.generate()) {
             qCritical() << "ERROR: Generate atlas!";
