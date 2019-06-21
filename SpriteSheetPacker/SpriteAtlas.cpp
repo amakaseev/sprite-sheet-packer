@@ -328,7 +328,7 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
     } else {
         qDebug() << "Volume size:" << w << "x" << h;
         bool k = true;
-        int step = (w + h) / 20;
+        int step = qMax((w + h) / 20, 1);
         while (1) {
             if (_aborted) return false;
 
@@ -376,7 +376,7 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
 
             qDebug() << "Resize for bigger:" << w << "x" << h << "step:" << step;
         }
-        step = (w + h) / 20;
+        step = qMax((w + h) / 20, 1);
         while (w) {
             if (_aborted) return false;
 
@@ -400,7 +400,7 @@ bool SpriteAtlas::packWithRect(const QVector<PackContent>& content) {
             qDebug() << "Optimize width:" << w << "x" << h << "step:" << step;
         }
         if (!_forceSquared) {
-            step = (w + h) / 20;
+            step = qMax((w + h) / 20, 1);
             while (h) {
                 if (_aborted) return false;
 
