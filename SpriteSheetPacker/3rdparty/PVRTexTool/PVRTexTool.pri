@@ -38,8 +38,8 @@ win32 {
 
 linux {
     linux:contains(QMAKE_HOST.arch, x86_64) {
-        LIBS += $$PWD/Linux_x86_64/libPVRTexLib.so
+        LIBS += -L$$PWD/Linux_x86_64/ -lPVRTexLib
     } else {
-        LIBS += $$PWD/Linux_x86_32/libPVRTexLib.so
+        LIBS += -L$$PWD/Linux_x86_32/ -lPVRTexLib
     }
 }
