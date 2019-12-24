@@ -577,7 +577,11 @@ void MainWindow::on_actionSaveAs_triggered() {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save sprite packer project file."),
                                                     dir,
                                                     tr("Sprite sheet packer (*.ssp)"));
+    QFileInfo info(fileName);
     if (!fileName.isEmpty()) {
+        if (info.suffix() != "ssp") {
+          fileName.append(".ssp");
+        }
         settings.setValue("spritePackerFileName", fileName);
         saveSpritePackerProject(fileName);
     }
