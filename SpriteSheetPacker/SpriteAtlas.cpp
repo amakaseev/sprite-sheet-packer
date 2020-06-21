@@ -148,6 +148,9 @@ bool SpriteAtlas::generate(SpriteAtlasGenerateProgress* progress) {
         if (_scale != 1) {
             image = image.scaled(ceil(image.width() * _scale), ceil(image.height() * _scale), Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
+        if (image.format() == QImage::Format_Indexed8) {
+            image = image.convertToFormat(QImage::Format_ARGB32);
+        }
 
         // Apply Heuristic mask
         if (_heuristicMask) {
