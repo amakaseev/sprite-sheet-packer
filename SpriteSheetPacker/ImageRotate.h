@@ -40,7 +40,7 @@ QImage rotate(int degrees, const QImage &src) {
     }
 }
 QImage rotate90(const QImage &src) {
-    QImage dst(src.height(), src.width(), src.format() == QImage::Format_Indexed8 ? QImage::Format_RGBA8888 : src.format());
+    QImage dst(src.height(), src.width(), src.format());
     for (int y=0;y<src.height();++y) {
         const uint *srcLine = reinterpret_cast< const uint * >(src.scanLine(y));
         for (int x=0;x<src.width();++x) {
@@ -50,7 +50,7 @@ QImage rotate90(const QImage &src) {
     return dst;
 }
 QImage rotate180(const QImage &src) {
-    QImage dst(src.width(), src.height(), src.format() == QImage::Format_Indexed8 ? QImage::Format_RGBA8888 : src.format());
+    QImage dst(src.width(), src.height(), src.format());
     for (int y=0;y<src.height();++y) {
         const uint *srcLine = reinterpret_cast< const uint * >(src.scanLine(y));
         for (int x=0;x<src.width();++x) {
@@ -60,7 +60,7 @@ QImage rotate180(const QImage &src) {
     return dst;
 }
 QImage rotate270(const QImage &src) {
-    QImage dst(src.height(), src.width(), src.format() == QImage::Format_Indexed8 ? QImage::Format_RGBA8888 : src.format());
+    QImage dst(src.height(), src.width(), src.format());
     for (int y=0;y<src.height();++y) {
         const uint *srcLine = reinterpret_cast< const uint * >(src.scanLine(y));
         for (int x=0;x<src.width();++x) {
