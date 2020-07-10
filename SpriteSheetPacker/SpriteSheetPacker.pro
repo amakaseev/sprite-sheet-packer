@@ -136,6 +136,7 @@ CONFIG(release,debug|release) {
         DEPLOY_COMMAND = macdeployqt
         isEmpty(TARGET_EXT) TARGET_EXT = .app
         DEPLOY_TARGET = $$shell_quote($$shell_path($${DESTDIR}/$${TARGET}$${TARGET_EXT}))
+        DEPLOY_OPTIONS = -dmg
     }
 
     linux {
