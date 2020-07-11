@@ -133,10 +133,10 @@ CONFIG(release,debug|release) {
     }
 
     macx {
-        DEPLOY_COMMAND = macdeployqt
+        DEPLOY_PATH = $$shell_quote($$shell_path($${DESTDIR}))
         isEmpty(TARGET_EXT) TARGET_EXT = .app
-        DEPLOY_TARGET = $$shell_quote($$shell_path($${DESTDIR}/$${TARGET}$${TARGET_EXT}))
         DEPLOY_OPTIONS = -dmg
+        DEPLOY_COMMAND = "cd $${DEPLOY_PATH} && macdeployqt $${TARGET}$${TARGET_EXT}"
     }
 
     linux {
