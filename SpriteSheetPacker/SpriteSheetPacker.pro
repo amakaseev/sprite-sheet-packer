@@ -15,7 +15,7 @@ CONFIG += c++11
 CONFIG(release,debug|release) {
     win32: DESTDIR = $$PWD/../install/win/bin
     macx: DESTDIR = $$PWD/../install/macos/bin
-    linux: DESTDIR = $$PWD/../AppDir/usr/bin
+    linux: DESTDIR = $$PWD/../install/linux/bin
 } else {
     macx: DESTDIR = $$OUT_PWD
     win32: DESTDIR = $$OUT_PWD/debug
@@ -129,21 +129,14 @@ CONFIG(release,debug|release) {
     win32 {
         DEPLOY_COMMAND = windeployqt
         isEmpty(TARGET_EXT) TARGET_EXT = .exe
-        DEPLOY_TARGET = $$shell_quote($$shell_path($${DESTDIR}/$${TARGET}$${TARGET_EXT}))
     }
 
     macx {
-        DEPLOY_PATH = $$shell_quote($$shell_path($${DESTDIR}))
+        DEPLOY_COMMAND = macdeployqt
         isEmpty(TARGET_EXT) TARGET_EXT = .app
-        DEPLOY_OPTIONS = -dmg
-        DEPLOY_COMMAND = "cd $${DEPLOY_PATH} && macdeployqt $${TARGET}$${TARGET_EXT}"
     }
 
-    linux {
-        DEPLOY_COMMAND = linuxdeployqt
-        DEPLOY_TARGET = ../AppDir/usr/share/applications/$${TARGET}.desktop
-        DEPLOY_OPTIONS = -appimage
-    }
+    DEPLOY_TARGET = $$shell_quote($$shell_path($${DESTDIR}/$${TARGET}$${TARGET_EXT}))
 
-    QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET} $${DEPLOY_OPTIONS}
+    QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}
 }
