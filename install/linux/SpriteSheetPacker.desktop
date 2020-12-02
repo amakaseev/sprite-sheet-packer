@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=SpriteSheetPacker
+Comment=
+Exec=SpriteSheetPacker
+Icon=SpriteSheetPacker
+# available categories, see: https://specifications.freedesktop.org/menu-spec/latest/apa.html
+Categories=Utility;

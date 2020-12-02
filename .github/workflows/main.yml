@@ -1,0 +1,91 @@
+name: SpritesheetPacker
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Cache Qt
+      id: cache-qt
+      uses: actions/cache@v1
+      with:
+        path: ../Qt
+        key: ${{ runner.os }}-QtCache
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        cached: ${{ steps.cache-qt.outputs.cache-hit }}
+
+    - name: Run QMake
+      run: qmake sprite-sheet-packer.pro
+
+    - name: Build
+      run: |
+        make -j8
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: SpriteSheetPacker-macos
+        path: |
+          ./*.dmg
+          ./**/*.dmg
+
+  linux:
+    runs-on: ubuntu-16.04
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Cache Qt
+      id: cache-qt
+      uses: actions/cache@v1
+      with:
+        path: ../Qt
+        key: ${{ runner.os }}-QtCache
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        cached: ${{ steps.cache-qt.outputs.cache-hit }}
+
+    - name: Download linuxdeployqt
+      run: |
+        wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
+        mkdir -p $GITHUB_WORKSPACE/bin
+        mv linuxdeployqt-continuous-x86_64.AppImage $GITHUB_WORKSPACE/bin/linuxdeployqt
+        chmod +x $GITHUB_WORKSPACE/bin/linuxdeployqt
+        echo "$GITHUB_WORKSPACE/bin" >> $GITHUB_PATH
+
+    - name: Run QMake
+      run: qmake sprite-sheet-packer.pro
+
+    - name: Create AppDir
+      run: |
+        mkdir -p AppDir/usr/bin
+        mkdir -p AppDir/usr/lib
+        mkdir -p AppDir/usr/share/applications
+        mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+        cp install/linux/SpriteSheetPacker.desktop AppDir/usr/share/applications/
+        cp SpriteSheetPacker/res/icon.png AppDir/usr/share/icons/hicolor/256x256/apps/SpriteSheetPacker.png
+
+    - name: Build
+      run: |
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GITHUB_WORKSPACE/SpriteSheetPacker/3rdparty/PVRTexTool/Linux_x86_64
+        make -j8
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: SpriteSheetPacker-linux
+        path: |
+          ./*.AppImage
+          ./**/*.AppImage
