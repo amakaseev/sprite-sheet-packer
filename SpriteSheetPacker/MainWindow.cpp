@@ -815,7 +815,7 @@ void MainWindow::on_destFolderToolButton_clicked() {
     QString destPath = ui->destPathLineEdit->text();
     destPath = QFileDialog::getExistingDirectory(this,
                                                  tr("Destination folder"),
-                                                 settings.value("MainWindow/destinationFolder", QDir::currentPath()).toString(),//destPath,
+                                                 settings.value("MainWindow/destinationFolder", QDir::currentPath()).toString(),
                                                  QFileDialog::DontResolveSymlinks);
     if (!destPath.isEmpty()) {
         ui->destPathLineEdit->setText(QDir(destPath).canonicalPath());
