@@ -116,6 +116,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //refreshAtlas();
     on_actionCheckForUpdates_triggered();
+    
+    // remove entries from sprite list with the DELETE key
+    QShortcut* shortcut = new QShortcut(QKeySequence(Qt::Key_Delete), _spritesTreeWidget);
+    connect(shortcut, SIGNAL(activated()), this, SLOT(on_actionRemove_triggered()));
 }
 
 MainWindow::~MainWindow() {
