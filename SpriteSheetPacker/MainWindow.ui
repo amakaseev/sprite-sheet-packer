@@ -194,7 +194,7 @@
      <x>0</x>
      <y>0</y>
      <width>1328</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="defaultUp">
@@ -306,8 +306,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>314</width>
-          <height>909</height>
+          <width>320</width>
+          <height>763</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -344,7 +344,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Algorithm&lt;/span&gt;&lt;/p&gt;&lt;p&gt;There are currently one algorithm&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Rect&lt;/span&gt;&lt;/p&gt;&lt;p&gt;BinPack2D is a 2 dimensional, multi-bin, bin-packer. ( Texture Atlas Array! )&lt;/p&gt;&lt;p&gt;It supports an arbitrary number of bins, at arbitrary sizes.&lt;/p&gt;&lt;p&gt;rectangles can be added one at a time, chunks at a time, or all at once.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Algorithm&lt;/span&gt;&lt;/p&gt;&lt;p&gt;There is currently one algorithm&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Rect&lt;/span&gt;&lt;/p&gt;&lt;p&gt;BinPack2D is a 2 dimensional, multi-bin, bin-packer. ( Texture Atlas Array! )&lt;/p&gt;&lt;p&gt;It supports an arbitrary number of bins, at arbitrary sizes.&lt;/p&gt;&lt;p&gt;rectangles can be added one at a time, chunks at a time, or all at once.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <item>
                  <property name="text">
@@ -362,9 +362,6 @@
             </item>
             <item>
              <widget class="QGroupBox" name="property_trimCropGroupBox">
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Trim / Crop&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Removes transparent pixels from a sprite's border.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
               <property name="title">
                <string>Trim / Crop</string>
               </property>
@@ -488,11 +485,14 @@
                 <layout class="QHBoxLayout" name="horizontalLayout_8">
                  <item>
                   <widget class="QCheckBox" name="heuristicMaskCheckBox">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Heuristic mask&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Creates transparency in images that come with a single solid background color.&lt;br/&gt;Uses the pixels at the corners to identify that color.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
                    <property name="layoutDirection">
                     <enum>Qt::RightToLeft</enum>
                    </property>
                    <property name="text">
-                    <string>Heuristic mask: </string>
+                    <string>Heuristic mask:</string>
                    </property>
                   </widget>
                  </item>
@@ -734,7 +734,7 @@
             <item>
              <widget class="QTabWidget" name="imageFormatSettingsTabWidget">
               <property name="currentIndex">
-               <number>1</number>
+               <number>0</number>
               </property>
               <widget class="QWidget" name="png">
                <attribute name="title">
@@ -1027,7 +1027,7 @@
               <item>
                <widget class="QLineEdit" name="destPathLineEdit">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Destination:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Forlder for collect data and image&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Destination:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Folder where the sprite sheet's image and data files will be saved&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
