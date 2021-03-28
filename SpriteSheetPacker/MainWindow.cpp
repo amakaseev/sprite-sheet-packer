@@ -815,13 +815,15 @@ void MainWindow::spritesTreeWidgetItemSelectionChanged() {
 }
 
 void MainWindow::on_destFolderToolButton_clicked() {
+    QSettings settings;
     QString destPath = ui->destPathLineEdit->text();
     destPath = QFileDialog::getExistingDirectory(this,
                                                  tr("Destination folder"),
-                                                 destPath,
+                                                 settings.value("MainWindow/destinationFolder", QDir::currentPath()).toString(),
                                                  QFileDialog::DontResolveSymlinks);
     if (!destPath.isEmpty()) {
         ui->destPathLineEdit->setText(QDir(destPath).canonicalPath());
+        settings.setValue("MainWindow/destinationFolder", destPath);
     }
 }
 
