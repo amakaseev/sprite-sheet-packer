@@ -9,6 +9,10 @@ QT += core widgets xml qml concurrent network
 TARGET = SpriteSheetPacker
 TEMPLATE = app
 
+OBJECTS_DIR = obj
+MOC_DIR = qt_gen
+UI_DIR = qt_gen
+
 CONFIG += c++11
 #QMAKE_CXXFLAGS +=-std=c++11 -stdlib=libc++
 
