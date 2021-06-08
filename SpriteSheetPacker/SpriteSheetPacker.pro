@@ -9,6 +9,10 @@ QT += core widgets xml qml concurrent network
 TARGET = SpriteSheetPacker
 TEMPLATE = app
 
+OBJECTS_DIR = obj
+MOC_DIR = qt_gen
+UI_DIR = qt_gen
+
 CONFIG += c++11
 #QMAKE_CXXFLAGS +=-std=c++11 -stdlib=libc++
 
@@ -127,16 +131,10 @@ win32 {
 CONFIG(release,debug|release) {
     # release
     win32 {
-        DEPLOY_COMMAND = windeployqt
-        isEmpty(TARGET_EXT) TARGET_EXT = .exe
+        QMAKE_POST_LINK = windeployqt $$shell_quote($$shell_path($${DESTDIR}/$${TARGET}.exe))
     }
 
     macx {
-        DEPLOY_COMMAND = macdeployqt
-        isEmpty(TARGET_EXT) TARGET_EXT = .app
+        QMAKE_POST_LINK = macdeployqt $$shell_quote($$shell_path($${DESTDIR}/$${TARGET}.app))
     }
-
-    DEPLOY_TARGET = $$shell_quote($$shell_path($${DESTDIR}/$${TARGET}$${TARGET_EXT}))
-
-    QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}
 }
